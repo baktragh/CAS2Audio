@@ -48,7 +48,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void onPlay(View v) {
 
-        casTask = new CasTask(getIntent().getDataString(),findViewById(R.id.btnPlay),findViewById(R.id.btnStop));
+        try {
+            casTask = new CasTask(getContentResolver().openInputStream(getIntent().getData()),findViewById(R.id.btnPlay),findViewById(R.id.btnStop));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         casTask.execute();
 
     }
