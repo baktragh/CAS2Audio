@@ -8,7 +8,7 @@ public class Utils {
 
     /**
      * Get a message string for some Exception
-     * @return 
+     * @return message
      */
     public static String getExceptionMessage(Exception ex) {
         StringBuilder sb = new StringBuilder();
@@ -24,7 +24,7 @@ public class Utils {
 
     /**
      * Get HTML formatted message for some exception with title specified
-     * @return 
+     * @return message
      */
     public static String getTitledExceptionMessage(String title, Exception ex) {
         StringBuilder sb = new StringBuilder();
@@ -36,38 +36,6 @@ public class Utils {
         return sb.toString();
 
     }
-
-
-    /**
-     *
-     * @param byteArray
-     * @return
-     */
-    public static int[] getAsIntArray(byte[] byteArray) {
-        return getAsIntArray(byteArray, byteArray.length);
-    }
-
-    /**
-     *
-     * @param byteArray
-     * @param numBytes
-     * @return
-     */
-    public static int[] getAsIntArray(byte[] byteArray, int numBytes) {
-
-        int[] intArray = new int[numBytes];
-
-        byte b;
-
-        for (int i = 0; i < numBytes; i++) {
-            /*Orezani znamenka*/
-            b = byteArray[i];
-            intArray[i] = (b < 0) ? b + 256 : b;
-        }
-
-        return intArray;
-    }
-
 
     private Utils() {
     }

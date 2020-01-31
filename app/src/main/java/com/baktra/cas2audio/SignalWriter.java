@@ -10,11 +10,10 @@ public interface SignalWriter {
     /**
      * Prepare signal writer
      *
-     * @param outputFile Output file
      * @throws java.lang.Exception
      *
      */
-    public void prepare(String outputFile) throws Exception;
+    public void prepare() throws Exception;
 
     /**
      * Write initial signal

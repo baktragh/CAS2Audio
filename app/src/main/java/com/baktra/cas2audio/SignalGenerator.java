@@ -1,11 +1,9 @@
 package com.baktra.cas2audio;
 
-import java.io.*;
-
 /**
  * Electric signal generator
  */
-public class SignalGenerator implements Runnable, SampleConsumer {
+public class SignalGenerator implements SampleConsumer {
 
     /*Output types*/
     public static final int TYPE_AUDIO = 1;
@@ -45,7 +43,6 @@ public class SignalGenerator implements Runnable, SampleConsumer {
     public static final int FLAG_ORDER_LH = 0;
     public static final int FLAG_ORDER_HL = 1;
 
-
     public static class SignalGeneratorConfig {
         public int numChannels;
         public int bitsPerSample;
@@ -63,7 +60,6 @@ public class SignalGenerator implements Runnable, SampleConsumer {
 
 
     /*Postprocessing enabled flag*/
-    private final boolean wavePostProcessingEnabled;
     private final SignalGeneratorConfig asConfig;
 
     /*Total number of instructions*/
@@ -124,14 +120,6 @@ public class SignalGenerator implements Runnable, SampleConsumer {
     /*FSK related*/
     private FSKGenerator fskGenerator;
 
-    /*Output file*/
-    private final String outFile;
-    /*Cancel type*/
-    private volatile int cancelType;
-    /*Postprocessing run flag*/
-    private boolean postProcessRunning = false;
-
-
     /*Configuration copy*/
     private boolean cSigned;
     private int cBits;
@@ -153,40 +141,23 @@ public class SignalGenerator implements Runnable, SampleConsumer {
      * Signal writer
      */
     private SignalWriter signalWriter;
+    private CasTask parentTask;
 
-    /*Output type, WAVE or AUDIO*/
-    private final int outputType;
-
-    /*Pause and repeat*/
-    private boolean resumeFromPause;
-    private final boolean repeatOutput;
-
-    /*Dummy*/
-    private final boolean isDummy;
+    private Exception lastException;
 
     /**
      * Create new SignalGenerator
      *
-     * @param outFile Output file
      * @param dta Generator instructions
-     * @param postProEnabled Postprocessing enabled
-     * @param outputType Output type WAVE or AUDIO
-     * @param repeat Indicates whether the output should be repeated
-     * @param dummy
      * @param asc
      */
-    public SignalGenerator(String outFile, int[] dta, boolean postProEnabled, int outputType, boolean repeat, boolean dummy,SignalGeneratorConfig asc) {
+    public SignalGenerator(int[] dta, SignalGeneratorConfig asc, CasTask parentTask) {
+        lastException = null;
         mem = dta;
-        cancelType = CANCEL_NO;
         genLength = mem.length;
         errorMessage = null;
-        wavePostProcessingEnabled = postProEnabled;
-        this.outputType = outputType;
-        resumeFromPause = false;
-        repeatOutput = repeat;
-        this.outFile = outFile;
-        isDummy = dummy;
         asConfig = asc;
+        this.parentTask = parentTask;
     }
 
 
@@ -218,12 +189,11 @@ public class SignalGenerator implements Runnable, SampleConsumer {
 
     }
 
-    
 
     /**
      * Prepare to generate signal
      *
-     * @throws java.lang.Exception
+     * @throws java.lang.Exception when preparing for generation goes wrong
      */
     public void prepare() throws Exception {
 
@@ -231,19 +201,13 @@ public class SignalGenerator implements Runnable, SampleConsumer {
         copyConfiguration();
 
 
-
-            if (!isDummy) {
-                signalWriter = new AudioSignalBufferedWriter(cBits, cChannels, cSigned, cBufferSize, cSampleRate, cTerminalSilence);
-            }
-
-
-
+        signalWriter = new AudioSignalBufferedWriter(cBits, cChannels, cSigned, cBufferSize, cSampleRate, cTerminalSilence);
         /*Prepare writer*/
-        signalWriter.prepare(outFile);
+        signalWriter.prepare();
 
         /*Create silence*/
-        SILENCE_SHORT = PulseCreator.createPulse(cChannels, cPulseVolume, cSampleRate/10, cBits, cSigned, 1, 1, cSignalInRightChannelOnly, 0);
-        BLOCKSEP = PulseCreator.createPulse(cChannels, cPulseVolume, cSampleRate/44, cBits, cSigned, 1, 1, cSignalInRightChannelOnly, 0);
+        SILENCE_SHORT = PulseCreator.createPulse(cChannels, cPulseVolume, cSampleRate / 10, cBits, cSigned, 1, 1, cSignalInRightChannelOnly, 0);
+        BLOCKSEP = PulseCreator.createPulse(cChannels, cPulseVolume, cSampleRate / 44, cBits, cSigned, 1, 1, cSignalInRightChannelOnly, 0);
 
         /*Reasonable default pieces of signal*/
         LOW_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_LOW, SignalGenerator.FLAG_POLARITY_01, cSignalInRightChannelOnly, 0);
@@ -253,40 +217,38 @@ public class SignalGenerator implements Runnable, SampleConsumer {
     }
 
     /*Main Thread -----------------------------------------------------------*/
+
     /**
      * **********************************************************************
      */
-    @Override
-    public void run() {
+
+    public void run() throws Exception  {
 
 
-
-        /*Prepare for output*/
-        try {
+            /*Prepare for output*/
             prepare();
-        } catch (Exception e) {
-            errorMessage = "Error when preparing audio output: "
-                    + Utils.getExceptionMessage(e);
 
-            e.printStackTrace();
-            return;
-        }
 
-        /*Start writing signal*/
-        try {
+            /*Start writing signal*/
 
             /*Initial signal*/
             for (int k = 0; k < cInitialSilence; k++) {
                 signalWriter.writeInitialSignal(SILENCE_SHORT);
             }
 
+            int lastIp=0;
             ip = 0;
             op = INSTR_NOP;
 
-            while (op != SignalGenerator.INSTR_END && cancelType == CANCEL_NO) {
+            while (op != SignalGenerator.INSTR_END && !parentTask.isCancelled()) {
 
                 op = mem[ip];
 
+                /*Show progress every 2nd instruction*/
+                if (ip-lastIp>=2) {
+                    parentTask.setProgress(getStatusPercent());
+                    lastIp=ip;
+                }
 
                 /*Execution of instructions*/
                 switch (op) {
@@ -321,7 +283,7 @@ public class SignalGenerator implements Runnable, SampleConsumer {
                         cx = mem[ip];
                         ip++;
 
-                        for (int i = 0; i < cx && cancelType == CANCEL_NO; i++) {
+                        for (int i = 0; i < cx && !parentTask.isCancelled(); i++) {
                             generateByte(mem[ip]);
                             ip++;
                         }
@@ -339,13 +301,7 @@ public class SignalGenerator implements Runnable, SampleConsumer {
 
                     /*End*/
                     case SignalGenerator.INSTR_END: {
-                        if (repeatOutput == true) {
-                            ip = 0;
-                            op = INSTR_NOP;
-                            continue;
-                        } else {
-                            break;
-                        }
+                        break;
                     }
 
 
@@ -434,7 +390,7 @@ public class SignalGenerator implements Runnable, SampleConsumer {
                         cx = mem[ip];
                         /*Bytes of data*/
 
- /*Create pulses*/
+                        /*Create pulses*/
                         ip++;
                         NARROW_PULSE = PulseCreator.createPulse(cChannels, cPulseVolume, getPWMLength(mem[ip]), cBits, cSigned, 0, pwmPolarity, cSignalInRightChannelOnly, cHarmonic);
                         ip++;
@@ -444,7 +400,7 @@ public class SignalGenerator implements Runnable, SampleConsumer {
                         loHiOrder = pwmLoHiOrder;
 
                         /*Generate data itself*/
-                        for (int i = 0; i < cx && cancelType == CANCEL_NO; i++) {
+                        for (int i = 0; i < cx && !parentTask.isCancelled(); i++) {
                             generateByte(mem[ip]);
                             ip++;
                         }
@@ -509,41 +465,18 @@ public class SignalGenerator implements Runnable, SampleConsumer {
 
 
             /*Generator canceled*/
-            if (cancelType != CANCEL_NO) {
+            if (parentTask.isCancelled()) {
                 signalWriter.prepareForClose();
                 signalWriter.close();
-            } /*Generator ended normally*/ else {
-
-                /*Terminal signal - silence*/
+            }
+            /*Generator ended normally*/
+            else {
                 signalWriter.prepareForTerminationSignal(SILENCE_SHORT);
-                while (cancelType == CANCEL_NO && signalWriter.writeTerminationSignal()) {
-
-                }
-
                 signalWriter.prepareForClose();
                 signalWriter.close();
-                //dumpInstructions();
-
             }
 
-            /*Everything OK*/
-
-        } catch (Exception e) {
-
-            errorMessage = Utils.getExceptionMessage(e);
-            try {
-                e.printStackTrace();
-                signalWriter.close();
-            } catch (Exception e1) {
-                errorMessage = Utils.getExceptionMessage(e1);
-                e1.printStackTrace();
-            } finally {
-            }
-        } finally {
-
-
-        }
-
+        /*Everything OK*/
     }
 
     /**
@@ -554,7 +487,7 @@ public class SignalGenerator implements Runnable, SampleConsumer {
      */
     private void generatePilotTone(int num) throws Exception {
 
-        for (int i = 0; i < num && cancelType == CANCEL_NO; i++) {
+        for (int i = 0; i < num && !parentTask.isCancelled(); i++) {
             signalWriter.write(PILOTTONE_PULSE);
         }
 
@@ -574,7 +507,7 @@ public class SignalGenerator implements Runnable, SampleConsumer {
      * @throws Exception
      */
     private void generateSilence(int tenths) throws Exception {
-        for (int p = 0; p < tenths && cancelType == CANCEL_NO; p++) {
+        for (int p = 0; p < tenths && !parentTask.isCancelled(); p++) {
             signalWriter.write(SILENCE_SHORT);
         }
     }
@@ -642,7 +575,6 @@ public class SignalGenerator implements Runnable, SampleConsumer {
     /*Implementing Generator*/
 
     /**
-     *
      * @return
      */
 
@@ -673,45 +605,24 @@ public class SignalGenerator implements Runnable, SampleConsumer {
 
     }
 
-    /*Cancel generator*/
-
-    public synchronized void cancelOperation(int cncType) {
-        cancelType = cncType;
-        resumeFromPause = true;
-        this.notifyAll();
-    }
-
     public int getStatusPercent() {
-        double d;
+        float d;
         d = ip;
         d /= genLength;
         d *= 100;
         if (d > 100) {
-            d = 100.0;
+            d = 100.0f;
         }
         return (int) Math.round(d);
     }
 
-    /**
-     *
-     * @return
-     */
-    public int getCancelledType() {
-        return cancelType;
-    }
-
-
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
 
     private int getPWMLength(int i) {
         return (int) Math.round(i * (double) cSampleRate / pwmSampleRate);
     }
 
     private int getPWMMilis2Samples(int i) {
-        return (int) Math.round(i * (((double)cSampleRate)/1000));
+        return (int) Math.round(i * (((double) cSampleRate) / 1000));
     }
 
     /**
@@ -719,7 +630,7 @@ public class SignalGenerator implements Runnable, SampleConsumer {
      */
     private void generateBAUD() {
         ip++;
-        fskGenerator = new FSKGenerator(mem[ip], cSigned, cChannels, cBits, this, cPulseVolume, cSignalInRightChannelOnly,cSampleRate);
+        fskGenerator = new FSKGenerator(mem[ip], cSigned, cChannels, cBits, this, cPulseVolume, cSignalInRightChannelOnly, cSampleRate);
         ip++;
     }
 
@@ -750,13 +661,13 @@ public class SignalGenerator implements Runnable, SampleConsumer {
         /*Generate IRG in pieces of 2 seconds*/
         for (int i = 0; i < numPieces; i++) {
             fskGenerator.generateIRG(2_000);
-            if (cancelType != CANCEL_NO) {
+            if (parentTask.isCancelled()) {
                 return;
             }
         }
         /*Remainder of IRG*/
         fskGenerator.generateIRG(remainder);
-        if (cancelType != CANCEL_NO) {
+        if (parentTask.isCancelled()) {
             return;
         }
 
@@ -781,7 +692,7 @@ public class SignalGenerator implements Runnable, SampleConsumer {
         /*To be on the safe side*/
         if (fskGenerator == null) {
 
-                fskGenerator = new FSKGenerator(600, cSigned, cChannels, cBits, this, cPulseVolume, cSignalInRightChannelOnly,cSampleRate);
+            fskGenerator = new FSKGenerator(600, cSigned, cChannels, cBits, this, cPulseVolume, cSignalInRightChannelOnly, cSampleRate);
 
         }
         fskGenerator.resetAngle();
@@ -790,14 +701,10 @@ public class SignalGenerator implements Runnable, SampleConsumer {
         ip += dataLen;
     }
 
-    /**
-     *
-     * @param b
-     * @throws Exception
-     */
     @Override
     public void consumeSamples(byte[] b) throws Exception {
         signalWriter.write(b);
     }
+
 
 }

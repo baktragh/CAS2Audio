@@ -111,7 +111,7 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }
 
     @Override
-    public void prepare(String outputFile) throws Exception {
+    public void prepare() throws Exception {
 
         AudioTrack.Builder builder = new AudioTrack.Builder();
         builder=builder.setAudioFormat(audioFormat);
