@@ -2,6 +2,7 @@ package com.baktra.cas2audio;
 
 import android.os.AsyncTask;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -14,8 +15,10 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     private Exception lastException;
     private TextView errorText;
     private ProgressBar progressBar;
+    private Button browseButton;
+    private MainActivity parentActivity;
 
-    public CasTask(int[] instructions, View startView, View stopView, boolean stereo, TextView errorText,ProgressBar progressBar) {
+    public CasTask(int[] instructions, View startView, View stopView, boolean stereo, TextView errorText, ProgressBar progressBar, Button browseButton, MainActivity mainActivity) {
         this.instructions=instructions;
         this.startView=startView;
         this.stopView=stopView;
@@ -23,6 +26,8 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         this.lastException=null;
         this.errorText=errorText;
         this.progressBar=progressBar;
+        this.browseButton=browseButton;
+        this.parentActivity=mainActivity;
     }
 
     @Override
@@ -69,6 +74,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
        else {
            errorText.setText("Tape image processed succesfully");
        }
+       parentActivity.setPlaybackInProgress(false);
     }
 
     protected void onCancelled() {
@@ -81,16 +87,19 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
             errorText.setText("Tape image processing cancelled");
         }
         progressBar.setProgress(0);
+        parentActivity.setPlaybackInProgress(false);
     }
 
     private void setControlsForTermination() {
         stopView.setEnabled(false);
         startView.setEnabled(true);
+        browseButton.setEnabled(true);
     }
 
     protected void onPreExecute() {
         stopView.setEnabled(true);
         startView.setEnabled(false);
+        browseButton.setEnabled(false);
     }
 
 

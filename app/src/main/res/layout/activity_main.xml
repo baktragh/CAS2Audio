@@ -29,7 +29,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:drawableLeft="@android:drawable/ic_media_play"
                 android:onClick="onPlay"
+                android:padding="20dp"
                 android:text="PLAY" />
 
             <Button
@@ -37,8 +39,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:drawableLeft="@android:drawable/ic_media_pause"
                 android:enabled="false"
                 android:onClick="onStopPlaying"
+                android:padding="20dp"
                 android:text="STOP" />
 
         </LinearLayout>
@@ -52,6 +56,13 @@
             android:layout_marginBottom="12dp"
             android:max="100"
             android:progress="0" />
+
+        <Button
+            android:id="@+id/btnBrowse"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onBrowseTapeImage"
+            android:text="Browse for tape image..." />
 
         <FrameLayout
             android:layout_width="match_parent"

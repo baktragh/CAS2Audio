@@ -173,7 +173,6 @@ public class AudioSignalBufferedWriter implements SignalWriter {
         if (internalBufferPos != 0) {
             track.write(internalBuffer, 0, internalBuffer.length - internalBufferAvail);
         }
-        //track.drain();
         track.stop();
     }
 
