@@ -9,25 +9,19 @@ import android.widget.TextView;
 public class CasTask extends AsyncTask<Void,Integer,Void> {
 
     private final boolean stereo;
+    private final boolean square;
+    private final int volume;
     private int[] instructions;
-    private View startView;
-    private View stopView;
     private Exception lastException;
-    private TextView errorText;
-    private ProgressBar progressBar;
-    private Button browseButton;
     private MainActivity parentActivity;
 
-    public CasTask(int[] instructions, View startView, View stopView, boolean stereo, TextView errorText, ProgressBar progressBar, Button browseButton, MainActivity mainActivity) {
+    public CasTask(int[] instructions, TextView errorText, ProgressBar progressBar, MainActivity mainActivity, boolean stereo,boolean square,int volume) {
         this.instructions=instructions;
-        this.startView=startView;
-        this.stopView=stopView;
         this.stereo=stereo;
         this.lastException=null;
-        this.errorText=errorText;
-        this.progressBar=progressBar;
-        this.browseButton=browseButton;
         this.parentActivity=mainActivity;
+        this.square=square;
+        this.volume=volume;
     }
 
     @Override
@@ -35,7 +29,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
 
             try {
                 SignalGenerator.SignalGeneratorConfig sgc = new SignalGenerator.SignalGeneratorConfig();
-                sgc.amplitude=75;
+                sgc.amplitude=volume*10;
                 sgc.bitsPerSample=16;
                 sgc.doNotModulateStandard=false;
                 sgc.initialSilence=1;
@@ -46,7 +40,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
                 sgc.bufferSize=sgc.sampleRate;
                 sgc.signedSamples=true;
                 sgc.terminalSilence=1;
-                sgc.waveForm=-1;
+                sgc.waveForm=square?0:-1;
 
                 SignalGenerator sg = new SignalGenerator(instructions,sgc,this);
                 sg.run();
@@ -62,17 +56,17 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
 
     @Override
     protected void onProgressUpdate(Integer... progress) {
-        progressBar.setProgress(progress[0]);
+        parentActivity.setProgressBar(progress[0]);
     }
 
     protected void onPostExecute(Void v) {
        setControlsForTermination();
        if (lastException!=null) {
-            errorText.setText(Utils.getExceptionMessage(lastException));
+            parentActivity.setErrorText(Utils.getExceptionMessage(lastException));
             lastException.printStackTrace();
        }
        else {
-           errorText.setText("Tape image processed succesfully");
+           parentActivity.setErrorText("Tape image processed succesfully");
        }
        parentActivity.setPlaybackInProgress(false);
     }
@@ -80,26 +74,22 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     protected void onCancelled() {
         setControlsForTermination();
         if (lastException!=null) {
-            errorText.setText(Utils.getExceptionMessage(lastException));
+            parentActivity.setErrorText(Utils.getExceptionMessage(lastException));
             lastException.printStackTrace();
         }
         else {
-            errorText.setText("Tape image processing cancelled");
+            parentActivity.setErrorText("Tape image processing cancelled");
         }
-        progressBar.setProgress(0);
+        parentActivity.setProgressBar(0);
         parentActivity.setPlaybackInProgress(false);
     }
 
     private void setControlsForTermination() {
-        stopView.setEnabled(false);
-        startView.setEnabled(true);
-        browseButton.setEnabled(true);
+        parentActivity.setPlayBackViewsEnabled(false);
     }
 
     protected void onPreExecute() {
-        stopView.setEnabled(true);
-        startView.setEnabled(false);
-        browseButton.setEnabled(false);
+        parentActivity.setPlayBackViewsEnabled(true);
     }
 
 

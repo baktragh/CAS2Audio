@@ -1,11 +1,14 @@
 package com.baktra.cas2audio;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -13,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,12 +26,20 @@ public class MainActivity extends AppCompatActivity {
     private Uri currentUri;
     private boolean playbackInProgress;
 
+    private ArrayList<View> playBackViewsDisabled;
+    private ArrayList<View> playBackViewsEnabled;
+
     public MainActivity() {
         super();
         lnsp=System.getProperty("line.separator");
         casTask=null;
         currentUri=null;
         playbackInProgress=false;
+        playBackViewsDisabled = new ArrayList<>();
+        playBackViewsEnabled = new ArrayList<>();
+
+
+
     }
 
 
@@ -35,6 +47,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        playBackViewsDisabled.add(getBrowseButton());
+        playBackViewsDisabled.add(findViewById(R.id.btnPlay));
+        playBackViewsDisabled.add(findViewById(R.id.swChannels));
+        playBackViewsDisabled.add(findViewById(R.id.swSquareWave));
+        playBackViewsDisabled.add(findViewById(R.id.sbVolume));
+        playBackViewsEnabled.add(findViewById(R.id.btnStop));
+
+
     }
 
     protected void onResume() {
@@ -53,11 +73,9 @@ public class MainActivity extends AppCompatActivity {
 
             /*Valid path selected*/
             if (u!=null && u.getPath()!=null) {
-                String filename = new File(u.getPath()).getName();
+                String filename = extractFileNameFromURI(u);
                 setCurrentFileName(filename);
-                findViewById(R.id.btnPlay).setEnabled(true);
-                findViewById(R.id.btnStop).setEnabled(false);
-                getBrowseButton().setEnabled(true);
+                setPlayBackViewsEnabled(false);
                 currentUri=u;
             }
             /*There was some intent, but no valid path selected*/
@@ -67,20 +85,17 @@ public class MainActivity extends AppCompatActivity {
                         "No tape image selected. Click the 'Browse for tape image...' button, or "+
                                 "Go to your favorite file manager, select a tape image, and then select this application to open it."
                 );
-                findViewById(R.id.btnPlay).setEnabled(false);
-                findViewById(R.id.btnStop).setEnabled(false);
-                getBrowseButton().setEnabled(true);
+                setPlayBackViewsEnabled(false);
                 currentUri=null;
             }
 
         }
         /*Activity was resumed, we are still open with valid tape image, and no playback is in progress*/
         else {
-            String filename = new File(currentUri.getPath()).getName();
+            String filename = extractFileNameFromURI(currentUri);
             setCurrentFileName(filename);
-            findViewById(R.id.btnPlay).setEnabled(true);
-            findViewById(R.id.btnStop).setEnabled(false);
-            getBrowseButton().setEnabled(true);
+            setPlayBackViewsEnabled(false);
+            msgText.setText("");
         }
 
     }
@@ -105,6 +120,13 @@ public class MainActivity extends AppCompatActivity {
         int[] instructions = null;
         InputStream iStream = null;
 
+        /*Check if anything was selected*/
+        if (currentUri==null) {
+            getMessageWidget().setText("Unable to play. No tape image was selected");
+            return;
+        }
+
+
         /*Try to open the tape image - short, can be in  the even thread*/
         try {
             iStream = getContentResolver().openInputStream(currentUri);
@@ -126,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
         /*Create new background task*/
         try {
-            casTask = new CasTask(instructions,findViewById(R.id.btnPlay),findViewById(R.id.btnStop),isStereo(),getMessageWidget(),getProgressBar(),getBrowseButton(),this);
+            casTask = new CasTask(instructions,getMessageWidget(),getProgressBar(),this,isStereo(),isSquare(),getVolume());
         }
         catch (Exception e) {
             getMessageWidget().setText(Utils.getExceptionMessage(e));
@@ -177,6 +199,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean isStereo() {
         return ((Switch) findViewById(R.id.swChannels)).isSelected();
     }
+    private boolean isSquare() { return ((Switch) findViewById(R.id.swSquareWave)).isSelected();}
+    private int getVolume() { return ((SeekBar) findViewById(R.id.sbVolume)).getProgress();}
     private ProgressBar getProgressBar() {
         return ((ProgressBar) findViewById(R.id.pbProgress));
     }
@@ -193,7 +217,42 @@ public class MainActivity extends AppCompatActivity {
         playbackInProgress=b;
     }
 
+    void setPlayBackViewsEnabled(boolean b) {
+        for (View v:playBackViewsDisabled) {
+            v.setEnabled(!b);
+        }
+        for (View v:playBackViewsEnabled) {
+            v.setEnabled(b);
+        }
+    }
 
+    void setErrorText(String s) {
+        getMessageWidget().setText(s);
+    }
+
+    void setProgressBar(int value) {
+        getProgressBar().setProgress(value);
+    }
+
+    private String extractFileNameFromURI(Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        if (result == null) {
+            File f = new File (uri.getPath());
+            result = f.getName();
+        }
+        return result;
+
+    }
 
 
 }
