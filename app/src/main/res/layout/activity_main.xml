@@ -64,17 +64,57 @@
             android:onClick="onBrowseTapeImage"
             android:text="Browse for tape image..." />
 
-        <FrameLayout
+        <TableLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:stretchColumns="0,1">
 
-            <Switch
-                android:id="@+id/swChannels"
+            <TableRow
                 android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center|center_horizontal|fill|center_vertical"
+                android:orientation="horizontal">
+
+                <Switch
+                    android:id="@+id/swSquareWave"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="Square waveform" />
+
+                <Switch
+                    android:id="@+id/swChannels"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:padding="8dp"
+                    android:text="Stereo" />
+            </TableRow>
+
+        </TableLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Stereo"
-                tools:checked="true" />
-        </FrameLayout>
+                android:layout_weight="0"
+                android:padding="8dp"
+                android:text="Amplitude:"
+                android:textAppearance="@android:style/TextAppearance.Material" />
+
+            <SeekBar
+                android:id="@+id/sbVolume"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:max="10"
+                android:progress="5" />
+        </LinearLayout>
 
         <Space
             android:layout_width="match_parent"
