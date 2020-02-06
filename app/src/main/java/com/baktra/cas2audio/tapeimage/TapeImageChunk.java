@@ -1,4 +1,4 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.tapeimage;
 
 import java.io.InputStream;
 

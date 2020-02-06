@@ -1,44 +1,63 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.tapeimage;
+
+import com.baktra.cas2audio.FileFormatException;
 
 import java.io.InputStream;
 
+
 /**
- * baud tape image chunk
+ *
+ * @author  
  */
-public class BaudChunk implements TapeImageChunk {
+public class PWMChunk implements TapeImageChunk {
+
+    /**
+     *
+     * @param sampleRate
+     * @return
+     */
+    public static PWMChunk createDummyPWMS(int sampleRate) {
+        PWMChunk c = new PWMChunk("pwms", null);
+        c.length = 0x02;
+        c.auxLo = 0x05;
+        c.auxHi = 0x00;
+        c.aux = 0x05;
+        c.data = new int[]{sampleRate % 256, sampleRate / 256};
+        return c;
+    }
 
     /**
      * Chunk type
      */
-    private static final String type = "baud";
+    private final String type;
     /**
      * Chunk length
      */
     private int length;
     /**
-     * Baud rate
-     */
-    private int baudRate;
-    /**
-     * Data
+     * Chunk data
      */
     private int[] data;
+    /**
+     * Parent chunk
+     */
+    private final TapeImageChunk parent;
+    /**
+     * Aux bytes
+     */
+    private int auxLo;
+    private int auxHi;
+    private int aux;
 
     /**
      *
+     * @param type
+     * @param parent
      */
-    public BaudChunk() {
+    public PWMChunk(String type, TapeImageChunk parent) {
 
-    }
-
-    /**
-     *
-     * @param baudRate
-     */
-    public BaudChunk(int baudRate) {
-        length = 0;
-        this.baudRate = baudRate;
-        data = new int[0];
+        this.type = type;
+        this.parent = parent;
     }
 
     @Override
@@ -65,8 +84,24 @@ public class BaudChunk implements TapeImageChunk {
      *
      * @return
      */
-    public int getBaudRate() {
-        return baudRate;
+    public int getAux() {
+        return aux;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public int getAuxLo() {
+        return auxLo;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public int getAuxHi() {
+        return auxHi;
     }
 
     /**
@@ -80,22 +115,21 @@ public class BaudChunk implements TapeImageChunk {
         /*Read length and baud rate*/
         int lengthLo = s.read();
         int lengthHi = s.read();
-        int baudLo = s.read();
-        int baudHi = s.read();
+        auxLo = s.read();
+        auxHi = s.read();
 
-        if (lengthLo == -1 || lengthHi == -1 || baudLo == -1 || baudHi == -1) {
-            throw new FileFormatException("Truncated baud chunk header");
+        if (lengthLo == -1 || lengthHi == -1 || auxLo == -1 || auxHi == -1) {
+            throw new FileFormatException("Truncated pwmX chunk header");
         }
-
         length = lengthLo + (256 * lengthHi);
-        baudRate = baudLo + (256 * baudHi);
+        aux = auxLo + (256 * auxHi);
 
         /*Read data*/
         data = new int[length];
         for (int i = 0; i < length; i++) {
             int b = s.read();
             if (b == -1) {
-                throw new FileFormatException("Truncated baud chunk data");
+                throw new FileFormatException("Truncated pwmX chunk data");
             }
             data[i] = b;
         }
@@ -108,11 +142,11 @@ public class BaudChunk implements TapeImageChunk {
      */
     @Override
     public void writeToStream(java.io.DataOutputStream s) throws Exception {
-        s.writeBytes("baud");
+        s.writeBytes(type);
         s.write(length % 256);
         s.write(length / 256);
-        s.write(baudRate % 256);
-        s.write(baudRate / 256);
+        s.write(aux % 256);
+        s.write(aux / 256);
         for (int i = 0; i < data.length; i++) {
             s.write(data[i]);
         }
@@ -124,12 +158,12 @@ public class BaudChunk implements TapeImageChunk {
      */
     @Override
     public String toString() {
-        return "baud: [" + Integer.toString(baudRate) + " bd] (" + Integer.toString(length) + ")";
+        return type + ": (" + Integer.toString(length) + ")";
     }
 
     @Override
     public TapeImageChunk getParent() {
-        return null;
+        return parent;
     }
 
     /**
@@ -138,7 +172,8 @@ public class BaudChunk implements TapeImageChunk {
      */
     @Override
     public void setAux(int newAuxValue) {
-        baudRate = newAuxValue;
+
     }
+
 
 }

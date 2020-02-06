@@ -47,11 +47,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /*Widgets to be disabled during playback*/
         playBackViewsDisabled.add(getBrowseButton());
         playBackViewsDisabled.add(findViewById(R.id.btnPlay));
         playBackViewsDisabled.add(findViewById(R.id.swChannels));
         playBackViewsDisabled.add(findViewById(R.id.swSquareWave));
         playBackViewsDisabled.add(findViewById(R.id.sbVolume));
+        playBackViewsDisabled.add(findViewById(R.id.tvAmplitude));
+        playBackViewsDisabled.add(findViewById(R.id.sw48kHz));
+
+        /*Widgets to be enabled during playback*/
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
 
 
@@ -122,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
         /*Check if anything was selected*/
         if (currentUri==null) {
-            getMessageWidget().setText("Unable to play. No tape image was selected");
+            getMessageWidget().setText("Unable to play. No tape image was selected.");
             return;
         }
 
@@ -136,10 +142,11 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        int sampleRate = getSampleRate();
         /*Try to process the tape image*/
         try {
             TapeImageProcessor tip = new TapeImageProcessor();
-            instructions = tip.convertItem(iStream,44100);
+            instructions = tip.convertItem(iStream,sampleRate);
         }
         catch (Exception e) {
             getMessageWidget().setText("Unable to process the tape image:"+lnsp+Utils.getExceptionMessage(e));
@@ -148,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
 
         /*Create new background task*/
         try {
-            casTask = new CasTask(instructions,getMessageWidget(),getProgressBar(),this,isStereo(),isSquare(),getVolume());
+            casTask = new CasTask(instructions,getMessageWidget(),getProgressBar(),this,isStereo(),isSquare(),getVolume(),sampleRate);
         }
         catch (Exception e) {
             getMessageWidget().setText(Utils.getExceptionMessage(e));
@@ -197,12 +204,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isStereo() {
-        return ((Switch) findViewById(R.id.swChannels)).isSelected();
+        return ((Switch) findViewById(R.id.swChannels)).isChecked();
     }
-    private boolean isSquare() { return ((Switch) findViewById(R.id.swSquareWave)).isSelected();}
+    private boolean isSquare() { return ((Switch) findViewById(R.id.swSquareWave)).isChecked();}
     private int getVolume() { return ((SeekBar) findViewById(R.id.sbVolume)).getProgress();}
     private ProgressBar getProgressBar() {
         return ((ProgressBar) findViewById(R.id.pbProgress));
+    }
+    private int getSampleRate() {
+        boolean f48kHz = ((Switch)findViewById(R.id.sw48kHz)).isChecked();
+        return f48kHz?48000:44100;
     }
 
     private Button getBrowseButton() {

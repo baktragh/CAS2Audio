@@ -1,4 +1,4 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.signal;
 
 
 import android.media.AudioAttributes;

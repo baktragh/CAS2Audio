@@ -1,4 +1,4 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.signal;
 
 
 public interface Double2Sample {

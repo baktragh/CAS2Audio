@@ -1,9 +1,9 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.tapeimage;
 
-import android.net.Uri;
+import com.baktra.cas2audio.FileFormatException;
+import com.baktra.cas2audio.TapeImageProcessor;
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 
 

@@ -1,4 +1,6 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.tapeimage;
+
+import com.baktra.cas2audio.FileFormatException;
 
 import java.io.InputStream;
 
@@ -7,55 +9,32 @@ import java.io.InputStream;
  *
  * @author  
  */
-public class PWMChunk implements TapeImageChunk {
+public class FujiChunk implements TapeImageChunk {
 
+    private static final String type = "FUJI";
     /**
+     * Get default FUJI chunk
      *
-     * @param sampleRate
-     * @return
+     * @return Default FUJI chunk
      */
-    public static PWMChunk createDummyPWMS(int sampleRate) {
-        PWMChunk c = new PWMChunk("pwms", null);
-        c.length = 0x02;
-        c.auxLo = 0x05;
-        c.auxHi = 0x00;
-        c.aux = 0x05;
-        c.data = new int[]{sampleRate % 256, sampleRate / 256};
-        return c;
-    }
+    public static FujiChunk getDefaultFujiChunk() {
+        FujiChunk fc = new FujiChunk();
+        fc.length = 0;
+        fc.data = new int[0];
+        fc.aux = 0;
 
-    /**
-     * Chunk type
-     */
-    private final String type;
-    /**
-     * Chunk length
-     */
+        return fc;
+    }
     private int length;
-    /**
-     * Chunk data
-     */
     private int[] data;
-    /**
-     * Parent chunk
-     */
-    private final TapeImageChunk parent;
-    /**
-     * Aux bytes
-     */
-    private int auxLo;
-    private int auxHi;
     private int aux;
 
     /**
      *
-     * @param type
-     * @param parent
+     * @return
      */
-    public PWMChunk(String type, TapeImageChunk parent) {
-
-        this.type = type;
-        this.parent = parent;
+    public int getAux() {
+        return aux;
     }
 
     @Override
@@ -80,45 +59,22 @@ public class PWMChunk implements TapeImageChunk {
 
     /**
      *
-     * @return
-     */
-    public int getAux() {
-        return aux;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public int getAuxLo() {
-        return auxLo;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public int getAuxHi() {
-        return auxHi;
-    }
-
-    /**
-     *
      * @param s
      * @throws Exception
      */
     @Override
     public void readFromStream(InputStream s) throws Exception {
 
-        /*Read length and baud rate*/
+        /*Read length and AUX*/
         int lengthLo = s.read();
         int lengthHi = s.read();
-        auxLo = s.read();
-        auxHi = s.read();
+        int auxLo = s.read();
+        int auxHi = s.read();
 
         if (lengthLo == -1 || lengthHi == -1 || auxLo == -1 || auxHi == -1) {
-            throw new FileFormatException("Truncated pwmX chunk header");
+            throw new FileFormatException("Truncated FUJI chunk header");
         }
+
         length = lengthLo + (256 * lengthHi);
         aux = auxLo + (256 * auxHi);
 
@@ -127,10 +83,11 @@ public class PWMChunk implements TapeImageChunk {
         for (int i = 0; i < length; i++) {
             int b = s.read();
             if (b == -1) {
-                throw new FileFormatException("Truncated pwmX chunk data");
+                throw new FileFormatException("Truncated FUJI chunk data");
             }
             data[i] = b;
         }
+
     }
 
     /**
@@ -140,7 +97,7 @@ public class PWMChunk implements TapeImageChunk {
      */
     @Override
     public void writeToStream(java.io.DataOutputStream s) throws Exception {
-        s.writeBytes(type);
+        s.writeBytes("FUJI");
         s.write(length % 256);
         s.write(length / 256);
         s.write(aux % 256);
@@ -148,6 +105,7 @@ public class PWMChunk implements TapeImageChunk {
         for (int i = 0; i < data.length; i++) {
             s.write(data[i]);
         }
+
     }
 
     /**
@@ -156,12 +114,12 @@ public class PWMChunk implements TapeImageChunk {
      */
     @Override
     public String toString() {
-        return type + ": (" + Integer.toString(length) + ")";
+        return "FUJI (" + Integer.toString(length) + ")";
     }
 
     @Override
     public TapeImageChunk getParent() {
-        return parent;
+        return null;
     }
 
     /**
@@ -172,6 +130,5 @@ public class PWMChunk implements TapeImageChunk {
     public void setAux(int newAuxValue) {
 
     }
-
 
 }

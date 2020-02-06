@@ -91,6 +91,20 @@
                     android:text="Stereo" />
             </TableRow>
 
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center|center_horizontal|fill|center_vertical"
+                android:orientation="horizontal">
+
+                <Switch
+                    android:id="@+id/sw48kHz"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="48 kHz" />
+            </TableRow>
+
         </TableLayout>
 
         <LinearLayout
@@ -100,10 +114,11 @@
             android:paddingBottom="12dp">
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/tvAmplitude"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
+                android:labelFor="@id/sbVolume"
                 android:padding="8dp"
                 android:text="Amplitude:"
                 android:textAppearance="@android:style/TextAppearance.Material" />
@@ -128,7 +143,9 @@
             android:editable="false"
             android:ems="10"
             android:gravity="start|top"
-            android:inputType="textMultiLine" />
+            android:inputType="textMultiLine"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

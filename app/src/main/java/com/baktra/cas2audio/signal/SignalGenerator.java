@@ -1,16 +1,11 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.signal;
+
+import com.baktra.cas2audio.CasTask;
 
 /**
  * Electric signal generator
  */
 public class SignalGenerator implements SampleConsumer {
-
-    /*Output types*/
-    public static final int TYPE_AUDIO = 1;
-
-    /*Cancellation*/
-    public static final int CANCEL_NO = 0;
-    public static final int CANCEL_YES = 1;
 
     /*Instruction constants*/
 
@@ -132,18 +127,15 @@ public class SignalGenerator implements SampleConsumer {
     private int cInitialSilence;
     private int cTerminalSilence;
 
-    private boolean cDoNotModulateStandardRecords;
     private int cHarmonic;
 
-    /*Error message*/
-    private String errorMessage;
     /**
      * Signal writer
      */
     private SignalWriter signalWriter;
     private CasTask parentTask;
 
-    private Exception lastException;
+
 
     /**
      * Create new SignalGenerator
@@ -152,10 +144,8 @@ public class SignalGenerator implements SampleConsumer {
      * @param asc
      */
     public SignalGenerator(int[] dta, SignalGeneratorConfig asc, CasTask parentTask) {
-        lastException = null;
         mem = dta;
         genLength = mem.length;
-        errorMessage = null;
         asConfig = asc;
         this.parentTask = parentTask;
     }
@@ -169,7 +159,6 @@ public class SignalGenerator implements SampleConsumer {
         cChannels = asConfig.numChannels;
         cPulseVolume = asConfig.amplitude;
         cSignalInRightChannelOnly = asConfig.rightChannelOnly;
-        cDoNotModulateStandardRecords = asConfig.doNotModulateStandard;
         cHarmonic = asConfig.waveForm;
         cInitialSilence = asConfig.initialSilence;
         cTerminalSilence = asConfig.terminalSilence;
@@ -216,12 +205,10 @@ public class SignalGenerator implements SampleConsumer {
 
     }
 
-    /*Main Thread -----------------------------------------------------------*/
-
-    /**
-     * **********************************************************************
+    /** Generate the signal
+     *
+     * @throws Exception When anything fails
      */
-
     public void run() throws Exception  {
 
 
@@ -365,7 +352,7 @@ public class SignalGenerator implements SampleConsumer {
                     /*PWMC*/
                     case SignalGenerator.INSTR_PWMC: {
                         ip++;
-                        int silence = getPWMMilis2Samples(mem[ip]);
+                        int silence = getPWMMillis2Samples(mem[ip]);
                         ip++;
                         for (int i = 0; i < silence; i++) {
                             signalWriter.write(SILENCE_SAMPLE);
@@ -411,7 +398,7 @@ public class SignalGenerator implements SampleConsumer {
                     case SignalGenerator.INSTR_PWML: {
                         ip++;
                         /*Silence*/
-                        int silence = getPWMMilis2Samples(mem[ip]);
+                        int silence = getPWMMillis2Samples(mem[ip]);
                         ip++;
                         for (int i = 0; i < silence; i++) {
                             signalWriter.write(SILENCE_SAMPLE);
@@ -483,7 +470,7 @@ public class SignalGenerator implements SampleConsumer {
      * Generate pilot tone
      *
      * @param num Number of pilot tone pulses
-     * @throws Exception
+     * @throws Exception When pilot tone generation fails
      */
     private void generatePilotTone(int num) throws Exception {
 
@@ -572,16 +559,6 @@ public class SignalGenerator implements SampleConsumer {
         }
     }
 
-    /*Implementing Generator*/
-
-    /**
-     * @return
-     */
-
-    public boolean isDirect() {
-        return false;
-    }
-
     /**
      * Handle setup instruction
      */
@@ -613,7 +590,7 @@ public class SignalGenerator implements SampleConsumer {
         if (d > 100) {
             d = 100.0f;
         }
-        return (int) Math.round(d);
+        return Math.round(d);
     }
 
 
@@ -621,7 +598,7 @@ public class SignalGenerator implements SampleConsumer {
         return (int) Math.round(i * (double) cSampleRate / pwmSampleRate);
     }
 
-    private int getPWMMilis2Samples(int i) {
+    private int getPWMMillis2Samples(int i) {
         return (int) Math.round(i * (((double) cSampleRate) / 1000));
     }
 
@@ -649,7 +626,7 @@ public class SignalGenerator implements SampleConsumer {
         ip++;
 
         /*Prepare data for fsk genetator*/
-        int data[] = new int[dataLen];
+        int[] data = new int[dataLen];
         System.arraycopy(mem, ip, data, 0, dataLen);
 
         /*Increase instruction pointer*/
@@ -680,7 +657,7 @@ public class SignalGenerator implements SampleConsumer {
      * Generate FSK instruction 00 IRG 01 LENGTH 02 ... DATA (0 and 1 durations
      * in 0.1 miliseconds)
      *
-     * @throws Exception
+     * @throws Exception when FSK generation fails
      */
     private void generateFSK() throws Exception {
         ip++;

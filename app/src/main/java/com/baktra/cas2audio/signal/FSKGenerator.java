@@ -1,4 +1,4 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.signal;
 
 /**
  * FSK generator Supports standard FSK tape system Lookup table based.

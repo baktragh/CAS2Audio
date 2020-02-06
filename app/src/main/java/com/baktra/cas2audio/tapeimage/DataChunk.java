@@ -1,4 +1,6 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.tapeimage;
+
+import com.baktra.cas2audio.FileFormatException;
 
 import java.io.InputStream;
 
@@ -7,25 +9,36 @@ import java.io.InputStream;
  *
  * @author  
  */
-public class FujiChunk implements TapeImageChunk {
+public class DataChunk implements TapeImageChunk {
 
-    private static final String type = "FUJI";
     /**
-     * Get default FUJI chunk
-     *
-     * @return Default FUJI chunk
+     * Chunk type
      */
-    public static FujiChunk getDefaultFujiChunk() {
-        FujiChunk fc = new FujiChunk();
-        fc.length = 0;
-        fc.data = new int[0];
-        fc.aux = 0;
-
-        return fc;
-    }
+    private static final String type = "data";
+    /**
+     * Chunk length
+     */
     private int length;
-    private int[] data;
+    /**
+     * Chunk AUX
+     */
     private int aux;
+    /**
+     * Chunk data
+     */
+    private int[] data;
+    /**
+     * Parent chunk
+     */
+    private final TapeImageChunk parent;
+
+    /**
+     *
+     * @param parent
+     */
+    public DataChunk(TapeImageChunk parent) {
+        this.parent = parent;
+    }
 
     /**
      *
@@ -52,7 +65,7 @@ public class FujiChunk implements TapeImageChunk {
 
     @Override
     public boolean isGeneretedUsingParent() {
-        return false;
+        return true;
     }
 
     /**
@@ -63,14 +76,14 @@ public class FujiChunk implements TapeImageChunk {
     @Override
     public void readFromStream(InputStream s) throws Exception {
 
-        /*Read length and AUX*/
+        /*Read length and baud rate*/
         int lengthLo = s.read();
         int lengthHi = s.read();
         int auxLo = s.read();
         int auxHi = s.read();
 
         if (lengthLo == -1 || lengthHi == -1 || auxLo == -1 || auxHi == -1) {
-            throw new FileFormatException("Truncated FUJI chunk header");
+            throw new FileFormatException("Truncated data chunk header");
         }
 
         length = lengthLo + (256 * lengthHi);
@@ -81,11 +94,10 @@ public class FujiChunk implements TapeImageChunk {
         for (int i = 0; i < length; i++) {
             int b = s.read();
             if (b == -1) {
-                throw new FileFormatException("Truncated FUJI chunk data");
+                throw new FileFormatException("Truncated data chunk data");
             }
             data[i] = b;
         }
-
     }
 
     /**
@@ -95,7 +107,7 @@ public class FujiChunk implements TapeImageChunk {
      */
     @Override
     public void writeToStream(java.io.DataOutputStream s) throws Exception {
-        s.writeBytes("FUJI");
+        s.writeBytes("data");
         s.write(length % 256);
         s.write(length / 256);
         s.write(aux % 256);
@@ -103,7 +115,6 @@ public class FujiChunk implements TapeImageChunk {
         for (int i = 0; i < data.length; i++) {
             s.write(data[i]);
         }
-
     }
 
     /**
@@ -112,12 +123,12 @@ public class FujiChunk implements TapeImageChunk {
      */
     @Override
     public String toString() {
-        return "FUJI (" + Integer.toString(length) + ")";
+        return "data: [" + Integer.toString(aux) + "] (" + Integer.toString(length) + ")";
     }
 
     @Override
     public TapeImageChunk getParent() {
-        return null;
+        return parent;
     }
 
     /**
@@ -126,7 +137,7 @@ public class FujiChunk implements TapeImageChunk {
      */
     @Override
     public void setAux(int newAuxValue) {
-
+        aux = newAuxValue;
     }
 
 }

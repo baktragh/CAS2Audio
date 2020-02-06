@@ -1,49 +1,46 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.tapeimage;
+
+import com.baktra.cas2audio.FileFormatException;
 
 import java.io.InputStream;
 
-
 /**
- *
- * @author  
+ * baud tape image chunk
  */
-public class DataChunk implements TapeImageChunk {
+public class BaudChunk implements TapeImageChunk {
 
     /**
      * Chunk type
      */
-    private static final String type = "data";
+    private static final String type = "baud";
     /**
      * Chunk length
      */
     private int length;
     /**
-     * Chunk AUX
+     * Baud rate
      */
-    private int aux;
+    private int baudRate;
     /**
-     * Chunk data
+     * Data
      */
     private int[] data;
-    /**
-     * Parent chunk
-     */
-    private final TapeImageChunk parent;
 
     /**
      *
-     * @param parent
      */
-    public DataChunk(TapeImageChunk parent) {
-        this.parent = parent;
+    public BaudChunk() {
+
     }
 
     /**
      *
-     * @return
+     * @param baudRate
      */
-    public int getAux() {
-        return aux;
+    public BaudChunk(int baudRate) {
+        length = 0;
+        this.baudRate = baudRate;
+        data = new int[0];
     }
 
     @Override
@@ -63,7 +60,15 @@ public class DataChunk implements TapeImageChunk {
 
     @Override
     public boolean isGeneretedUsingParent() {
-        return true;
+        return false;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public int getBaudRate() {
+        return baudRate;
     }
 
     /**
@@ -77,22 +82,22 @@ public class DataChunk implements TapeImageChunk {
         /*Read length and baud rate*/
         int lengthLo = s.read();
         int lengthHi = s.read();
-        int auxLo = s.read();
-        int auxHi = s.read();
+        int baudLo = s.read();
+        int baudHi = s.read();
 
-        if (lengthLo == -1 || lengthHi == -1 || auxLo == -1 || auxHi == -1) {
-            throw new FileFormatException("Truncated data chunk header");
+        if (lengthLo == -1 || lengthHi == -1 || baudLo == -1 || baudHi == -1) {
+            throw new FileFormatException("Truncated baud chunk header");
         }
 
         length = lengthLo + (256 * lengthHi);
-        aux = auxLo + (256 * auxHi);
+        baudRate = baudLo + (256 * baudHi);
 
         /*Read data*/
         data = new int[length];
         for (int i = 0; i < length; i++) {
             int b = s.read();
             if (b == -1) {
-                throw new FileFormatException("Truncated data chunk data");
+                throw new FileFormatException("Truncated baud chunk data");
             }
             data[i] = b;
         }
@@ -105,11 +110,11 @@ public class DataChunk implements TapeImageChunk {
      */
     @Override
     public void writeToStream(java.io.DataOutputStream s) throws Exception {
-        s.writeBytes("data");
+        s.writeBytes("baud");
         s.write(length % 256);
         s.write(length / 256);
-        s.write(aux % 256);
-        s.write(aux / 256);
+        s.write(baudRate % 256);
+        s.write(baudRate / 256);
         for (int i = 0; i < data.length; i++) {
             s.write(data[i]);
         }
@@ -121,12 +126,12 @@ public class DataChunk implements TapeImageChunk {
      */
     @Override
     public String toString() {
-        return "data: [" + Integer.toString(aux) + "] (" + Integer.toString(length) + ")";
+        return "baud: [" + Integer.toString(baudRate) + " bd] (" + Integer.toString(length) + ")";
     }
 
     @Override
     public TapeImageChunk getParent() {
-        return parent;
+        return null;
     }
 
     /**
@@ -135,7 +140,7 @@ public class DataChunk implements TapeImageChunk {
      */
     @Override
     public void setAux(int newAuxValue) {
-        aux = newAuxValue;
+        baudRate = newAuxValue;
     }
 
 }

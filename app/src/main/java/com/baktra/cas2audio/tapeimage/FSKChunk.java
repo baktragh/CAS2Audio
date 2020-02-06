@@ -3,7 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.tapeimage;
+
+import com.baktra.cas2audio.FileFormatException;
 
 import java.io.InputStream;
 

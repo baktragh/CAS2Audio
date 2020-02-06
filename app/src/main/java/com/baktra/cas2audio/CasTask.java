@@ -1,10 +1,10 @@
 package com.baktra.cas2audio;
 
 import android.os.AsyncTask;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.baktra.cas2audio.signal.SignalGenerator;
 
 public class CasTask extends AsyncTask<Void,Integer,Void> {
 
@@ -14,14 +14,16 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     private int[] instructions;
     private Exception lastException;
     private MainActivity parentActivity;
+    private int sampleRate;
 
-    public CasTask(int[] instructions, TextView errorText, ProgressBar progressBar, MainActivity mainActivity, boolean stereo,boolean square,int volume) {
+    public CasTask(int[] instructions, TextView errorText, ProgressBar progressBar, MainActivity mainActivity, boolean stereo, boolean square, int volume,int sampleRate) {
         this.instructions=instructions;
         this.stereo=stereo;
         this.lastException=null;
         this.parentActivity=mainActivity;
         this.square=square;
         this.volume=volume;
+        this.sampleRate=sampleRate;
     }
 
     @Override
@@ -36,7 +38,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
                 sgc.numChannels=(stereo?2:1);
                 sgc.postProcessingString="";
                 sgc.rightChannelOnly=(stereo?true:false);
-                sgc.sampleRate=44100;
+                sgc.sampleRate=sampleRate;
                 sgc.bufferSize=sgc.sampleRate;
                 sgc.signedSamples=true;
                 sgc.terminalSilence=1;
@@ -91,7 +93,6 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     protected void onPreExecute() {
         parentActivity.setPlayBackViewsEnabled(true);
     }
-
 
     public void setProgress(int statusPercent) {
         publishProgress(statusPercent);
