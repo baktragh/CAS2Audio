@@ -49,7 +49,7 @@ public class FSKChunk implements TapeImageChunk {
     }
 
     @Override
-    public boolean isGeneretedUsingParent() {
+    public boolean isGeneratedUsingParent() {
         return false;
     }
 

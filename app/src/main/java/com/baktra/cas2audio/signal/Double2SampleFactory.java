@@ -11,12 +11,12 @@ public class Double2SampleFactory {
     /**
      *
      */
-    protected final float amplitudeMultiplier;
+    private final float amplitudeMultiplier;
 
     /**
      *
      */
-    protected final boolean rightOnly;
+    private final boolean rightOnly;
 
     Double2SampleFactory(int amplitude, boolean rightOnly) {
         classArray[7] = new Signed16Stereo();

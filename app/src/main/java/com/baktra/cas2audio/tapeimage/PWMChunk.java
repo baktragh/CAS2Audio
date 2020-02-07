@@ -76,7 +76,7 @@ public class PWMChunk implements TapeImageChunk {
     }
 
     @Override
-    public boolean isGeneretedUsingParent() {
+    public boolean isGeneratedUsingParent() {
         return false;
     }
 

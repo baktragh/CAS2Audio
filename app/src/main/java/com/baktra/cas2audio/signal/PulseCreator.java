@@ -4,7 +4,7 @@ package com.baktra.cas2audio.signal;
  * Pulse Creator
  *
  */
-public class PulseCreator {
+class PulseCreator {
 
     /**
      *
@@ -34,7 +34,7 @@ public class PulseCreator {
     /**
      *
      */
-    public static final int SPECIAL_NONE = 0;
+    private static final int SPECIAL_NONE = 0;
 
     /**
      *
@@ -61,11 +61,9 @@ public class PulseCreator {
      */
     public static int prolongatePilotTone(int numPulses, int origWidth, int newWidth) {
 
-        double npl = newWidth;
         double origTime = origWidth * (double) numPulses;
-        double newPulses = origTime / npl;
-        int np = (int) Math.round(newPulses);
-        return np;
+        double newPulses = origTime / (double) newWidth;
+        return (int) Math.round(newPulses);
     }
 
     /**

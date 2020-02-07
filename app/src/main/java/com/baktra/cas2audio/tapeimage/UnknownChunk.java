@@ -39,7 +39,7 @@ public class UnknownChunk implements TapeImageChunk {
     }
 
     @Override
-    public boolean isGeneretedUsingParent() {
+    public boolean isGeneratedUsingParent() {
         return false;
     }
 

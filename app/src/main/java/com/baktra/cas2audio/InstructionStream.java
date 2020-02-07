@@ -4,7 +4,7 @@ package com.baktra.cas2audio;
  * Auto-growing storage for integers
  *
  */
-public class InstructionStream {
+class InstructionStream {
 
     private int[] storage;
     private int pointer;
@@ -21,7 +21,7 @@ public class InstructionStream {
      *
      * @param initialCapacity Initial capacity
      */
-    public InstructionStream(int initialCapacity) {
+    private InstructionStream(int initialCapacity) {
         storage = new int[initialCapacity];
         pointer = 0;
     }

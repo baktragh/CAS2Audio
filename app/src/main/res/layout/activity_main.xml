@@ -121,7 +121,7 @@
                 android:labelFor="@id/sbVolume"
                 android:padding="8dp"
                 android:text="Amplitude:"
-                android:textAppearance="@android:style/TextAppearance.Material" />
+                />
 
             <SeekBar
                 android:id="@+id/sbVolume"

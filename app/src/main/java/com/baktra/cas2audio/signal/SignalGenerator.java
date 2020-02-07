@@ -9,18 +9,18 @@ public class SignalGenerator implements SampleConsumer {
 
     /*Instruction constants*/
 
-    public static final int INSTR_NARROW = 0;
-    public static final int INSTR_WIDE = 1;
-    public static final int INSTR_PILOT = 2;
-    public static final int INSTR_DATA = 3;
-    public static final int INSTR_PILOTTONE = 4;
+    private static final int INSTR_NARROW = 0;
+    private static final int INSTR_WIDE = 1;
+    private static final int INSTR_PILOT = 2;
+    private static final int INSTR_DATA = 3;
+    private static final int INSTR_PILOTTONE = 4;
     public static final int INSTR_END = 7;
 
-    public static final int INSTR_SYNC = 9;
-    public static final int INSTR_SILENCE = 10;
-    public static final int INSTR_SETUP = 11;
-    public static final int INSTR_BLOCKSEP = 12;
-    public static final int INSTR_STOP = 13;
+    private static final int INSTR_SYNC = 9;
+    private static final int INSTR_SILENCE = 10;
+    private static final int INSTR_SETUP = 11;
+    private static final int INSTR_BLOCKSEP = 12;
+    private static final int INSTR_STOP = 13;
     public static final int INSTR_PWMS = 14;
     public static final int INSTR_PWMC = 15;
     public static final int INSTR_PWMD = 16;
@@ -29,8 +29,8 @@ public class SignalGenerator implements SampleConsumer {
     public static final int INSTR_STDDATA = 19;
     public static final int INSTR_FSK = 20;
     public static final int INSTR_FUJI = 21;
-    public static final int INSTR_PAUSE = 22;
-    public static final int INSTR_NOP = 99;
+    private static final int INSTR_PAUSE = 22;
+    private static final int INSTR_NOP = 99;
 
     /*Flag constants*/
     public static final int FLAG_POLARITY_10 = 1;
@@ -61,10 +61,6 @@ public class SignalGenerator implements SampleConsumer {
     private final int genLength;
 
     private int ip;
-    /*Index of current instruction*/
-    private int cx;
-    /*Loop counter*/
-    private int op;
     /*Current instruction*/
 
     private final int[] mem;
@@ -119,7 +115,6 @@ public class SignalGenerator implements SampleConsumer {
     private boolean cSigned;
     private int cBits;
     private int cSampleRate;
-    private String cPostProcessingString;
     private int cPulseVolume;
     private int cChannels;
     private boolean cSignalInRightChannelOnly;
@@ -133,7 +128,7 @@ public class SignalGenerator implements SampleConsumer {
      * Signal writer
      */
     private SignalWriter signalWriter;
-    private CasTask parentTask;
+    private final CasTask parentTask;
 
 
 
@@ -154,8 +149,6 @@ public class SignalGenerator implements SampleConsumer {
     private void copyConfiguration() {
 
         cBits = asConfig.bitsPerSample;
-
-        cPostProcessingString = asConfig.postProcessingString;
         cChannels = asConfig.numChannels;
         cPulseVolume = asConfig.amplitude;
         cSignalInRightChannelOnly = asConfig.rightChannelOnly;
@@ -184,7 +177,7 @@ public class SignalGenerator implements SampleConsumer {
      *
      * @throws java.lang.Exception when preparing for generation goes wrong
      */
-    public void prepare() throws Exception {
+    private void prepare() throws Exception {
 
         /*Copy configuration*/
         copyConfiguration();
@@ -225,7 +218,8 @@ public class SignalGenerator implements SampleConsumer {
 
             int lastIp=0;
             ip = 0;
-            op = INSTR_NOP;
+        /*Loop counter*/
+        int op = INSTR_NOP;
 
             while (op != SignalGenerator.INSTR_END && !parentTask.isCancelled()) {
 
@@ -238,6 +232,8 @@ public class SignalGenerator implements SampleConsumer {
                 }
 
                 /*Execution of instructions*/
+                /*Index of current instruction*/
+                int cx;
                 switch (op) {
 
                     /*Narrow pulse*/
@@ -514,7 +510,7 @@ public class SignalGenerator implements SampleConsumer {
     }
 
     /**
-     * Generuje 0 nebo 1
+     * Generates 0 or 1
      */
     private void generateWide() throws Exception {
         signalWriter.write(WIDE_PULSE);
@@ -582,7 +578,7 @@ public class SignalGenerator implements SampleConsumer {
 
     }
 
-    public int getStatusPercent() {
+    private int getStatusPercent() {
         float d;
         d = ip;
         d /= genLength;
@@ -625,7 +621,7 @@ public class SignalGenerator implements SampleConsumer {
         int dataLen = mem[ip];
         ip++;
 
-        /*Prepare data for fsk genetator*/
+        /*Prepare data for fsk generator*/
         int[] data = new int[dataLen];
         System.arraycopy(mem, ip, data, 0, dataLen);
 
@@ -655,7 +651,7 @@ public class SignalGenerator implements SampleConsumer {
 
     /**
      * Generate FSK instruction 00 IRG 01 LENGTH 02 ... DATA (0 and 1 durations
-     * in 0.1 miliseconds)
+     * in 0.1 milliseconds)
      *
      * @throws Exception when FSK generation fails
      */

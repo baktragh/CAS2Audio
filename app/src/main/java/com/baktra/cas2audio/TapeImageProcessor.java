@@ -43,7 +43,7 @@ public class TapeImageProcessor {
 
 
 
-    public void addInstructionsForChunk(InstructionStream is, TapeImageChunk chunk) throws Exception {
+    private void addInstructionsForChunk(InstructionStream is, TapeImageChunk chunk) throws Exception {
 
         if (chunk.getType().equals("pwmc")) {
             processPWMC(is, (PWMChunk) chunk);

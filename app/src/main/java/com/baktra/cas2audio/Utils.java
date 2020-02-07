@@ -1,10 +1,7 @@
 package com.baktra.cas2audio;
 
-import java.io.*;
-import java.util.*;
 
-
-public class Utils {
+class Utils {
 
     /**
      * Get a message string for some Exception
@@ -27,13 +24,12 @@ public class Utils {
      * @return message
      */
     public static String getTitledExceptionMessage(String title, Exception ex) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<HTML><B>");
-        sb.append(title);
-        sb.append("</B><BR>");
-        sb.append(Utils.getExceptionMessage(ex));
-        sb.append("</HTML>");
-        return sb.toString();
+        String sb = "<HTML><B>" +
+                title +
+                "</B><BR>" +
+                Utils.getExceptionMessage(ex) +
+                "</HTML>";
+        return sb;
 
     }
 

@@ -10,6 +10,6 @@ public interface Double2Sample {
      * @param srcIndex Source index
      * @param doubleSamples Double values
      */
-    public void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples);
+    void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples);
 
 }

@@ -1,10 +1,13 @@
 package com.baktra.cas2audio.signal;
 
 
-import android.media.AudioAttributes;
+/*import android.media.AudioAttributes;
+import android.media.AudioFormat;
+import android.media.AudioManager;*/
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+
 
 /**
  * Buffered audio signal writer This signal writer uses internal buffer to
@@ -17,45 +20,42 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     private int internalBufferAvail;
     private int internalBufferPos;
     
-    protected final int terminalSilence;
-    protected final int sampleRate;
-    protected final int numChannels;
-    protected final int bitsPerSample;
+    private final int terminalSilence;
+    private final int sampleRate;
+    private final int numChannels;
+    private final int bitsPerSample;
 
     /**
      *
      */
-    protected AudioTrack track;
+    private AudioTrack track;
+
+    /*private final AudioFormat audioFormat;*/
 
     /**
      *
      */
-    protected final AudioFormat audioFormat;
+    private final int bufferSize;
 
     /**
      *
      */
-    protected final int bufferSize;
+    private int terminationSignalCounter;
 
     /**
      *
      */
-    protected int terminationSignalCounter;
+    private byte[] terminationSignal;
 
     /**
      *
      */
-    protected byte[] terminationSignal;
+    private final int bitShift;
 
     /**
      *
      */
-    protected final int bitShift;
-
-    /**
-     *
-     */
-    protected long numSamples;
+    private long numSamples;
 
     /**
      *
@@ -69,14 +69,10 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     public AudioSignalBufferedWriter(int bitsPerSample, int channels, boolean signed, int bufferSize,int sampleRate,int terminalSilence) {
         this.bufferSize = bufferSize;
 
-        AudioFormat.Builder afb = new AudioFormat.Builder().setSampleRate(sampleRate).setEncoding(bitsPerSample==16?AudioFormat.ENCODING_PCM_16BIT:AudioFormat.ENCODING_PCM_8BIT);
-        if (channels==1) {
-            afb.setChannelMask(AudioFormat.CHANNEL_OUT_MONO);
-        }
-        else {
-            afb.setChannelMask(AudioFormat.CHANNEL_OUT_FRONT_LEFT+AudioFormat.CHANNEL_OUT_FRONT_RIGHT);
-        }
-        audioFormat = afb.build();
+        /* Audio format - new style*/
+        /*audioFormat = getAudioFormat(sampleRate,bitsPerSample.channels);*/
+
+
         terminationSignalCounter = -1;
         terminationSignal = null;
         numSamples = 0;
@@ -113,16 +109,47 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     @Override
     public void prepare() throws Exception {
 
+        track = getOldStyleAudioTrack();
+        track.play();
+    }
+
+    private AudioTrack getOldStyleAudioTrack() {
+
+        AudioTrack track = new AudioTrack (
+                AudioManager.STREAM_MUSIC,
+                sampleRate,
+                numChannels==1? AudioFormat.CHANNEL_OUT_MONO:AudioFormat.CHANNEL_OUT_STEREO,
+                bitsPerSample==8?AudioFormat.ENCODING_PCM_8BIT:AudioFormat.ENCODING_PCM_16BIT,
+                bufferSize,
+                AudioTrack.MODE_STREAM
+        );
+
+        return track;
+
+    }
+
+    /*private AudioTrack getNewStyleAudioTrack() {
+
         AudioTrack.Builder builder = new AudioTrack.Builder();
         builder=builder.setAudioFormat(audioFormat);
-
-        track = new AudioTrack(new AudioAttributes.Builder()
+        return new AudioTrack(new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 .build(),
-                audioFormat,bufferSize,AudioTrack.MODE_STREAM, AudioManager.AUDIO_SESSION_ID_GENERATE);
-        track.play();
-    }
+                audioFormat, bufferSize, AudioTrack.MODE_STREAM, AudioManager.AUDIO_SESSION_ID_GENERATE);
+    }*/
+
+    /*private AudioFormat getAudioFormat(int sampleRate,int bitsPerChannel,int numChannels) {
+        AudioFormat.Builder afb = new AudioFormat.Builder().setSampleRate(sampleRate).setEncoding(bitsPerSample==16?AudioFormat.ENCODING_PCM_16BIT:AudioFormat.ENCODING_PCM_8BIT);
+        if (channels==1) {
+            afb.setChannelMask(AudioFormat.CHANNEL_OUT_MONO);
+        }
+        else {
+            afb.setChannelMask(AudioFormat.CHANNEL_OUT_FRONT_LEFT+AudioFormat.CHANNEL_OUT_FRONT_RIGHT);
+        }
+        return afb.build();
+
+    }*/
 
     @Override
     public void write(byte[] signal) throws Exception {

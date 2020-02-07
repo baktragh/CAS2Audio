@@ -3,25 +3,25 @@ package com.baktra.cas2audio.signal;
 /**
  * FSK generator Supports standard FSK tape system Lookup table based.
  */
-public class FSKGenerator {
+class FSKGenerator {
 
     private static final int MARK_FREQUENCY = 5_327;
     private static final int SPACE_FREQUENCY = 3_995;
     private final int MARK_DEGREES_PER_SAMPLE; 
     private final int SPACE_DEGREES_PER_SAMPLE; 
-    protected final int sampleRate;
+    private final int sampleRate;
 
     /**
      *
      */
-    protected int samplesPerMarkOrSpace;
+    private final int samplesPerMarkOrSpace;
     private final int byteMultiplier;
     private byte[][] sampleSineTable;
 
     /**
      *
      */
-    protected final SampleConsumer consumer;
+    private final SampleConsumer consumer;
     private final Double2Sample f2s;
 
     /*Sine wave generation*/
@@ -61,14 +61,14 @@ public class FSKGenerator {
     /**
      * Generate inter-record gap
      *
-     * @param milis Duration in miliseconds
+     * @param millis Duration in milliseconds
      * @throws Exception
      */
-    public void generateIRG(int milis) throws Exception {
+    public void generateIRG(int millis) throws Exception {
 
         /*Total number of samples for mark tone*/
         int counter = 0;
-        int max = milis * sampleRate / 1_000;
+        int max = millis * sampleRate / 1_000;
 
         /*Generate marks repeatedly*/
         while (counter < max) {
@@ -136,8 +136,7 @@ public class FSKGenerator {
     /**
      * Generate 0 and 1
      *
-     * @param oneOrZero 0 for space, 1 for mark
-     * @param duration Duration in tenths of miliseconds
+     *
      */
     void generateFSK(int[] durations, int offset, int length) throws Exception {
 

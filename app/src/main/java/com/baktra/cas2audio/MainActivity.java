@@ -26,8 +26,8 @@ public class MainActivity extends AppCompatActivity {
     private Uri currentUri;
     private boolean playbackInProgress;
 
-    private ArrayList<View> playBackViewsDisabled;
-    private ArrayList<View> playBackViewsEnabled;
+    private final ArrayList<View> playBackViewsDisabled;
+    private final ArrayList<View> playBackViewsEnabled;
 
     public MainActivity() {
         super();
@@ -191,15 +191,14 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case BROWSE_REQUEST_CODE: {
                 if (resultCode==RESULT_OK && resultData !=null) {
-                    Uri resUri = resultData.getData();
-                    currentUri=resUri;
+                    currentUri= resultData.getData();
                 }
                 break;
             }
         }
     }
 
-    protected TextView getMessageWidget() {
+    private TextView getMessageWidget() {
         return ((TextView) findViewById(R.id.mltMessages));
     }
 

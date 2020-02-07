@@ -5,7 +5,7 @@ package com.baktra.cas2audio.signal;
  *
  * @author michael
  */
-public interface SignalWriter {
+interface SignalWriter {
 
     /**
      * Prepare signal writer
@@ -13,7 +13,7 @@ public interface SignalWriter {
      * @throws java.lang.Exception
      *
      */
-    public void prepare() throws Exception;
+    void prepare() throws Exception;
 
     /**
      * Write initial signal
@@ -21,7 +21,7 @@ public interface SignalWriter {
      * @param signal Signal
      * @throws Exception
      */
-    public void writeInitialSignal(byte[] signal) throws Exception;
+    void writeInitialSignal(byte[] signal) throws Exception;
 
     /**
      * Write termination signal
@@ -30,7 +30,7 @@ public interface SignalWriter {
      * @throws Exception
      *
      */
-    public boolean writeTerminationSignal() throws Exception;
+    boolean writeTerminationSignal() throws Exception;
 
     /**
      * Write data
@@ -38,41 +38,41 @@ public interface SignalWriter {
      * @param signal
      * @throws Exception
      */
-    public void write(byte[] signal) throws Exception;
+    void write(byte[] signal) throws Exception;
 
     /**
      * Prepare for closing
      *
      * @throws Exception
      */
-    public void prepareForClose() throws Exception;
+    void prepareForClose() throws Exception;
 
     /**
      * Close writer
      *
      * @throws Exception
      */
-    public void close() throws Exception;
+    void close() throws Exception;
 
     /**
      * Flush data instantly
      *
      * @throws java.lang.Exception
      */
-    public void flush() throws Exception;
+    void flush() throws Exception;
 
     /**
      * Prepare for terminal silence
      *
      * @param signal Terminal signal
      */
-    public void prepareForTerminationSignal(byte[] signal);
+    void prepareForTerminationSignal(byte[] signal);
 
     /**
      * Get total number of generated samples
      *
      * @return Number of samples
      */
-    public long getNumberOfSamples();
+    long getNumberOfSamples();
 
 }

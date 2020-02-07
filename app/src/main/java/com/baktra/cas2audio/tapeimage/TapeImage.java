@@ -26,7 +26,7 @@ public class TapeImage {
      *
      * @return
      */
-    public int[] getChunkBilance() {
+    public int[] getChunkBalance() {
 
         int[] retVal = new int[2];
         int l = chunkList.size();
@@ -44,7 +44,7 @@ public class TapeImage {
             chunk = (TapeImageChunk) it.next();
 
             /*Parent chunk ?*/
-            if (chunk.isGeneretedUsingParent() == false) {
+            if (chunk.isGeneratedUsingParent() == false) {
                 lastParentSupported = TapeImageProcessor.isChunkSupported(chunk);
             }
 
@@ -65,8 +65,8 @@ public class TapeImage {
 
         try {
 
-            /**
-             * Open tape image file
+            /*
+              Open tape image file
              */
             bis = new BufferedInputStream(is);
 
@@ -181,8 +181,8 @@ public class TapeImage {
             }
         } finally {
 
-            /**
-             * Attempt to close tape image file
+            /*
+              Attempt to close tape image file
              */
             try {
                 if (bis != null) {

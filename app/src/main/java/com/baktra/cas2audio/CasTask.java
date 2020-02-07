@@ -11,10 +11,10 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     private final boolean stereo;
     private final boolean square;
     private final int volume;
-    private int[] instructions;
+    private final int[] instructions;
     private Exception lastException;
-    private MainActivity parentActivity;
-    private int sampleRate;
+    private final MainActivity parentActivity;
+    private final int sampleRate;
 
     public CasTask(int[] instructions, TextView errorText, ProgressBar progressBar, MainActivity mainActivity, boolean stereo, boolean square, int volume,int sampleRate) {
         this.instructions=instructions;
@@ -68,7 +68,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
             lastException.printStackTrace();
        }
        else {
-           parentActivity.setErrorText("Tape image processed succesfully");
+           parentActivity.setErrorText("Tape image processed successfully");
        }
        parentActivity.setPlaybackInProgress(false);
     }
