@@ -20,3 +20,7 @@ No special permissions are required, only read-only access to the storage is req
 * pwml, pwmc, pwmd, pwms (turbo)
 
 Full description of the tape image format is available at http://a8cas.sourceforge.net/format-cas.html
+
+## Screenshot
+
+![Screenshot](c2a_shot1.png)
