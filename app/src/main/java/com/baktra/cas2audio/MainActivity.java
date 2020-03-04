@@ -1,17 +1,14 @@
 package com.baktra.cas2audio;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.SeekBar;
-import android.widget.Switch;
-import android.widget.TextView;
-
+import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
@@ -37,9 +34,6 @@ public class MainActivity extends AppCompatActivity {
         playbackInProgress=false;
         playBackViewsDisabled = new ArrayList<>();
         playBackViewsEnabled = new ArrayList<>();
-
-
-
     }
 
 
@@ -60,8 +54,12 @@ public class MainActivity extends AppCompatActivity {
         /*Widgets to be enabled during playback*/
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
 
+        restorePreferences();
+
 
     }
+
+
 
     protected void onResume() {
 
@@ -108,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected void onStop() {
         super.onStop();
+        storePreferences();
     }
 
     protected void onDestroy() {
@@ -263,6 +262,40 @@ public class MainActivity extends AppCompatActivity {
         return result;
 
     }
+
+    private void restorePreferences() {
+        SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
+
+        Switch channels = findViewById(R.id.swChannels);
+        Switch squareWave = findViewById(R.id.swSquareWave);
+        Switch s48kHz = findViewById(R.id.sw48kHz);
+        SeekBar volume = findViewById(R.id.sbVolume);
+
+        channels.setChecked(sPref.getBoolean("c2a_stereo",true));
+        squareWave.setChecked(sPref.getBoolean("c2a_square",false));
+        s48kHz.setChecked(sPref.getBoolean("c2a_48kHz",false));
+        volume.setProgress(sPref.getInt("c2a_volume",5));
+    }
+
+    protected void storePreferences () {
+
+        SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
+
+        Switch channels = findViewById(R.id.swChannels);
+        Switch squareWave = findViewById(R.id.swSquareWave);
+        Switch s48kHz = findViewById(R.id.sw48kHz);
+        SeekBar volume = findViewById(R.id.sbVolume);
+
+        SharedPreferences.Editor editor = sPref.edit();
+
+        editor.putBoolean("c2a_stereo",channels.isChecked());
+        editor.putBoolean("c2a_square",squareWave.isChecked());
+        editor.putBoolean("c2a_48kHz",s48kHz.isChecked());
+        editor.putInt("c2a_volume",(byte)volume.getProgress());
+        editor.apply();
+
+    }
+
 
 
 }

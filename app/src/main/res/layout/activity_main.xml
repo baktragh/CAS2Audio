@@ -15,7 +15,7 @@
             android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="12px"
+            android:layout_margin="12dp"
             android:gravity="center_horizontal"
             android:text="CAS2Audio" />
 
