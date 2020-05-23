@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.provider.OpenableColumns;
 import android.view.View;
 import android.widget.*;
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int BROWSE_REQUEST_CODE = 100;
     private Uri currentUri;
     private boolean playbackInProgress;
+    private PowerManager powerManager;
 
     private final ArrayList<View> playBackViewsDisabled;
     private final ArrayList<View> playBackViewsEnabled;
@@ -34,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         playbackInProgress=false;
         playBackViewsDisabled = new ArrayList<>();
         playBackViewsEnabled = new ArrayList<>();
+
     }
 
 
@@ -55,6 +58,13 @@ public class MainActivity extends AppCompatActivity {
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
 
         restorePreferences();
+
+        try {
+            powerManager = (PowerManager) getApplicationContext().getSystemService(POWER_SERVICE);
+        } catch (Exception e) {
+            powerManager = null;
+            e.printStackTrace();
+        }
 
 
     }
@@ -84,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             }
             /*There was some intent, but no valid path selected*/
             else {
-                setCurrentFileName("CAS2Audio");
+                setCurrentFileName("CAS2Audio 0.0.6");
                 msgText.setText(
                         "No tape image selected. Click the 'Browse for tape image...' button, or "+
                                 "Go to your favorite file manager, select a tape image, and then select this application to open it."
@@ -261,6 +271,10 @@ public class MainActivity extends AppCompatActivity {
         }
         return result;
 
+    }
+
+    public PowerManager getPowerManager() {
+        return powerManager;
     }
 
     private void restorePreferences() {

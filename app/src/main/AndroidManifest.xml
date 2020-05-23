@@ -5,6 +5,7 @@
     <uses-permission
             android:name="android.permission.READ_EXTERNAL_STORAGE"
             android:maxSdkVersion="99" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="false"

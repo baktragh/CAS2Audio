@@ -1,6 +1,7 @@
 package com.baktra.cas2audio;
 
 import android.os.AsyncTask;
+import android.os.PowerManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -15,6 +16,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     private Exception lastException;
     private final MainActivity parentActivity;
     private final int sampleRate;
+    private PowerManager.WakeLock wakeLock;
 
     public CasTask(int[] instructions, TextView errorText, ProgressBar progressBar, MainActivity mainActivity, boolean stereo, boolean square, int volume,int sampleRate) {
         this.instructions=instructions;
@@ -24,10 +26,24 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         this.square=square;
         this.volume=volume;
         this.sampleRate=sampleRate;
+        this.wakeLock = null;
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
+
+        try {
+            PowerManager pm = parentActivity.getPowerManager();
+            if (pm != null) {
+                wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CAS2Audio::TaskWakeLock");
+                wakeLock.acquire();
+            } else {
+                wakeLock = null;
+            }
+        } catch (Exception e) {
+            wakeLock = null;
+            e.printStackTrace();
+        }
 
             try {
                 SignalGenerator.SignalGeneratorConfig sgc = new SignalGenerator.SignalGeneratorConfig();
@@ -50,6 +66,8 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
             catch (Exception e) {
                 e.printStackTrace();
                 lastException=e;
+            } finally {
+                if (wakeLock != null) wakeLock.release();
             }
 
             setProgress(100);
@@ -84,6 +102,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         }
         parentActivity.setProgressBar(0);
         parentActivity.setPlaybackInProgress(false);
+
     }
 
     private void setControlsForTermination() {

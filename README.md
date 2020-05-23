@@ -10,8 +10,13 @@ The application is developed with Android studio
 
 ## System requirements
 
+### OS Version
 At least Android 4.4 is required, Android 6.0 is recommended.
-No special permissions are required, only read-only access to the storage is required to read your tape images.
+
+### Permissions
+
+* Read only access to storage
+* Wake lock (to prevent the device from sleeping when playing back)
 
 ## Tape image chunks supported
 
