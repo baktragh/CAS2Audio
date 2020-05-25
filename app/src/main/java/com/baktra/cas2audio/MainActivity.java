@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private CasTask casTask;
-    private final String lnsp;
+    private final String LN_SP;
     private static final int BROWSE_REQUEST_CODE = 100;
     private Uri currentUri;
     private boolean playbackInProgress;
@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     public MainActivity() {
         super();
-        lnsp=System.getProperty("line.separator");
+        LN_SP = System.getProperty("line.separator");
         casTask=null;
         currentUri=null;
         playbackInProgress=false;
@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
         restorePreferences();
 
+        /*Try to get a power manager*/
         try {
             powerManager = (PowerManager) getApplicationContext().getSystemService(POWER_SERVICE);
         } catch (Exception e) {
@@ -94,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
             }
             /*There was some intent, but no valid path selected*/
             else {
-                setCurrentFileName("CAS2Audio 0.0.6");
+                setCurrentFileName("CAS2Audio 0.0.7");
                 msgText.setText(
                         "No tape image selected. Click the 'Browse for tape image...' button, or "+
                                 "Go to your favorite file manager, select a tape image, and then select this application to open it."
@@ -147,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
             iStream = getContentResolver().openInputStream(currentUri);
         }
         catch (Exception e) {
-            getMessageWidget().setText("Unable to open the tape image:"+lnsp+Utils.getExceptionMessage(e));
+            getMessageWidget().setText("Unable to open the tape image:" + LN_SP + Utils.getExceptionMessage(e));
             return;
         }
 
@@ -158,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
             instructions = tip.convertItem(iStream,sampleRate);
         }
         catch (Exception e) {
-            getMessageWidget().setText("Unable to process the tape image:"+lnsp+Utils.getExceptionMessage(e));
+            getMessageWidget().setText("Unable to process the tape image:" + LN_SP + Utils.getExceptionMessage(e));
             return;
         }
 
