@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.obsez.android.lib.filechooser.ChooserDialog;
+
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -20,10 +22,10 @@ public class MainActivity extends AppCompatActivity {
 
     private CasTask casTask;
     private final String LN_SP;
-    private static final int BROWSE_REQUEST_CODE = 100;
     private Uri currentUri;
     private boolean playbackInProgress;
     private PowerManager powerManager;
+    private File lastChooserDirectory;
 
     private final ArrayList<View> playBackViewsDisabled;
     private final ArrayList<View> playBackViewsEnabled;
@@ -36,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         playbackInProgress=false;
         playBackViewsDisabled = new ArrayList<>();
         playBackViewsEnabled = new ArrayList<>();
-
+        lastChooserDirectory = null;
     }
 
 
@@ -57,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         /*Widgets to be enabled during playback*/
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
 
+        /*Restore preferences from permanent storage*/
         restorePreferences();
 
         /*Try to get a power manager*/
@@ -66,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
             powerManager = null;
             e.printStackTrace();
         }
-
 
     }
 
@@ -93,13 +95,10 @@ public class MainActivity extends AppCompatActivity {
                 setPlayBackViewsEnabled(false);
                 currentUri=u;
             }
-            /*There was some intent, but no valid path selected*/
+            /*There was some intent, but no valid path selected.*/
             else {
-                setCurrentFileName("CAS2Audio 0.0.7");
-                msgText.setText(
-                        "No tape image selected. Click the 'Browse for tape image...' button, or "+
-                                "Go to your favorite file manager, select a tape image, and then select this application to open it."
-                );
+                setCurrentFileName("CAS2Audio 0.0.8");
+                msgText.setText(R.string.msg_notape);
                 setPlayBackViewsEnabled(false);
                 currentUri=null;
             }
@@ -107,10 +106,7 @@ public class MainActivity extends AppCompatActivity {
         }
         /*Activity was resumed, we are still open with valid tape image, and no playback is in progress*/
         else {
-            String filename = extractFileNameFromURI(currentUri);
-            setCurrentFileName(filename);
-            setPlayBackViewsEnabled(false);
-            msgText.setText("");
+            updateUIForURI();
         }
 
     }
@@ -138,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
         /*Check if anything was selected*/
         if (currentUri==null) {
-            getMessageWidget().setText("Unable to play. No tape image was selected.");
+            getMessageWidget().setText(R.string.msg_nothing_to_play);
             return;
         }
 
@@ -148,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
             iStream = getContentResolver().openInputStream(currentUri);
         }
         catch (Exception e) {
-            getMessageWidget().setText("Unable to open the tape image:" + LN_SP + Utils.getExceptionMessage(e));
+            getMessageWidget().setText(R.string.msg_unable_to_open + ":" + LN_SP + Utils.getExceptionMessage(e));
             return;
         }
 
@@ -159,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
             instructions = tip.convertItem(iStream,sampleRate);
         }
         catch (Exception e) {
-            getMessageWidget().setText("Unable to process the tape image:" + LN_SP + Utils.getExceptionMessage(e));
+            getMessageWidget().setText(R.string.msg_unable_to_process + ":" + LN_SP + Utils.getExceptionMessage(e));
             return;
         }
 
@@ -188,24 +184,31 @@ public class MainActivity extends AppCompatActivity {
         /*First, stop playing, this will set the controls*/
         onStopPlaying(view);
 
-        /*Open a picker*/
-        Intent browseIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        browseIntent.setType("*/*");
-        startActivityForResult(browseIntent, BROWSE_REQUEST_CODE);
+        /*Create basic chooser dialog*/
+        ChooserDialog cDlg = new ChooserDialog(MainActivity.this)
+                .withFilter(false, false, "cas", "CAS")
+                .withResources(R.string.tit_choose_image, R.string.btn_choose, R.string.btn_cancel)
+                .withChosenListener(new ChooserDialog.Result() {
+                    @Override
+                    public void onChoosePath(String path, File pathFile) {
+                        currentUri = Uri.fromFile(pathFile);
+                        updateUIForURI();
+                        lastChooserDirectory = pathFile.getParentFile();
+                    }
+                });
+        if (lastChooserDirectory != null && lastChooserDirectory.isDirectory()) {
+            cDlg = cDlg.withStartFile(lastChooserDirectory.getAbsolutePath());
+        }
 
-        /*And then let the activity resume with the selected file*/
+        cDlg.build().show();
+
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-
-        switch (requestCode) {
-            case BROWSE_REQUEST_CODE: {
-                if (resultCode==RESULT_OK && resultData !=null) {
-                    currentUri= resultData.getData();
-                }
-                break;
-            }
-        }
+    private void updateUIForURI() {
+        String filename = extractFileNameFromURI(currentUri);
+        setCurrentFileName(filename);
+        setPlayBackViewsEnabled(false);
+        getMessageWidget().setText("");
     }
 
     private TextView getMessageWidget() {
@@ -290,6 +293,8 @@ public class MainActivity extends AppCompatActivity {
         squareWave.setChecked(sPref.getBoolean("c2a_square",false));
         s48kHz.setChecked(sPref.getBoolean("c2a_48kHz",false));
         volume.setProgress(sPref.getInt("c2a_volume",5));
+        lastChooserDirectory = new File(sPref.getString("c2a_last_dir", ""));
+
     }
 
     protected void storePreferences () {
@@ -307,10 +312,13 @@ public class MainActivity extends AppCompatActivity {
         editor.putBoolean("c2a_square",squareWave.isChecked());
         editor.putBoolean("c2a_48kHz",s48kHz.isChecked());
         editor.putInt("c2a_volume",(byte)volume.getProgress());
+
+        if (lastChooserDirectory != null) {
+            editor.putString("c2a_last_dir", lastChooserDirectory.getAbsolutePath());
+        }
+
         editor.apply();
 
     }
-
-
 
 }

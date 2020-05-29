@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="12dp"
             android:gravity="center_horizontal"
-            android:text="CAS2Audio 0.0.6" />
+            android:text="@string/lbl_app_title" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,7 +33,7 @@
                 android:drawableLeft="@android:drawable/ic_media_play"
                 android:onClick="onPlay"
                 android:padding="20dp"
-                android:text="PLAY" />
+                android:text="@string/btn_play" />
 
             <Button
                 android:id="@+id/btnStop"
@@ -44,7 +44,7 @@
                 android:enabled="false"
                 android:onClick="onStopPlaying"
                 android:padding="20dp"
-                android:text="STOP" />
+                android:text="@string/btn_stop" />
 
         </LinearLayout>
 
@@ -63,7 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="onBrowseTapeImage"
-            android:text="Browse for tape image..." />
+            android:text="@string/btn_browse" />
 
         <TableLayout
             android:layout_width="match_parent"
@@ -81,7 +81,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="8dp"
-                    android:text="Square waveform" />
+                    android:text="@string/lbl_square" />
 
                 <Switch
                     android:id="@+id/swChannels"
@@ -89,7 +89,7 @@
                     android:layout_height="wrap_content"
                     android:checked="true"
                     android:padding="8dp"
-                    android:text="Stereo" />
+                    android:text="@string/lbl_stereo" />
             </TableRow>
 
             <TableRow
@@ -103,7 +103,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="8dp"
-                    android:text="48 kHz" />
+                    android:text="@string/lbl_48kHz" />
             </TableRow>
 
         </TableLayout>
@@ -121,7 +121,7 @@
                 android:layout_weight="0"
                 android:labelFor="@id/sbVolume"
                 android:padding="8dp"
-                android:text="Amplitude:" />
+                android:text="@string/lbl_amplitude" />
 
             <SeekBar
                 android:id="@+id/sbVolume"
@@ -140,7 +140,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clickable="false"
-            android:editable="false"
             android:ems="10"
             android:gravity="start|top"
             android:inputType="textMultiLine"

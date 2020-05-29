@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">Cas2Audio</string>
+    <string name="btn_browse">Browse for tape image&#8230;</string>
+    <string name="btn_play">PLAY</string>
+    <string name="btn_stop">STOP</string>
+    <string name="lbl_square">Square waveform</string>
+    <string name="lbl_stereo">Stereo</string>
+    <string name="lbl_48kHz">48 kHz</string>
+    <string name="lbl_amplitude">Amplitude:</string>
+    <string name="lbl_app_title">CAS2Audio</string>
+    <string name="msg_notape">No tape image selected. Click the \'Browse for tape image&#8230;\' button to select one.</string>
+    <string name="msg_nothing_to_play">Unable to play. No tape image selected.</string>
+    <string name="msg_unable_to_open">Unable to open the tape image</string>
+    <string name="msg_unable_to_process">Unable to process the tape image</string>
+    <string name="tit_choose_image">Choose tape image (*.cas)</string>
+    <string name="btn_choose">Choose</string>
+    <string name="btn_cancel">Cancel</string>
 </resources>
