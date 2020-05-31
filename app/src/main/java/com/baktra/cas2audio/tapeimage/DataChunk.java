@@ -123,7 +123,7 @@ public class DataChunk implements TapeImageChunk {
      */
     @Override
     public String toString() {
-        return "data: [" + Integer.toString(aux) + "] (" + Integer.toString(length) + ")";
+        return "data: [" + aux + "] (" + length + ")";
     }
 
     @Override

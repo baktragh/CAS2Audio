@@ -2,8 +2,6 @@ package com.baktra.cas2audio;
 
 import android.os.AsyncTask;
 import android.os.PowerManager;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.baktra.cas2audio.signal.SignalGenerator;
 
@@ -18,7 +16,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     private final int sampleRate;
     private PowerManager.WakeLock wakeLock;
 
-    public CasTask(int[] instructions, TextView errorText, ProgressBar progressBar, MainActivity mainActivity, boolean stereo, boolean square, int volume,int sampleRate) {
+    public CasTask(int[] instructions, MainActivity mainActivity, boolean stereo, boolean square, int volume, int sampleRate) {
         this.instructions=instructions;
         this.stereo=stereo;
         this.lastException=null;
@@ -36,7 +34,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
             PowerManager pm = parentActivity.getPowerManager();
             if (pm != null) {
                 wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CAS2Audio::TaskWakeLock");
-                wakeLock.acquire();
+                wakeLock.acquire(120 * 60 * 1000);
             } else {
                 wakeLock = null;
             }
@@ -53,7 +51,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
                 sgc.initialSilence=1;
                 sgc.numChannels=(stereo?2:1);
                 sgc.postProcessingString="";
-                sgc.rightChannelOnly=(stereo?true:false);
+                sgc.rightChannelOnly = (stereo);
                 sgc.sampleRate=sampleRate;
                 sgc.bufferSize=sgc.sampleRate;
                 sgc.signedSamples=true;

@@ -158,7 +158,7 @@ public class PWMChunk implements TapeImageChunk {
      */
     @Override
     public String toString() {
-        return type + ": (" + Integer.toString(length) + ")";
+        return type + ": (" + length + ")";
     }
 
     @Override

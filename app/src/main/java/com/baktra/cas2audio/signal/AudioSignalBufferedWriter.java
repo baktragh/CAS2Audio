@@ -58,15 +58,13 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     private long numSamples;
 
     /**
-     *
-     * @param bitsPerSample
+     *  @param bitsPerSample
      * @param channels
-     * @param signed
      * @param bufferSize
      * @param sampleRate
      * @param terminalSilence
      */
-    public AudioSignalBufferedWriter(int bitsPerSample, int channels, boolean signed, int bufferSize,int sampleRate,int terminalSilence) {
+    public AudioSignalBufferedWriter(int bitsPerSample, int channels, int bufferSize, int sampleRate, int terminalSilence) {
         this.bufferSize = bufferSize;
 
         /* Audio format - new style*/

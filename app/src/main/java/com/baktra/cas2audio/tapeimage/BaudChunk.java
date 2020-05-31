@@ -126,7 +126,7 @@ public class BaudChunk implements TapeImageChunk {
      */
     @Override
     public String toString() {
-        return "baud: [" + Integer.toString(baudRate) + " bd] (" + Integer.toString(length) + ")";
+        return "baud: [" + baudRate + " bd] (" + length + ")";
     }
 
     @Override

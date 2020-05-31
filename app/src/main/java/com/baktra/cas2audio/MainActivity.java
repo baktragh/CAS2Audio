@@ -129,8 +129,8 @@ public class MainActivity extends AppCompatActivity {
         getMessageWidget().setText("");
         getProgressBar().setProgress(0);
 
-        int[] instructions = null;
-        InputStream iStream = null;
+        int[] instructions;
+        InputStream iStream;
 
         /*Check if anything was selected*/
         if (currentUri==null) {
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
         /*Create new background task*/
         try {
-            casTask = new CasTask(instructions,getMessageWidget(),getProgressBar(),this,isStereo(),isSquare(),getVolume(),sampleRate);
+            casTask = new CasTask(instructions, this, isStereo(), isSquare(), getVolume(), sampleRate);
         }
         catch (Exception e) {
             getMessageWidget().setText(Utils.getExceptionMessage(e));
@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    protected void storePreferences () {
+    private void storePreferences() {
 
         SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
 

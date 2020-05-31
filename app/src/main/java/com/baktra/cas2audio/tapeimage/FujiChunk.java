@@ -9,6 +9,7 @@ import java.io.InputStream;
  *
  * @author  
  */
+@SuppressWarnings("ALL")
 public class FujiChunk implements TapeImageChunk {
 
     private static final String type = "FUJI";
@@ -62,6 +63,7 @@ public class FujiChunk implements TapeImageChunk {
      * @param s
      * @throws Exception
      */
+    @SuppressWarnings("JavaDoc")
     @Override
     public void readFromStream(InputStream s) throws Exception {
 

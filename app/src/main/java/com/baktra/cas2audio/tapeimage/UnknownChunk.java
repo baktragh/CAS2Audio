@@ -98,7 +98,7 @@ public class UnknownChunk implements TapeImageChunk {
      */
     @Override
     public String toString() {
-        return type + ": [" + Integer.toString(aux) + "] (" + Integer.toString(length) + ")";
+        return type + ": [" + aux + "] (" + length + ")";
     }
 
     @Override

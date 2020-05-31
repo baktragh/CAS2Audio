@@ -183,7 +183,7 @@ public class SignalGenerator implements SampleConsumer {
         copyConfiguration();
 
 
-        signalWriter = new AudioSignalBufferedWriter(cBits, cChannels, cSigned, cBufferSize, cSampleRate, cTerminalSilence);
+        signalWriter = new AudioSignalBufferedWriter(cBits, cChannels, cBufferSize, cSampleRate, cTerminalSilence);
         /*Prepare writer*/
         signalWriter.prepare();
 
