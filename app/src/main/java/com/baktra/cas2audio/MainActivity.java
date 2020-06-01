@@ -253,6 +253,10 @@ public class MainActivity extends AppCompatActivity {
         getMessageWidget().setText(s);
     }
 
+    public void setErrorText(int msgId) {
+        getMessageWidget().setText(msgId);
+    }
+
     void setProgressBar(int value) {
         getProgressBar().setProgress(value);
     }
@@ -320,5 +324,6 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
 
     }
+
 
 }

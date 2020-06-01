@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cas2Audio</string>
+    <string name="lbl_stereo">Stereo</string>
+    <string name="lbl_48kHz">48 kHz</string>
+    <string name="lbl_app_title">CAS2Audio</string>
+    <string name="lbl_square">Kwadratowy przebieg</string>
+    <string name="btn_browse">Otwórz obraz taśmy&#8230;</string>
+    <string name="btn_stop">Zatrzymaj</string>
+    <string name="lbl_amplitude">Amplituda:</string>
+    <string name="tit_choose_image">Wybierz obraz taśmy (*.cas)</string>
+    <string name="btn_choose">Wybierz</string>
+    <string name="btn_cancel">Anuluj</string>
+    <string name="btn_play">Odtwarzaj</string>
+    <string name="msg_unable_to_process">Błąd przetwarzania obrazu taśmy</string>
+    <string name="msg_unable_to_open">Błąd otwierania obrazu taśmy</string>
+    <string name="msg_nothing_to_play">Nie można odtworzyć. Nie wybrano obrazu taśmy.</string>
+    <string name="msg_notape">Nie wybrano obrazu taśmy. Kliknij \'Otwórz obraz taśmy&#8230;\'</string>
+    <string name="msg_proc_ok">Przetwarzanie obrazu taśmy zakończone</string>
+    <string name="msg_proc_cancel">Przetwarzanie obrazu taśmy anulowano</string>
+</resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cas2Audio</string>
+    <string name="btn_browse">Otevřít obraz kazety&#8230;</string>
+    <string name="btn_play">Přehrát</string>
+    <string name="btn_stop">Zastavit</string>
+    <string name="lbl_square">Obdélníkový signál</string>
+    <string name="lbl_stereo">Stereo</string>
+    <string name="lbl_48kHz">48 kHz</string>
+    <string name="lbl_amplitude">Síla signálu:</string>
+    <string name="lbl_app_title">CAS2Audio</string>
+    <string name="msg_nothing_to_play">Nelze přehrát. Nebyl vybrán obraz kazety.</string>
+    <string name="msg_unable_to_open">Nelze otevřít obraz kazety</string>
+    <string name="msg_unable_to_process">Chyba při zpracování obrazu kazety</string>
+    <string name="tit_choose_image">Vyberte obraz kazety (*.cas)</string>
+    <string name="btn_choose">Vybrat</string>
+    <string name="btn_cancel">Zrušit</string>
+    <string name="msg_notape">Nebyl vybrán obraz kazety. Vyberte obraz kazety klepnutím na \'Otevřít obraz kazety&#8230;\'</string>
+    <string name="msg_proc_ok">Zpracování obrazu kazety dokončeno</string>
+    <string name="msg_proc_cancel">Zpracování obrazu kazety zrušeno</string>
+</resources>

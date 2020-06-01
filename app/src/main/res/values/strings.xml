@@ -15,4 +15,6 @@
     <string name="tit_choose_image">Choose tape image (*.cas)</string>
     <string name="btn_choose">Choose</string>
     <string name="btn_cancel">Cancel</string>
+    <string name="msg_proc_ok">Tape image processed successfully</string>
+    <string name="msg_proc_cancel">Tape image processing cancelled</string>
 </resources>

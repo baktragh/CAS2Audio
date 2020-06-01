@@ -84,7 +84,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
             lastException.printStackTrace();
        }
        else {
-           parentActivity.setErrorText("Tape image processed successfully");
+           parentActivity.setErrorText(R.string.msg_proc_ok);
        }
        parentActivity.setPlaybackInProgress(false);
     }
@@ -96,7 +96,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
             lastException.printStackTrace();
         }
         else {
-            parentActivity.setErrorText("Tape image processing cancelled");
+            parentActivity.setErrorText(R.string.msg_proc_cancel);
         }
         parentActivity.setProgressBar(0);
         parentActivity.setPlaybackInProgress(false);
