@@ -64,7 +64,7 @@ class FSKGenerator {
      * @param millis Duration in milliseconds
      * @throws Exception
      */
-    public void generateIRG(int millis) throws Exception {
+    public final void generateIRG(int millis) throws Exception {
 
         /*Total number of samples for mark tone*/
         int counter = 0;
@@ -84,7 +84,7 @@ class FSKGenerator {
      * @param data Data
      * @throws Exception
      */
-    public void generateData(int[] data) throws Exception {
+    public final void generateData(int[] data) throws Exception {
 
         int dataByte;
         int p;
@@ -135,10 +135,8 @@ class FSKGenerator {
 
     /**
      * Generate 0 and 1
-     *
-     *
      */
-    void generateFSK(int[] durations, int offset, int length) throws Exception {
+    final void generateFSK(int[] durations, int offset, int length) throws Exception {
 
         int maxIndex = offset + length;
         int durationInSamples;
@@ -165,7 +163,7 @@ class FSKGenerator {
         }
     }
 
-    void resetAngle() {
+    final void resetAngle() {
         angle = 0;
     }
 

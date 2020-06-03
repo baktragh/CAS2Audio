@@ -44,30 +44,29 @@ public class BaudChunk implements TapeImageChunk {
     }
 
     @Override
-    public String getType() {
+    public final String getType() {
         return type;
     }
 
     @Override
-    public int getLength() {
+    public final int getLength() {
         return length;
     }
 
     @Override
-    public int[] getData() {
+    public final int[] getData() {
         return data;
     }
 
     @Override
-    public boolean isGeneratedUsingParent() {
+    public final boolean isGeneratedUsingParent() {
         return false;
     }
 
     /**
-     *
      * @return
      */
-    public int getBaudRate() {
+    public final int getBaudRate() {
         return baudRate;
     }
 
@@ -77,7 +76,7 @@ public class BaudChunk implements TapeImageChunk {
      * @throws Exception
      */
     @Override
-    public void readFromStream(InputStream s) throws Exception {
+    public final void readFromStream(InputStream s) throws Exception {
 
         /*Read length and baud rate*/
         int lengthLo = s.read();
@@ -109,7 +108,7 @@ public class BaudChunk implements TapeImageChunk {
      * @throws Exception
      */
     @Override
-    public void writeToStream(java.io.DataOutputStream s) throws Exception {
+    public final void writeToStream(java.io.DataOutputStream s) throws Exception {
         s.writeBytes("baud");
         s.write(length % 256);
         s.write(length / 256);
@@ -125,12 +124,12 @@ public class BaudChunk implements TapeImageChunk {
      * @return
      */
     @Override
-    public String toString() {
+    public final String toString() {
         return "baud: [" + baudRate + " bd] (" + length + ")";
     }
 
     @Override
-    public TapeImageChunk getParent() {
+    public final TapeImageChunk getParent() {
         return null;
     }
 
@@ -139,7 +138,7 @@ public class BaudChunk implements TapeImageChunk {
      * @param newAuxValue
      */
     @Override
-    public void setAux(int newAuxValue) {
+    public final void setAux(int newAuxValue) {
         baudRate = newAuxValue;
     }
 

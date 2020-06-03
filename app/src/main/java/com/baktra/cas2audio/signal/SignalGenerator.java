@@ -198,21 +198,22 @@ public class SignalGenerator implements SampleConsumer {
 
     }
 
-    /** Generate the signal
+    /**
+     * Generate the signal
      *
      * @throws Exception When anything fails
      */
-    public void run() throws Exception  {
+    public final void run() throws Exception {
 
 
-            /*Prepare for output*/
-            prepare();
+        /*Prepare for output*/
+        prepare();
 
 
-            /*Start writing signal*/
+        /*Start writing signal*/
 
-            /*Initial signal*/
-            for (int k = 0; k < cInitialSilence; k++) {
+        /*Initial signal*/
+        for (int k = 0; k < cInitialSilence; k++) {
                 signalWriter.writeInitialSignal(SILENCE_SHORT);
             }
 
@@ -675,7 +676,7 @@ public class SignalGenerator implements SampleConsumer {
     }
 
     @Override
-    public void consumeSamples(byte[] b) throws Exception {
+    public final void consumeSamples(byte[] b) throws Exception {
         signalWriter.write(b);
     }
 

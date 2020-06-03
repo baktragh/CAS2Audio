@@ -41,30 +41,29 @@ public class DataChunk implements TapeImageChunk {
     }
 
     /**
-     *
      * @return
      */
-    public int getAux() {
+    public final int getAux() {
         return aux;
     }
 
     @Override
-    public String getType() {
+    public final String getType() {
         return type;
     }
 
     @Override
-    public int getLength() {
+    public final int getLength() {
         return length;
     }
 
     @Override
-    public int[] getData() {
+    public final int[] getData() {
         return data;
     }
 
     @Override
-    public boolean isGeneratedUsingParent() {
+    public final boolean isGeneratedUsingParent() {
         return true;
     }
 
@@ -74,7 +73,7 @@ public class DataChunk implements TapeImageChunk {
      * @throws Exception
      */
     @Override
-    public void readFromStream(InputStream s) throws Exception {
+    public final void readFromStream(InputStream s) throws Exception {
 
         /*Read length and baud rate*/
         int lengthLo = s.read();
@@ -106,7 +105,7 @@ public class DataChunk implements TapeImageChunk {
      * @throws Exception
      */
     @Override
-    public void writeToStream(java.io.DataOutputStream s) throws Exception {
+    public final void writeToStream(java.io.DataOutputStream s) throws Exception {
         s.writeBytes("data");
         s.write(length % 256);
         s.write(length / 256);
@@ -122,12 +121,12 @@ public class DataChunk implements TapeImageChunk {
      * @return
      */
     @Override
-    public String toString() {
+    public final String toString() {
         return "data: [" + aux + "] (" + length + ")";
     }
 
     @Override
-    public TapeImageChunk getParent() {
+    public final TapeImageChunk getParent() {
         return parent;
     }
 
@@ -136,7 +135,7 @@ public class DataChunk implements TapeImageChunk {
      * @param newAuxValue
      */
     @Override
-    public void setAux(int newAuxValue) {
+    public final void setAux(int newAuxValue) {
         aux = newAuxValue;
     }
 

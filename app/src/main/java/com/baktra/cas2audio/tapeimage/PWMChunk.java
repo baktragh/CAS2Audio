@@ -61,30 +61,29 @@ public class PWMChunk implements TapeImageChunk {
     }
 
     @Override
-    public String getType() {
+    public final String getType() {
         return type;
     }
 
     @Override
-    public int getLength() {
+    public final int getLength() {
         return length;
     }
 
     @Override
-    public int[] getData() {
+    public final int[] getData() {
         return data;
     }
 
     @Override
-    public boolean isGeneratedUsingParent() {
+    public final boolean isGeneratedUsingParent() {
         return false;
     }
 
     /**
-     *
      * @return
      */
-    public int getAux() {
+    public final int getAux() {
         return aux;
     }
 
@@ -92,7 +91,7 @@ public class PWMChunk implements TapeImageChunk {
      *
      * @return
      */
-    public int getAuxLo() {
+    public final int getAuxLo() {
         return auxLo;
     }
 
@@ -100,7 +99,7 @@ public class PWMChunk implements TapeImageChunk {
      *
      * @return
      */
-    public int getAuxHi() {
+    public final int getAuxHi() {
         return auxHi;
     }
 
@@ -110,7 +109,7 @@ public class PWMChunk implements TapeImageChunk {
      * @throws Exception
      */
     @Override
-    public void readFromStream(InputStream s) throws Exception {
+    public final void readFromStream(InputStream s) throws Exception {
 
         /*Read length and baud rate*/
         int lengthLo = s.read();
@@ -141,7 +140,7 @@ public class PWMChunk implements TapeImageChunk {
      * @throws Exception
      */
     @Override
-    public void writeToStream(java.io.DataOutputStream s) throws Exception {
+    public final void writeToStream(java.io.DataOutputStream s) throws Exception {
         s.writeBytes(type);
         s.write(length % 256);
         s.write(length / 256);
@@ -157,12 +156,12 @@ public class PWMChunk implements TapeImageChunk {
      * @return
      */
     @Override
-    public String toString() {
+    public final String toString() {
         return type + ": (" + length + ")";
     }
 
     @Override
-    public TapeImageChunk getParent() {
+    public final TapeImageChunk getParent() {
         return parent;
     }
 

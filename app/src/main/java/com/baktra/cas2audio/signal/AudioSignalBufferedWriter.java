@@ -105,7 +105,7 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }
 
     @Override
-    public void prepare() throws Exception {
+    public final void prepare() throws Exception {
 
         track = getOldStyleAudioTrack();
         track.play();
@@ -113,16 +113,16 @@ public class AudioSignalBufferedWriter implements SignalWriter {
 
     private AudioTrack getOldStyleAudioTrack() {
 
-        AudioTrack track = new AudioTrack (
+        AudioTrack oldTrack = new AudioTrack(
                 AudioManager.STREAM_MUSIC,
                 sampleRate,
-                numChannels==1? AudioFormat.CHANNEL_OUT_MONO:AudioFormat.CHANNEL_OUT_STEREO,
-                bitsPerSample==8?AudioFormat.ENCODING_PCM_8BIT:AudioFormat.ENCODING_PCM_16BIT,
+                numChannels == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO,
+                bitsPerSample == 8 ? AudioFormat.ENCODING_PCM_8BIT : AudioFormat.ENCODING_PCM_16BIT,
                 bufferSize,
                 AudioTrack.MODE_STREAM
         );
 
-        return track;
+        return oldTrack;
 
     }
 
@@ -150,7 +150,7 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }*/
 
     @Override
-    public void write(byte[] signal) throws Exception {
+    public final void write(byte[] signal) throws Exception {
 
         int remainingBytes = signal.length;
         int inputPos = 0;
@@ -181,12 +181,12 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }
 
     @Override
-    public void writeInitialSignal(byte[] signal) throws Exception {
+    public final void writeInitialSignal(byte[] signal) throws Exception {
         write(signal);
     }
 
     @Override
-    public void flush() throws Exception {
+    public final void flush() throws Exception {
         track.write(internalBuffer, 0, internalBufferPos);
         internalBufferPos = 0;
         internalBufferAvail = internalBuffer.length;
@@ -194,7 +194,7 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }
 
     @Override
-    public void prepareForClose() throws Exception {
+    public final void prepareForClose() throws Exception {
         if (internalBufferPos != 0) {
             track.write(internalBuffer, 0, internalBuffer.length - internalBufferAvail);
         }
@@ -202,8 +202,8 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }
 
     @Override
-    public void prepareForTerminationSignal(byte[] signal) {
-       if (signal == null) {
+    public final void prepareForTerminationSignal(byte[] signal) {
+        if (signal == null) {
             return;
         }
 
@@ -216,8 +216,8 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }
 
     @Override
-    public boolean writeTerminationSignal() throws Exception {
-       if (terminationSignal == null || terminationSignalCounter < 1) {
+    public final boolean writeTerminationSignal() throws Exception {
+        if (terminationSignal == null || terminationSignalCounter < 1) {
             return false;
         }
         write(terminationSignal);
@@ -226,12 +226,12 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }
 
     @Override
-    public long getNumberOfSamples() {
+    public final long getNumberOfSamples() {
         return numSamples;
     }
 
     @Override
-    public void close() throws Exception {
+    public final void close() throws Exception {
         track.stop();
     }
 

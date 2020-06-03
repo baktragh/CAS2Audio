@@ -22,10 +22,10 @@ public class MainActivity extends AppCompatActivity {
 
     private CasTask casTask;
     private final String LN_SP;
-    private Uri currentUri;
+    Uri currentUri;
     private boolean playbackInProgress;
     private PowerManager powerManager;
-    private File lastChooserDirectory;
+    File lastChooserDirectory;
 
     private final ArrayList<View> playBackViewsDisabled;
     private final ArrayList<View> playBackViewsEnabled;
@@ -33,17 +33,17 @@ public class MainActivity extends AppCompatActivity {
     public MainActivity() {
         super();
         LN_SP = System.getProperty("line.separator");
-        casTask=null;
-        currentUri=null;
-        playbackInProgress=false;
-        playBackViewsDisabled = new ArrayList<>();
-        playBackViewsEnabled = new ArrayList<>();
+        casTask = null;
+        currentUri = null;
+        playbackInProgress = false;
+        playBackViewsDisabled = new ArrayList<>(8);
+        playBackViewsEnabled = new ArrayList<>(8);
         lastChooserDirectory = null;
     }
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -73,8 +73,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-    protected void onResume() {
+    protected final void onResume() {
 
         super.onResume();
         TextView msgText = getMessageWidget();
@@ -83,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         if (playbackInProgress) return;
 
         /*If the current uri==null, then try to get input file from intent*/
-        if (currentUri==null) {
+        if (currentUri == null) {
 
             Intent intent = getIntent();
             Uri u = intent.getData();
@@ -111,19 +110,19 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    protected void onStop() {
+    protected final void onStop() {
         super.onStop();
         storePreferences();
     }
 
-    protected void onDestroy() {
+    protected final void onDestroy() {
         super.onDestroy();
-        if (casTask!=null) {
+        if (casTask != null) {
             casTask.cancel(true);
         }
     }
 
-    public void onPlay(View v) {
+    public final void onPlay(View v) {
 
         /*Clear text and progress*/
         getMessageWidget().setText("");
@@ -133,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         InputStream iStream;
 
         /*Check if anything was selected*/
-        if (currentUri==null) {
+        if (currentUri == null) {
             getMessageWidget().setText(R.string.msg_nothing_to_play);
             return;
         }
@@ -172,14 +171,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void onStopPlaying(View v) {
-        if (casTask!=null) {
+    public final void onStopPlaying(View v) {
+        if (casTask != null) {
             casTask.cancel(true);
         }
     }
 
     /*Browse for a tape image*/
-    public void onBrowseTapeImage(android.view.View view) {
+    public final void onBrowseTapeImage(android.view.View view) {
 
         /*First, stop playing, this will set the controls*/
         onStopPlaying(view);
@@ -204,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void updateUIForURI() {
+    void updateUIForURI() {
         String filename = extractFileNameFromURI(currentUri);
         setCurrentFileName(filename);
         setPlayBackViewsEnabled(false);
@@ -236,28 +235,28 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.textView)).setText(filename);
     }
 
-    void setPlaybackInProgress(boolean b) {
-        playbackInProgress=b;
+    final void setPlaybackInProgress(boolean b) {
+        playbackInProgress = b;
     }
 
-    void setPlayBackViewsEnabled(boolean b) {
-        for (View v:playBackViewsDisabled) {
+    final void setPlayBackViewsEnabled(boolean b) {
+        for (View v : playBackViewsDisabled) {
             v.setEnabled(!b);
         }
-        for (View v:playBackViewsEnabled) {
+        for (View v : playBackViewsEnabled) {
             v.setEnabled(b);
         }
     }
 
-    void setErrorText(String s) {
+    final void setErrorText(String s) {
         getMessageWidget().setText(s);
     }
 
-    public void setErrorText(int msgId) {
+    public final void setErrorText(int msgId) {
         getMessageWidget().setText(msgId);
     }
 
-    void setProgressBar(int value) {
+    final void setProgressBar(int value) {
         getProgressBar().setProgress(value);
     }
 
@@ -281,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public PowerManager getPowerManager() {
+    public final PowerManager getPowerManager() {
         return powerManager;
     }
 

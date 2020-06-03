@@ -11,12 +11,12 @@ public class Double2SampleFactory {
     /**
      *
      */
-    private final float amplitudeMultiplier;
+    final float amplitudeMultiplier;
 
     /**
      *
      */
-    private final boolean rightOnly;
+    final boolean rightOnly;
 
     Double2SampleFactory(int amplitude, boolean rightOnly) {
         classArray[7] = new Signed16Stereo();
@@ -39,7 +39,7 @@ public class Double2SampleFactory {
      * @param numChannels
      * @return
      */
-    public Double2Sample getDouble2Sample(boolean signed, int bitsPerSample, int numChannels) {
+    public final Double2Sample getDouble2Sample(boolean signed, int bitsPerSample, int numChannels) {
 
         int index = 0;
         if (signed == true) {
@@ -59,7 +59,7 @@ public class Double2SampleFactory {
     class Signed16Mono implements Double2Sample {
 
         @Override
-        public void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
+        public final void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
 
             double f;
             int s;
@@ -84,7 +84,7 @@ public class Double2SampleFactory {
     class Signed16Stereo implements Double2Sample {
 
         @Override
-        public void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
+        public final void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
             double f;
             int s;
 
@@ -119,7 +119,7 @@ public class Double2SampleFactory {
     class Signed8Mono implements Double2Sample {
 
         @Override
-        public void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
+        public final void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
             double f;
             int s;
 
@@ -140,7 +140,7 @@ public class Double2SampleFactory {
     class Signed8Stereo implements Double2Sample {
 
         @Override
-        public void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
+        public final void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
             double f;
             int s;
 
@@ -167,7 +167,7 @@ public class Double2SampleFactory {
     class Unsigned16Mono implements Double2Sample {
 
         @Override
-        public void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
+        public final void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
             double f;
             int s;
 
@@ -191,7 +191,7 @@ public class Double2SampleFactory {
     class Unsigned16Stereo implements Double2Sample {
 
         @Override
-        public void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
+        public final void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
             double f;
             int s;
 
@@ -227,7 +227,7 @@ public class Double2SampleFactory {
     class Unsigned8Mono implements Double2Sample {
 
         @Override
-        public void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
+        public final void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
             double f;
             int s;
 
@@ -248,7 +248,7 @@ public class Double2SampleFactory {
     class Unsigned8Stereo implements Double2Sample {
 
         @Override
-        public void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
+        public final void double2Sample(byte[] samples, int srcIndex, double[] doubleSamples) {
             double f;
             int s;
 

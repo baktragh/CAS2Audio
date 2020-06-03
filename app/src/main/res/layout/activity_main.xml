@@ -32,7 +32,8 @@
                 android:drawableStart="@android:drawable/ic_media_play"
                 android:onClick="onPlay"
                 android:padding="20dp"
-                android:text="@string/btn_play" />
+                android:text="@string/btn_play"
+                android:drawableLeft="@android:drawable/ic_media_play" />
 
             <Button
                 android:id="@+id/btnStop"
@@ -43,7 +44,8 @@
                 android:enabled="false"
                 android:onClick="onStopPlaying"
                 android:padding="20dp"
-                android:text="@string/btn_stop" />
+                android:text="@string/btn_stop"
+                android:drawableLeft="@android:drawable/ic_media_pause" />
 
         </LinearLayout>
 
@@ -142,7 +144,8 @@
             android:ems="10"
             android:gravity="start|top"
             android:paddingLeft="8dp"
-            android:paddingRight="8dp" />
+            android:paddingRight="8dp"
+            android:textIsSelectable="true" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

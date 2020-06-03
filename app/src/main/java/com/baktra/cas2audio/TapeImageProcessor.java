@@ -19,7 +19,7 @@ public class TapeImageProcessor {
     }
 
     /*Convert tape image to the signal generator instructions*/
-    public int[] convertItem(InputStream iStream, int sampleRate) throws Exception {
+    public final int[] convertItem(InputStream iStream, int sampleRate) throws Exception {
 
         InstructionStream is = new InstructionStream();
 

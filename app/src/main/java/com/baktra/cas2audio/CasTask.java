@@ -5,6 +5,8 @@ import android.os.PowerManager;
 
 import com.baktra.cas2audio.signal.SignalGenerator;
 
+import java.lang.ref.WeakReference;
+
 public class CasTask extends AsyncTask<Void,Integer,Void> {
 
     private final boolean stereo;
@@ -12,26 +14,26 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     private final int volume;
     private final int[] instructions;
     private Exception lastException;
-    private final MainActivity parentActivity;
+    private final WeakReference<MainActivity> parentActivity;
     private final int sampleRate;
     private PowerManager.WakeLock wakeLock;
 
     public CasTask(int[] instructions, MainActivity mainActivity, boolean stereo, boolean square, int volume, int sampleRate) {
         this.instructions=instructions;
         this.stereo=stereo;
-        this.lastException=null;
-        this.parentActivity=mainActivity;
-        this.square=square;
+        this.lastException = null;
+        this.parentActivity = new WeakReference<>(mainActivity);
+        this.square = square;
         this.volume=volume;
         this.sampleRate=sampleRate;
         this.wakeLock = null;
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    protected final Void doInBackground(Void... voids) {
 
         try {
-            PowerManager pm = parentActivity.getPowerManager();
+            PowerManager pm = parentActivity.get().getPowerManager();
             if (pm != null) {
                 wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CAS2Audio::TaskWakeLock");
                 wakeLock.acquire(120 * 60 * 1000);
@@ -73,45 +75,43 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     }
 
     @Override
-    protected void onProgressUpdate(Integer... progress) {
-        parentActivity.setProgressBar(progress[0]);
+    protected final void onProgressUpdate(Integer... progress) {
+        parentActivity.get().setProgressBar(progress[0]);
     }
 
-    protected void onPostExecute(Void v) {
-       setControlsForTermination();
-       if (lastException!=null) {
-            parentActivity.setErrorText(Utils.getExceptionMessage(lastException));
-            lastException.printStackTrace();
-       }
-       else {
-           parentActivity.setErrorText(R.string.msg_proc_ok);
-       }
-       parentActivity.setPlaybackInProgress(false);
-    }
-
-    protected void onCancelled() {
+    protected final void onPostExecute(Void v) {
         setControlsForTermination();
-        if (lastException!=null) {
-            parentActivity.setErrorText(Utils.getExceptionMessage(lastException));
+        if (lastException != null) {
+            parentActivity.get().setErrorText(Utils.getExceptionMessage(lastException));
             lastException.printStackTrace();
+        } else {
+            parentActivity.get().setErrorText(R.string.msg_proc_ok);
         }
-        else {
-            parentActivity.setErrorText(R.string.msg_proc_cancel);
+        parentActivity.get().setPlaybackInProgress(false);
+    }
+
+    protected final void onCancelled() {
+        setControlsForTermination();
+        if (lastException != null) {
+            parentActivity.get().setErrorText(Utils.getExceptionMessage(lastException));
+            lastException.printStackTrace();
+        } else {
+            parentActivity.get().setErrorText(R.string.msg_proc_cancel);
         }
-        parentActivity.setProgressBar(0);
-        parentActivity.setPlaybackInProgress(false);
+        parentActivity.get().setProgressBar(0);
+        parentActivity.get().setPlaybackInProgress(false);
 
     }
 
     private void setControlsForTermination() {
-        parentActivity.setPlayBackViewsEnabled(false);
+        parentActivity.get().setPlayBackViewsEnabled(false);
     }
 
-    protected void onPreExecute() {
-        parentActivity.setPlayBackViewsEnabled(true);
+    protected final void onPreExecute() {
+        parentActivity.get().setPlayBackViewsEnabled(true);
     }
 
-    public void setProgress(int statusPercent) {
+    public final void setProgress(int statusPercent) {
         publishProgress(statusPercent);
     }
 }

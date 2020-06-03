@@ -8,7 +8,7 @@ class Utils {
      * @return message
      */
     public static String getExceptionMessage(Exception ex) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(128);
         sb.append(ex.getClass().getName());
         String m = ex.getMessage();
         if (m != null) {
