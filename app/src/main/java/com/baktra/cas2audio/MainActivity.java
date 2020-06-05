@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
             }
             /*There was some intent, but no valid path selected.*/
             else {
-                setCurrentFileName("CAS2Audio 0.0.8");
+                setCurrentFileName("CAS2Audio 1.0.0");
                 msgText.setText(R.string.msg_notape);
                 setPlayBackViewsEnabled(false);
                 currentUri=null;
