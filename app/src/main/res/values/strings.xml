@@ -3,7 +3,7 @@
     <string name="btn_browse">Browse for tape image&#8230;</string>
     <string name="btn_play">PLAY</string>
     <string name="btn_stop">STOP</string>
-    <string name="lbl_square">Square waveform</string>
+    <string name="lbl_square">Square waveform (turbo)</string>
     <string name="lbl_stereo">Stereo</string>
     <string name="lbl_48kHz">48 kHz</string>
     <string name="lbl_amplitude">Amplitude:</string>
@@ -17,4 +17,5 @@
     <string name="btn_cancel">Cancel</string>
     <string name="msg_proc_ok">Tape image processed successfully</string>
     <string name="msg_proc_cancel">Tape image processing cancelled</string>
+    <string name="lbl_short_leader">Shorten standard leader</string>
 </resources>

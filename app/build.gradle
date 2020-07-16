@@ -8,10 +8,10 @@ android {
         minSdkVersion 14
         //noinspection OldTargetApi
         targetSdkVersion 26
-        versionName '1.0.0'
+        versionName '1.0.1'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug
-        versionCode = 10
+        versionCode = 11
     }
     buildTypes {
         release {

@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
             }
             /*There was some intent, but no valid path selected.*/
             else {
-                setCurrentFileName("CAS2Audio 1.0.0");
+                setCurrentFileName("CAS2Audio 1.0.1");
                 msgText.setText(R.string.msg_notape);
                 setPlayBackViewsEnabled(false);
                 currentUri=null;
@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         /*Try to process the tape image*/
         try {
             TapeImageProcessor tip = new TapeImageProcessor();
-            instructions = tip.convertItem(iStream,sampleRate);
+            instructions = tip.convertItem(iStream, sampleRate, isShortenStandardLeader());
         }
         catch (Exception e) {
             getMessageWidget().setText(R.string.msg_unable_to_process + ":" + LN_SP + Utils.getExceptionMessage(e));
@@ -217,14 +217,26 @@ public class MainActivity extends AppCompatActivity {
     private boolean isStereo() {
         return ((Switch) findViewById(R.id.swChannels)).isChecked();
     }
-    private boolean isSquare() { return ((Switch) findViewById(R.id.swSquareWave)).isChecked();}
-    private int getVolume() { return ((SeekBar) findViewById(R.id.sbVolume)).getProgress();}
+
+    private boolean isSquare() {
+        return ((Switch) findViewById(R.id.swSquareWave)).isChecked();
+    }
+
+    private int getVolume() {
+        return ((SeekBar) findViewById(R.id.sbVolume)).getProgress();
+    }
+
     private ProgressBar getProgressBar() {
         return ((ProgressBar) findViewById(R.id.pbProgress));
     }
+
     private int getSampleRate() {
-        boolean f48kHz = ((Switch)findViewById(R.id.sw48kHz)).isChecked();
-        return f48kHz?48000:44100;
+        boolean f48kHz = ((Switch) findViewById(R.id.sw48kHz)).isChecked();
+        return f48kHz ? 48000 : 44100;
+    }
+
+    private boolean isShortenStandardLeader() {
+        return ((Switch) findViewById(R.id.swShortLeader)).isChecked();
     }
 
     private Button getBrowseButton() {
@@ -232,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setCurrentFileName(String filename) {
-        ((TextView) findViewById(R.id.textView)).setText(filename);
+        setTitle(filename);
     }
 
     final void setPlaybackInProgress(boolean b) {
@@ -290,12 +302,15 @@ public class MainActivity extends AppCompatActivity {
         Switch channels = findViewById(R.id.swChannels);
         Switch squareWave = findViewById(R.id.swSquareWave);
         Switch s48kHz = findViewById(R.id.sw48kHz);
+        Switch sShortLeader = findViewById(R.id.swShortLeader);
         SeekBar volume = findViewById(R.id.sbVolume);
 
-        channels.setChecked(sPref.getBoolean("c2a_stereo",true));
-        squareWave.setChecked(sPref.getBoolean("c2a_square",false));
-        s48kHz.setChecked(sPref.getBoolean("c2a_48kHz",false));
-        volume.setProgress(sPref.getInt("c2a_volume",5));
+        channels.setChecked(sPref.getBoolean("c2a_stereo", true));
+        squareWave.setChecked(sPref.getBoolean("c2a_square", false));
+        s48kHz.setChecked(sPref.getBoolean("c2a_48kHz", false));
+        sShortLeader.setChecked(sPref.getBoolean("c2a_short_leader", false));
+
+        volume.setProgress(sPref.getInt("c2a_volume", 5));
         lastChooserDirectory = new File(sPref.getString("c2a_last_dir", ""));
 
     }
@@ -307,14 +322,18 @@ public class MainActivity extends AppCompatActivity {
         Switch channels = findViewById(R.id.swChannels);
         Switch squareWave = findViewById(R.id.swSquareWave);
         Switch s48kHz = findViewById(R.id.sw48kHz);
+        Switch sShortLeader = findViewById(R.id.swShortLeader);
+
         SeekBar volume = findViewById(R.id.sbVolume);
 
         SharedPreferences.Editor editor = sPref.edit();
 
-        editor.putBoolean("c2a_stereo",channels.isChecked());
-        editor.putBoolean("c2a_square",squareWave.isChecked());
-        editor.putBoolean("c2a_48kHz",s48kHz.isChecked());
-        editor.putInt("c2a_volume",(byte)volume.getProgress());
+        editor.putBoolean("c2a_stereo", channels.isChecked());
+        editor.putBoolean("c2a_square", squareWave.isChecked());
+        editor.putBoolean("c2a_48kHz", s48kHz.isChecked());
+        editor.putBoolean("c2a_short_leader", sShortLeader.isChecked());
+
+        editor.putInt("c2a_volume", (byte) volume.getProgress());
 
         if (lastChooserDirectory != null) {
             editor.putString("c2a_last_dir", lastChooserDirectory.getAbsolutePath());
