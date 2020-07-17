@@ -27,6 +27,7 @@ At least Android 4.4 is required, Android 6.0 is recommended.
 * Download the .apk package from the "Releases" section
 * Ensure that the application you will use to open the .apk package has permission to install unknown apps. To do so, go to Settings/Apps/Advanced and enabled the "Install unknown apps" options.
 * Open and install the .apk package
+* You might need to uninstall the previous version first
 
 ### Permissions
 

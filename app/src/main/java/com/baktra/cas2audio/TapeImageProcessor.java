@@ -31,8 +31,11 @@ public class TapeImageProcessor {
             for (int i = 0; i < ti.getChunkCount(); i++) {
                 TapeImageChunk c = ti.getChunkAt(i);
                 if (c.getType() == "data") {
+                    DataChunk dc = (DataChunk) c;
                     /*Shorten to 15 seconds*/
-                    c.setAux(15000);
+                    if (dc.getAux() > 15000) {
+                        c.setAux(15000);
+                    }
                     break;
                 }
             }

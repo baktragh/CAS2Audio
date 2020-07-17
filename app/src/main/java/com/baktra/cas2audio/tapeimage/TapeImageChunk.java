@@ -61,4 +61,6 @@ public interface TapeImageChunk {
      * @param newAuxValue
      */
     void setAux(int newAuxValue);
+
+
 }
