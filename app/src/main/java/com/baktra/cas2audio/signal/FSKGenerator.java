@@ -168,7 +168,7 @@ class FSKGenerator {
     }
 
     /**
-     * Precalculate lookup table
+     * Pre-calculate lookup table
      */
     private void createSineTable() {
 

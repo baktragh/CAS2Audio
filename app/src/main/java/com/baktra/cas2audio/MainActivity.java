@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
             }
             /*There was some intent, but no valid path selected.*/
             else {
-                setCurrentFileName("CAS2Audio 1.0.1");
+                setCurrentFileName("CAS2Audio 1.0.2");
                 msgText.setText(R.string.msg_notape);
                 setPlayBackViewsEnabled(false);
                 currentUri=null;
@@ -186,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
         /*Create basic chooser dialog*/
         ChooserDialog cDlg = new ChooserDialog(MainActivity.this)
                 .withFilter(false, false, "cas", "CAS")
+                .displayPath(true)
                 .withResources(R.string.tit_choose_image, R.string.btn_choose, R.string.btn_cancel)
                 .withChosenListener(new ChooserDialog.Result() {
                     @Override
