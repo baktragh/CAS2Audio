@@ -13,12 +13,13 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     private final boolean square;
     private final int volume;
     private final int[] instructions;
+    private final boolean invertPolarity;
     private Exception lastException;
     private final WeakReference<MainActivity> parentActivity;
     private final int sampleRate;
     private PowerManager.WakeLock wakeLock;
 
-    public CasTask(int[] instructions, MainActivity mainActivity, boolean stereo, boolean square, int volume, int sampleRate) {
+    public CasTask(int[] instructions, MainActivity mainActivity, boolean stereo, boolean square, int volume, int sampleRate,boolean invertPolarity) {
         this.instructions=instructions;
         this.stereo=stereo;
         this.lastException = null;
@@ -26,6 +27,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         this.square = square;
         this.volume=volume;
         this.sampleRate=sampleRate;
+        this.invertPolarity=invertPolarity;
         this.wakeLock = null;
     }
 
@@ -59,6 +61,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
                 sgc.signedSamples=true;
                 sgc.terminalSilence=1;
                 sgc.waveForm=square?0:-1;
+                sgc.invertPolarity=invertPolarity;
 
                 SignalGenerator sg = new SignalGenerator(instructions,sgc,this);
                 sg.run();

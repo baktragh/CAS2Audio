@@ -37,6 +37,7 @@ public class SignalGenerator implements SampleConsumer {
     public static final int FLAG_POLARITY_01 = 0;
     public static final int FLAG_ORDER_LH = 0;
     public static final int FLAG_ORDER_HL = 1;
+    private boolean cInvertPolarity;
 
     public static class SignalGeneratorConfig {
         public int numChannels;
@@ -51,6 +52,8 @@ public class SignalGenerator implements SampleConsumer {
         public boolean doNotModulateStandard;
         public int terminalSilence;
         public int initialSilence;
+
+        public boolean invertPolarity;
     }
 
 
@@ -156,6 +159,7 @@ public class SignalGenerator implements SampleConsumer {
         cInitialSilence = asConfig.initialSilence;
         cTerminalSilence = asConfig.terminalSilence;
         cSampleRate = asConfig.sampleRate;
+        cInvertPolarity = asConfig.invertPolarity;
 
         cSigned = asConfig.signedSamples;
 
@@ -192,9 +196,16 @@ public class SignalGenerator implements SampleConsumer {
         BLOCKSEP = PulseCreator.createPulse(cChannels, cPulseVolume, cSampleRate / 44, cBits, cSigned, 1, 1, cSignalInRightChannelOnly, 0);
 
         /*Reasonable default pieces of signal*/
-        LOW_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_LOW, SignalGenerator.FLAG_POLARITY_01, cSignalInRightChannelOnly, 0);
-        HIGH_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_HIGH, SignalGenerator.FLAG_POLARITY_01, cSignalInRightChannelOnly, 0);
-        SILENCE_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_SILENCE, SignalGenerator.FLAG_POLARITY_01, cSignalInRightChannelOnly, 0);
+        if (!cInvertPolarity) {
+            LOW_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_LOW, SignalGenerator.FLAG_POLARITY_01, cSignalInRightChannelOnly, 0);
+            HIGH_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_HIGH, SignalGenerator.FLAG_POLARITY_01, cSignalInRightChannelOnly, 0);
+            SILENCE_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_SILENCE, SignalGenerator.FLAG_POLARITY_01, cSignalInRightChannelOnly, 0);
+        }
+        else {
+            LOW_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_HIGH, SignalGenerator.FLAG_POLARITY_10, cSignalInRightChannelOnly, 0);
+            HIGH_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_LOW, SignalGenerator.FLAG_POLARITY_10, cSignalInRightChannelOnly, 0);
+            SILENCE_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_SILENCE, SignalGenerator.FLAG_POLARITY_10, cSignalInRightChannelOnly, 0);
+        }
 
     }
 
@@ -569,6 +580,15 @@ public class SignalGenerator implements SampleConsumer {
         /*Polarity and byte order*/
         int polarity = mem[tmp + 5];
         loHiOrder = mem[tmp + 6] != SignalGenerator.FLAG_ORDER_HL;
+
+        if (cInvertPolarity) {
+            if (polarity==SignalGenerator.FLAG_POLARITY_01) {
+                polarity=SignalGenerator.FLAG_POLARITY_10;
+            }
+            if (polarity==SignalGenerator.FLAG_POLARITY_01) {
+                polarity=SignalGenerator.FLAG_POLARITY_10;
+            }
+        }
 
         /*Create new pulses for the settings*/
         PILOTTONE_PULSE = PulseCreator.createPulse(cChannels, cPulseVolume, mem[tmp + 0], dab, das, 0, polarity, cSignalInRightChannelOnly, cHarmonic);

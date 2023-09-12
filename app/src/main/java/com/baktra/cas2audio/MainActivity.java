@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         playBackViewsDisabled.add(findViewById(R.id.sbVolume));
         playBackViewsDisabled.add(findViewById(R.id.tvAmplitude));
         playBackViewsDisabled.add(findViewById(R.id.sw48kHz));
+        playBackViewsDisabled.add(findViewById(R.id.swInvertPulses));
 
         /*Widgets to be enabled during playback*/
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
@@ -96,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
             }
             /*There was some intent, but no valid path selected.*/
             else {
-                setCurrentFileName("CAS2Audio 1.0.2");
+                setCurrentFileName("CAS2Audio 1.0.3");
                 msgText.setText(R.string.msg_notape);
                 setPlayBackViewsEnabled(false);
                 currentUri=null;
@@ -160,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
         /*Create new background task*/
         try {
-            casTask = new CasTask(instructions, this, isStereo(), isSquare(), getVolume(), sampleRate);
+            casTask = new CasTask(instructions, this, isStereo(), isSquare(), getVolume(), sampleRate, isInvertPolarity());
         }
         catch (Exception e) {
             getMessageWidget().setText(Utils.getExceptionMessage(e));
@@ -221,6 +222,10 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isSquare() {
         return ((Switch) findViewById(R.id.swSquareWave)).isChecked();
+    }
+
+    private boolean isInvertPolarity() {
+        return ((Switch) findViewById(R.id.swInvertPulses)).isChecked();
     }
 
     private int getVolume() {
@@ -304,12 +309,14 @@ public class MainActivity extends AppCompatActivity {
         Switch squareWave = findViewById(R.id.swSquareWave);
         Switch s48kHz = findViewById(R.id.sw48kHz);
         Switch sShortLeader = findViewById(R.id.swShortLeader);
+        Switch sInvertPulses = findViewById(R.id.swInvertPulses);
         SeekBar volume = findViewById(R.id.sbVolume);
 
         channels.setChecked(sPref.getBoolean("c2a_stereo", true));
         squareWave.setChecked(sPref.getBoolean("c2a_square", false));
         s48kHz.setChecked(sPref.getBoolean("c2a_48kHz", false));
         sShortLeader.setChecked(sPref.getBoolean("c2a_short_leader", false));
+        sInvertPulses.setChecked(sPref.getBoolean("c2a_invert_pulses", false));
 
         volume.setProgress(sPref.getInt("c2a_volume", 5));
         lastChooserDirectory = new File(sPref.getString("c2a_last_dir", ""));
@@ -324,6 +331,7 @@ public class MainActivity extends AppCompatActivity {
         Switch squareWave = findViewById(R.id.swSquareWave);
         Switch s48kHz = findViewById(R.id.sw48kHz);
         Switch sShortLeader = findViewById(R.id.swShortLeader);
+        Switch sInvertPulses = findViewById(R.id.swInvertPulses);
 
         SeekBar volume = findViewById(R.id.sbVolume);
 
@@ -333,6 +341,7 @@ public class MainActivity extends AppCompatActivity {
         editor.putBoolean("c2a_square", squareWave.isChecked());
         editor.putBoolean("c2a_48kHz", s48kHz.isChecked());
         editor.putBoolean("c2a_short_leader", sShortLeader.isChecked());
+        editor.putBoolean("c2a_invert_pulses", sInvertPulses.isChecked());
 
         editor.putInt("c2a_volume", (byte) volume.getProgress());
 

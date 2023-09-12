@@ -18,4 +18,5 @@
     <string name="msg_proc_ok">Tape image processed successfully</string>
     <string name="msg_proc_cancel">Tape image processing cancelled</string>
     <string name="lbl_short_leader">Shorten standard leader</string>
+    <string name="lbl_invert_polarity">Invert Polarity</string>
 </resources>

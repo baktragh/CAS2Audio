@@ -2,16 +2,15 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.baktra.cas2audio"
         minSdkVersion 14
         //noinspection OldTargetApi
         targetSdkVersion 26
-        versionName '1.0.2'
+        versionName '1.0.3'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug
-        versionCode = 12
+        versionCode = 13
     }
     buildTypes {
         release {
@@ -33,7 +32,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
-    implementation 'com.obsez.android.lib.filechooser:filechooser:1.1.19'
+    implementation 'com.obsez.android.lib.filechooser:filechooser:1.2.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
