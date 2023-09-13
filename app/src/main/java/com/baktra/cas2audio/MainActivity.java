@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.OpenableColumns;
+import android.util.Log;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import com.obsez.android.lib.filechooser.ChooserDialog;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +32,58 @@ public class MainActivity extends AppCompatActivity {
     private final ArrayList<View> playBackViewsDisabled;
     private final ArrayList<View> playBackViewsEnabled;
 
+    private static final class RecentItem {
+        Uri uri;
+        String filename;
+
+        RecentItem(Uri uri, String filename) {
+            this.uri = uri;
+            this.filename=filename;
+        }
+
+        public static String createPersistenceString(ArrayList<RecentItem> recentItems) {
+            StringBuilder sb = new StringBuilder();
+
+            for(RecentItem ri:recentItems) {
+                String p1 = ri.uri.toString();
+                String p2 = ri.filename.toString();
+                sb.append("{");
+                sb.append(p1);
+                sb.append(",");
+                sb.append(p2);
+                sb.append("}");
+                sb.append(";");
+            }
+
+            return sb.toString();
+        }
+
+        public static void parsePersistenceString(String s,ArrayList<RecentItem> recentItems) {
+            recentItems.clear();
+            StringTokenizer tk = new StringTokenizer(s,";");
+
+            while (tk.hasMoreTokens()) {
+                String pair = tk.nextToken();
+                if (pair.length()==0) break;
+
+                StringTokenizer tk2 = new StringTokenizer(pair,",");
+                String p1 = tk2.nextToken().replace("{","");
+                String p2 = tk2.nextToken().replace("}","");
+
+                recentItems.add(new RecentItem(Uri.parse(p1),p2));
+            }
+
+
+        }
+
+
+        public String toString() {
+            return filename;
+        }
+    }
+
+    private final ArrayList<RecentItem> recentItems;
+
     public MainActivity() {
         super();
         LN_SP = System.getProperty("line.separator");
@@ -39,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         playBackViewsDisabled = new ArrayList<>(8);
         playBackViewsEnabled = new ArrayList<>(8);
         lastChooserDirectory = null;
+        recentItems = new ArrayList<>();
     }
 
 
@@ -56,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
         playBackViewsDisabled.add(findViewById(R.id.tvAmplitude));
         playBackViewsDisabled.add(findViewById(R.id.sw48kHz));
         playBackViewsDisabled.add(findViewById(R.id.swInvertPulses));
+        playBackViewsDisabled.add(findViewById(R.id.lvRecentItems));
 
         /*Widgets to be enabled during playback*/
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
@@ -70,6 +126,17 @@ public class MainActivity extends AppCompatActivity {
             powerManager = null;
             e.printStackTrace();
         }
+
+        /*Allow the Recent items to be clicked*/
+        ListView lv = (ListView)findViewById(R.id.lvRecentItems);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                currentUri = recentItems.get(i).uri;
+                updateUIForURI();
+            }
+        });
+
 
     }
 
@@ -178,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     /*Browse for a tape image*/
     public final void onBrowseTapeImage(android.view.View view) {
 
@@ -197,10 +265,9 @@ public class MainActivity extends AppCompatActivity {
                         lastChooserDirectory = pathFile.getParentFile();
                     }
                 });
-        if (lastChooserDirectory != null && lastChooserDirectory.isDirectory()) {
+        if (lastChooserDirectory != null && lastChooserDirectory.isDirectory() && lastChooserDirectory.list().length>0) {
             cDlg = cDlg.withStartFile(lastChooserDirectory.getAbsolutePath());
         }
-
         cDlg.build().show();
 
     }
@@ -210,6 +277,33 @@ public class MainActivity extends AppCompatActivity {
         setCurrentFileName(filename);
         setPlayBackViewsEnabled(false);
         getMessageWidget().setText("");
+        addRecentItem(currentUri,filename);
+    }
+
+    void addRecentItem(Uri uri,String filename) {
+        RecentItem candidateItem = new RecentItem(uri,filename);
+
+        /*Check if already there*/
+        boolean found=false;
+        for (RecentItem item:recentItems) {
+            if (item.uri.equals(candidateItem.uri)) {
+                found=true;
+                break;
+            }
+        }
+        /*If already there, just return*/
+        if (found) return;
+
+        /*Move to front*/
+        recentItems.add(0,candidateItem);
+        if (recentItems.size()>12) recentItems.remove(11);
+        updateRecentItemsUI();
+
+    }
+
+    void updateRecentItemsUI() {
+        ListView lvRecentItems = (ListView)findViewById(R.id.lvRecentItems);
+        lvRecentItems.setAdapter(new ArrayAdapter<RecentItem>(this,R.layout.list_text,recentItems));
     }
 
     private TextView getMessageWidget() {
@@ -321,6 +415,9 @@ public class MainActivity extends AppCompatActivity {
         volume.setProgress(sPref.getInt("c2a_volume", 5));
         lastChooserDirectory = new File(sPref.getString("c2a_last_dir", ""));
 
+        RecentItem.parsePersistenceString(sPref.getString("c2a_recents",""),recentItems);
+        updateRecentItemsUI();
+
     }
 
     private void storePreferences() {
@@ -348,6 +445,9 @@ public class MainActivity extends AppCompatActivity {
         if (lastChooserDirectory != null) {
             editor.putString("c2a_last_dir", lastChooserDirectory.getAbsolutePath());
         }
+
+        String recentString = RecentItem.createPersistenceString(recentItems);
+        editor.putString("c2a_recents",recentString);
 
         editor.apply();
 
