@@ -12,6 +12,40 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <TextView
+            android:id="@+id/mltMessages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:ems="10"
+            android:gravity="start|top"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:textIsSelectable="true" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="?android:attr/listDivider" />
+
+        <ProgressBar
+            android:id="@+id/pbProgress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:max="100"
+            android:padding="5dp"
+            android:progress="0" />
+
+        <View
+            android:id="@+id/divider5"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -42,16 +76,11 @@
 
         </LinearLayout>
 
-        <ProgressBar
-            android:id="@+id/pbProgress"
-            style="?android:attr/progressBarStyleHorizontal"
+        <View
+            android:id="@+id/divider2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
-            android:max="100"
-            android:padding="5dp"
-            android:progress="0" />
+            android:layout_height="2dp"
+            android:background="?android:attr/listDivider" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -76,75 +105,9 @@
                 android:progress="5" />
         </LinearLayout>
 
-        <View
-            android:id="@+id/divider2"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="?android:attr/listDivider" />
-
-        <TextView
-            android:id="@+id/mltMessages"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:ems="10"
-            android:gravity="start|top"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:textIsSelectable="true" />
-
-        <View
-            android:id="@+id/divider"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="?android:attr/listDivider" />
-
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <Switch
-                    android:id="@+id/sw48kHz"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="@string/lbl_48kHz" />
-
-                <Switch
-                    android:id="@+id/swChannels"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:padding="8dp"
-                    android:text="@string/lbl_stereo" />
-
-                <Switch
-                    android:id="@+id/swSquareWave"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="@string/lbl_square" />
-
-                <Switch
-                    android:id="@+id/swShortLeader"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="@string/lbl_short_leader" />
-
-                <Switch
-                    android:id="@+id/swInvertPulses"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="@string/lbl_invert_polarity" />
-            </LinearLayout>
-        </ScrollView>
+            android:layout_height="wrap_content"/>
 
         <View
             android:id="@+id/divider4"

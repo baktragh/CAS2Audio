@@ -1,5 +1,6 @@
 package com.baktra.cas2audio;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,7 +9,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.OpenableColumns;
-import android.util.Log;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,9 +18,8 @@ import com.obsez.android.lib.filechooser.ChooserDialog;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     private CasTask casTask;
     private final String LN_SP;
@@ -29,58 +28,10 @@ public class MainActivity extends AppCompatActivity {
     private PowerManager powerManager;
     File lastChooserDirectory;
 
+    private UserSettings userSettings;
+
     private final ArrayList<View> playBackViewsDisabled;
     private final ArrayList<View> playBackViewsEnabled;
-
-    private static final class RecentItem {
-        Uri uri;
-        String filename;
-
-        RecentItem(Uri uri, String filename) {
-            this.uri = uri;
-            this.filename=filename;
-        }
-
-        public static String createPersistenceString(ArrayList<RecentItem> recentItems) {
-            StringBuilder sb = new StringBuilder();
-
-            for(RecentItem ri:recentItems) {
-                String p1 = ri.uri.toString();
-                String p2 = ri.filename.toString();
-                sb.append("{");
-                sb.append(p1);
-                sb.append(",");
-                sb.append(p2);
-                sb.append("}");
-                sb.append(";");
-            }
-
-            return sb.toString();
-        }
-
-        public static void parsePersistenceString(String s,ArrayList<RecentItem> recentItems) {
-            recentItems.clear();
-            StringTokenizer tk = new StringTokenizer(s,";");
-
-            while (tk.hasMoreTokens()) {
-                String pair = tk.nextToken();
-                if (pair.length()==0) break;
-
-                StringTokenizer tk2 = new StringTokenizer(pair,",");
-                String p1 = tk2.nextToken().replace("{","");
-                String p2 = tk2.nextToken().replace("}","");
-
-                recentItems.add(new RecentItem(Uri.parse(p1),p2));
-            }
-
-
-        }
-
-
-        public String toString() {
-            return filename;
-        }
-    }
 
     private final ArrayList<RecentItem> recentItems;
 
@@ -94,8 +45,8 @@ public class MainActivity extends AppCompatActivity {
         playBackViewsEnabled = new ArrayList<>(8);
         lastChooserDirectory = null;
         recentItems = new ArrayList<>();
+        userSettings = new UserSettings();
     }
-
 
     @Override
     protected final void onCreate(Bundle savedInstanceState) {
@@ -105,12 +56,8 @@ public class MainActivity extends AppCompatActivity {
         /*Widgets to be disabled during playback*/
         playBackViewsDisabled.add(getBrowseButton());
         playBackViewsDisabled.add(findViewById(R.id.btnPlay));
-        playBackViewsDisabled.add(findViewById(R.id.swChannels));
-        playBackViewsDisabled.add(findViewById(R.id.swSquareWave));
         playBackViewsDisabled.add(findViewById(R.id.sbVolume));
         playBackViewsDisabled.add(findViewById(R.id.tvAmplitude));
-        playBackViewsDisabled.add(findViewById(R.id.sw48kHz));
-        playBackViewsDisabled.add(findViewById(R.id.swInvertPulses));
         playBackViewsDisabled.add(findViewById(R.id.lvRecentItems));
 
         /*Widgets to be enabled during playback*/
@@ -164,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             }
             /*There was some intent, but no valid path selected.*/
             else {
-                setCurrentFileName("CAS2Audio 1.0.3");
+                setCurrentFileName("CAS2Audio 1.0.4");
                 msgText.setText(R.string.msg_notape);
                 setPlayBackViewsEnabled(false);
                 currentUri=null;
@@ -215,11 +162,12 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        int sampleRate = getSampleRate();
+        int sampleRate = userSettings.isDo48kHz()?48000:44100;
+
         /*Try to process the tape image*/
         try {
             TapeImageProcessor tip = new TapeImageProcessor();
-            instructions = tip.convertItem(iStream, sampleRate, isShortenStandardLeader());
+            instructions = tip.convertItem(iStream, sampleRate, false);
         }
         catch (Exception e) {
             getMessageWidget().setText(R.string.msg_unable_to_process + ":" + LN_SP + Utils.getExceptionMessage(e));
@@ -228,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
 
         /*Create new background task*/
         try {
-            casTask = new CasTask(instructions, this, isStereo(), isSquare(), getVolume(), sampleRate, isInvertPolarity());
+            casTask = new CasTask(instructions, this, !userSettings.isDoMono(), userSettings.isDoSquareWave(), getVolume(), sampleRate, userSettings.isDoInvertPolarity());
         }
         catch (Exception e) {
             getMessageWidget().setText(Utils.getExceptionMessage(e));
@@ -310,33 +258,12 @@ public class MainActivity extends AppCompatActivity {
         return ((TextView) findViewById(R.id.mltMessages));
     }
 
-    private boolean isStereo() {
-        return ((Switch) findViewById(R.id.swChannels)).isChecked();
-    }
-
-    private boolean isSquare() {
-        return ((Switch) findViewById(R.id.swSquareWave)).isChecked();
-    }
-
-    private boolean isInvertPolarity() {
-        return ((Switch) findViewById(R.id.swInvertPulses)).isChecked();
-    }
-
     private int getVolume() {
         return ((SeekBar) findViewById(R.id.sbVolume)).getProgress();
     }
 
     private ProgressBar getProgressBar() {
         return ((ProgressBar) findViewById(R.id.pbProgress));
-    }
-
-    private int getSampleRate() {
-        boolean f48kHz = ((Switch) findViewById(R.id.sw48kHz)).isChecked();
-        return f48kHz ? 48000 : 44100;
-    }
-
-    private boolean isShortenStandardLeader() {
-        return ((Switch) findViewById(R.id.swShortLeader)).isChecked();
     }
 
     private Button getBrowseButton() {
@@ -398,58 +325,31 @@ public class MainActivity extends AppCompatActivity {
 
     private void restorePreferences() {
         SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
-
-        Switch channels = findViewById(R.id.swChannels);
-        Switch squareWave = findViewById(R.id.swSquareWave);
-        Switch s48kHz = findViewById(R.id.sw48kHz);
-        Switch sShortLeader = findViewById(R.id.swShortLeader);
-        Switch sInvertPulses = findViewById(R.id.swInvertPulses);
         SeekBar volume = findViewById(R.id.sbVolume);
-
-        channels.setChecked(sPref.getBoolean("c2a_stereo", true));
-        squareWave.setChecked(sPref.getBoolean("c2a_square", false));
-        s48kHz.setChecked(sPref.getBoolean("c2a_48kHz", false));
-        sShortLeader.setChecked(sPref.getBoolean("c2a_short_leader", false));
-        sInvertPulses.setChecked(sPref.getBoolean("c2a_invert_pulses", false));
-
         volume.setProgress(sPref.getInt("c2a_volume", 5));
         lastChooserDirectory = new File(sPref.getString("c2a_last_dir", ""));
-
         RecentItem.parsePersistenceString(sPref.getString("c2a_recents",""),recentItems);
         updateRecentItemsUI();
-
+        userSettings = UserSettings.createFromPersistentStorage(sPref);
     }
 
     private void storePreferences() {
 
         SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
-
-        Switch channels = findViewById(R.id.swChannels);
-        Switch squareWave = findViewById(R.id.swSquareWave);
-        Switch s48kHz = findViewById(R.id.sw48kHz);
-        Switch sShortLeader = findViewById(R.id.swShortLeader);
-        Switch sInvertPulses = findViewById(R.id.swInvertPulses);
-
         SeekBar volume = findViewById(R.id.sbVolume);
-
         SharedPreferences.Editor editor = sPref.edit();
 
-        editor.putBoolean("c2a_stereo", channels.isChecked());
-        editor.putBoolean("c2a_square", squareWave.isChecked());
-        editor.putBoolean("c2a_48kHz", s48kHz.isChecked());
-        editor.putBoolean("c2a_short_leader", sShortLeader.isChecked());
-        editor.putBoolean("c2a_invert_pulses", sInvertPulses.isChecked());
-
+        /*Current state of the UI*/
         editor.putInt("c2a_volume", (byte) volume.getProgress());
-
         if (lastChooserDirectory != null) {
             editor.putString("c2a_last_dir", lastChooserDirectory.getAbsolutePath());
         }
-
         String recentString = RecentItem.createPersistenceString(recentItems);
         editor.putString("c2a_recents",recentString);
-
         editor.apply();
+
+        /*General settings*/
+
 
     }
 

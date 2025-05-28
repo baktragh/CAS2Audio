@@ -19,4 +19,5 @@
     <string name="msg_proc_cancel">Tape image processing cancelled</string>
     <string name="lbl_short_leader">Shorten standard leader</string>
     <string name="lbl_invert_polarity">Invert Polarity</string>
+    <string name="title_activity_settings">SettingsActivity</string>
 </resources>
