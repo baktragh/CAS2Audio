@@ -122,6 +122,13 @@
             android:onClick="onBrowseTapeImage"
             android:text="@string/btn_browse" />
 
+        <Button
+            android:id="@+id/btnSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onSettings"
+            android:text="@string/btn_settings" />
+
         <View
             android:id="@+id/divider3"
             android:layout_width="match_parent"

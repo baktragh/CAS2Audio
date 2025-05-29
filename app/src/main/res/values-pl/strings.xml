@@ -20,4 +20,5 @@
     <string name="msg_proc_cancel">Anulowano przetwarzanie obrazu taśmy</string>
     <string name="lbl_short_leader">Skróć sygnał pilota (normal)</string>
     <string name="lbl_invert_polarity">Odwrócić polaryzację</string>
+    <string name="btn_settings">Ustawienia...</string>
 </resources>

@@ -20,4 +20,5 @@
     <string name="msg_proc_cancel">Zpracování obrazu kazety zrušeno</string>
     <string name="lbl_short_leader">Zkrátit standardní zav. tón</string>
     <string name="lbl_invert_polarity">Obrátit polaritu</string>
+    <string name="btn_settings">Nastavení...</string>
 </resources>

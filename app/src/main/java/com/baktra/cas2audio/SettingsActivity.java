@@ -1,5 +1,6 @@
 package com.baktra.cas2audio;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,7 +28,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends Activity {
 
     public SettingsActivity() {
         super();
@@ -40,6 +41,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     protected final void onResume() {
+        super.onResume();
     }
 
     protected final void onStop() {

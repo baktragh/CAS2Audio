@@ -193,6 +193,12 @@ public class MainActivity extends Activity {
         }
     }
 
+    public final void onSettings(View v) {
+        System.out.println("Settings");
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+    }
+
 
     /*Browse for a tape image*/
     public final void onBrowseTapeImage(android.view.View view) {
