@@ -196,7 +196,22 @@ public class MainActivity extends Activity {
     public final void onSettings(View v) {
         System.out.println("Settings");
         Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.putExtra("user_settings",this.userSettings);
+        startActivityForResult(intent,148);
+    }
+
+    public final void onActivityResult(int requestCode,
+                                       int resultCode,
+                                       Intent data) {
+        super.onActivityResult(requestCode,resultCode,data);
+        if (data!=null) {
+            this.userSettings = (UserSettings) data.getSerializableExtra("user_settings");
+            System.out.println("Activity result");
+        }
+
+        System.out.println("Activity result processed");
+
     }
 
 

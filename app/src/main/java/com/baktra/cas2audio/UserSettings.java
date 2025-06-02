@@ -2,7 +2,9 @@ package com.baktra.cas2audio;
 
 import android.content.SharedPreferences;
 
-public class UserSettings {
+import java.io.Serializable;
+
+public class UserSettings implements Serializable {
 
     private boolean doMono=false;
     private boolean do48kHz=false;
