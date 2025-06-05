@@ -20,7 +20,7 @@ Play back tape images for 8-bit Atari computers on mobile devices with Android.
 ## Technical information
 
 ### OS Version
-At least Android 4.4 is required, Android 6.0 is recommended.
+At least Android 10.0 is required to run the most recent version
 
 ### Installation
 
@@ -36,8 +36,3 @@ At least Android 4.4 is required, Android 6.0 is recommended.
 
 ## Screenshot
 ![Screenshot](c2a_shot1.png)
-
-## Acknowledgements
-* This application uses [android-file-chooser](https://github.com/hedzr/android-file-chooser)
-
-
