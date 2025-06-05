@@ -5,7 +5,7 @@
     <string name="btn_play">Přehrát</string>
     <string name="btn_stop">Zastavit</string>
     <string name="lbl_square">Obdélníkový signál (turbo)</string>
-    <string name="lbl_stereo">Stereo</string>
+    <string name="lbl_mono">Mono</string>
     <string name="lbl_48kHz">48 kHz</string>
     <string name="lbl_amplitude">Síla signálu:</string>
     <string name="lbl_app_title">CAS2Audio</string>
@@ -21,4 +21,8 @@
     <string name="lbl_short_leader">Zkrátit standardní zav. tón</string>
     <string name="lbl_invert_polarity">Obrátit polaritu</string>
     <string name="btn_settings">Nastavení...</string>
+    <string name="title_activity_settings">Nastavení</string>
+    <string name="btn_confirm">Potvrdit</string>
+    <string name="btn_defaults">Výchozí</string>
+    <string name="btn_clear_history">Vymazat historii</string>
 </resources>

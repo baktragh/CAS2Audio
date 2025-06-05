@@ -2,7 +2,6 @@ package com.baktra.cas2audio;
 
 /**
  * Auto-growing storage for integers
- *
  */
 class InstructionStream {
 

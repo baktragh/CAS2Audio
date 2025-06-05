@@ -4,12 +4,12 @@ import android.content.SharedPreferences;
 
 import java.io.Serializable;
 
-public class UserSettings implements Serializable {
+class UserSettings implements Serializable {
 
-    private boolean doMono=false;
-    private boolean do48kHz=false;
-    private boolean doSquareWave=false;
-    private boolean doInvertPolarity=false;
+    private boolean doMono = false;
+    private boolean do48kHz = false;
+    private boolean doSquareWave = false;
+    private boolean doInvertPolarity = false;
 
     public UserSettings(final boolean doMono, final boolean do48kHz, final boolean doSquareWave, final boolean doInvertPolarity) {
         this.doMono = doMono;
@@ -57,22 +57,26 @@ public class UserSettings implements Serializable {
     public static UserSettings createFromPersistentStorage(SharedPreferences sPref) {
         UserSettings s = new UserSettings();
 
-        s.do48kHz = sPref.getBoolean("c2a_48kHz",false);
-        s.doMono = sPref.getBoolean("c2a_mono",false);
-        s.doSquareWave=sPref.getBoolean("c2a_square",false);
-        s.doInvertPolarity=sPref.getBoolean("c2a_invert_pulses",false);
+        s.do48kHz = sPref.getBoolean("c2a_48kHz", false);
+        s.doMono = sPref.getBoolean("c2a_mono", false);
+        s.doSquareWave = sPref.getBoolean("c2a_square", false);
+        s.doInvertPolarity = sPref.getBoolean("c2a_invert_pulses", false);
 
         return s;
     }
 
-    public static void flushToPersistentStorage(UserSettings s,SharedPreferences  sPref) {
+    protected static void flushToPersistentStorage(UserSettings s, SharedPreferences sPref) {
 
         SharedPreferences.Editor editor = sPref.edit();
-        editor.putBoolean("c2a_48kHz",s.do48kHz);
-        editor.putBoolean("c2a_mono",s.doMono);
-        editor.putBoolean("c2a_square",s.doSquareWave);
-        editor.putBoolean("c2a_invert_pulses",s.doInvertPolarity);
+        editor.putBoolean("c2a_48kHz", s.do48kHz);
+        editor.putBoolean("c2a_mono", s.doMono);
+        editor.putBoolean("c2a_square", s.doSquareWave);
+        editor.putBoolean("c2a_invert_pulses", s.doInvertPolarity);
         editor.apply();
+    }
+
+    public String toString() {
+        return "Settings:" + do48kHz + "," + doMono + "," + doSquareWave + "," + doInvertPolarity;
 
     }
 }

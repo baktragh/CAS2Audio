@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:checked="true"
             android:padding="8dp"
-            android:text="@string/lbl_stereo" />
+            android:text="@string/lbl_mono" />
 
         <Switch
             android:id="@+id/swSquareWave"
@@ -36,5 +36,27 @@
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:text="@string/lbl_invert_polarity" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnConfirm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onConfirm"
+                android:text="@string/btn_confirm" />
+
+            <Button
+                android:id="@+id/btnReset"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onDefaults"
+                android:text="@string/btn_defaults" />
+        </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

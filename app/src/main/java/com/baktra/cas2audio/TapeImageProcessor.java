@@ -57,7 +57,6 @@ public class TapeImageProcessor {
     }
 
 
-
     private void addInstructionsForChunk(InstructionStream is, TapeImageChunk chunk) throws Exception {
 
         if (chunk.getType().equals("pwmc")) {

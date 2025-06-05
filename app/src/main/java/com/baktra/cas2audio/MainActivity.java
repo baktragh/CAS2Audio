@@ -8,14 +8,17 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.provider.DocumentsContract;
 import android.provider.OpenableColumns;
 import android.view.View;
 import android.widget.*;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.obsez.android.lib.filechooser.ChooserDialog;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -59,6 +62,8 @@ public class MainActivity extends Activity {
         playBackViewsDisabled.add(findViewById(R.id.sbVolume));
         playBackViewsDisabled.add(findViewById(R.id.tvAmplitude));
         playBackViewsDisabled.add(findViewById(R.id.lvRecentItems));
+        playBackViewsDisabled.add(findViewById(R.id.btnSettings));
+        playBackViewsDisabled.add(findViewById(R.id.btnClearHistory));
 
         /*Widgets to be enabled during playback*/
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
@@ -75,12 +80,12 @@ public class MainActivity extends Activity {
         }
 
         /*Allow the Recent items to be clicked*/
-        ListView lv = (ListView)findViewById(R.id.lvRecentItems);
+        ListView lv = (ListView) findViewById(R.id.lvRecentItems);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 currentUri = recentItems.get(i).uri;
-                updateUIForURI();
+                updateUIForFile();
             }
         });
 
@@ -103,24 +108,24 @@ public class MainActivity extends Activity {
             Uri u = intent.getData();
 
             /*Valid path selected*/
-            if (u!=null && u.getPath()!=null) {
+            if (u != null && u.toString() != null) {
                 String filename = extractFileNameFromURI(u);
                 setCurrentFileName(filename);
                 setPlayBackViewsEnabled(false);
-                currentUri=u;
+                currentUri = u;
             }
             /*There was some intent, but no valid path selected.*/
             else {
                 setCurrentFileName("CAS2Audio 1.0.4");
                 msgText.setText(R.string.msg_notape);
                 setPlayBackViewsEnabled(false);
-                currentUri=null;
+                currentUri = null;
             }
 
         }
         /*Activity was resumed, we are still open with valid tape image, and no playback is in progress*/
         else {
-            updateUIForURI();
+            updateUIForFile();
         }
 
     }
@@ -156,20 +161,19 @@ public class MainActivity extends Activity {
         /*Try to open the tape image - short, can be in  the even thread*/
         try {
             iStream = getContentResolver().openInputStream(currentUri);
-        }
-        catch (Exception e) {
+
+        } catch (Exception e) {
             getMessageWidget().setText(R.string.msg_unable_to_open + ":" + LN_SP + Utils.getExceptionMessage(e));
             return;
         }
 
-        int sampleRate = userSettings.isDo48kHz()?48000:44100;
+        int sampleRate = userSettings.isDo48kHz() ? 48000 : 44100;
 
         /*Try to process the tape image*/
         try {
             TapeImageProcessor tip = new TapeImageProcessor();
             instructions = tip.convertItem(iStream, sampleRate, false);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             getMessageWidget().setText(R.string.msg_unable_to_process + ":" + LN_SP + Utils.getExceptionMessage(e));
             return;
         }
@@ -177,8 +181,7 @@ public class MainActivity extends Activity {
         /*Create new background task*/
         try {
             casTask = new CasTask(instructions, this, !userSettings.isDoMono(), userSettings.isDoSquareWave(), getVolume(), sampleRate, userSettings.isDoInvertPolarity());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             getMessageWidget().setText(Utils.getExceptionMessage(e));
         }
         /*Execute the task*/
@@ -194,23 +197,41 @@ public class MainActivity extends Activity {
     }
 
     public final void onSettings(View v) {
-        System.out.println("Settings");
         Intent intent = new Intent(this, SettingsActivity.class);
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        intent.putExtra("user_settings",this.userSettings);
-        startActivityForResult(intent,148);
+        intent.putExtra("user_settings", this.userSettings);
+        startActivityForResult(intent, OPEN_SETTINGS);
     }
 
-    public final void onActivityResult(int requestCode,
-                                       int resultCode,
-                                       Intent data) {
-        super.onActivityResult(requestCode,resultCode,data);
-        if (data!=null) {
-            this.userSettings = (UserSettings) data.getSerializableExtra("user_settings");
-            System.out.println("Activity result");
-        }
+    private static final int PICK_CAS_FILE = 102;
+    private static final int OPEN_SETTINGS =103;
 
-        System.out.println("Activity result processed");
+
+    protected final void onActivityResult(int requestCode,
+                                          int resultCode,
+                                          Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        /*Handle the settings activity*/
+        if (requestCode==OPEN_SETTINGS && resultCode==Activity.RESULT_OK) {
+            if (data != null) {
+                this.userSettings = (UserSettings) data.getSerializableExtra("user_settings");
+            }
+        }
+        /*Handle .CAS file pickup*/
+        else if (requestCode==PICK_CAS_FILE && resultCode==Activity.RESULT_OK) {
+            if (data != null) {
+                Uri uri = data.getData();
+                /*Get permissions for that URI*/
+                getContentResolver().takePersistableUriPermission(uri,Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                if (uri!=null) {
+                    currentUri=uri;
+                    updateUIForFile();
+                }
+            }
+
+        }
 
     }
 
@@ -221,27 +242,24 @@ public class MainActivity extends Activity {
         /*First, stop playing, this will set the controls*/
         onStopPlaying(view);
 
-        /*Create basic chooser dialog*/
-        ChooserDialog cDlg = new ChooserDialog(MainActivity.this)
-                .withFilter(false, false, "cas", "CAS")
-                .displayPath(true)
-                .withResources(R.string.tit_choose_image, R.string.btn_choose, R.string.btn_cancel)
-                .withChosenListener(new ChooserDialog.Result() {
-                    @Override
-                    public void onChoosePath(String path, File pathFile) {
-                        currentUri = Uri.fromFile(pathFile);
-                        updateUIForURI();
-                        lastChooserDirectory = pathFile.getParentFile();
-                    }
-                });
-        if (lastChooserDirectory != null && lastChooserDirectory.isDirectory() && lastChooserDirectory.list().length>0) {
-            cDlg = cDlg.withStartFile(lastChooserDirectory.getAbsolutePath());
+        /*Ask for document selection*/
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/octet-stream");
+
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        if (lastChooserDirectory!=null && lastChooserDirectory.exists() && lastChooserDirectory.isDirectory()) {
+            Uri pickerInitialUri = Uri.fromFile(lastChooserDirectory);
+            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
         }
-        cDlg.build().show();
+
+        startActivityForResult(intent, PICK_CAS_FILE);
 
     }
 
-    void updateUIForURI() {
+    void updateUIForFile() {
         String filename = extractFileNameFromURI(currentUri);
         setCurrentFileName(filename);
         setPlayBackViewsEnabled(false);
@@ -249,14 +267,14 @@ public class MainActivity extends Activity {
         addRecentItem(currentUri,filename);
     }
 
-    void addRecentItem(Uri uri,String filename) {
+    void addRecentItem(Uri uri, String filename) {
         RecentItem candidateItem = new RecentItem(uri,filename);
 
         /*Check if already there*/
-        boolean found=false;
-        for (RecentItem item:recentItems) {
-            if (item.uri.equals(candidateItem.uri)) {
-                found=true;
+        boolean found = false;
+        for (RecentItem item : recentItems) {
+            if (item.uri.toString().equals(candidateItem.uri.toString())) {
+                found = true;
                 break;
             }
         }
@@ -264,15 +282,15 @@ public class MainActivity extends Activity {
         if (found) return;
 
         /*Move to front*/
-        recentItems.add(0,candidateItem);
-        if (recentItems.size()>12) recentItems.remove(11);
+        recentItems.add(0, candidateItem);
+        if (recentItems.size() > 12) recentItems.remove(11);
         updateRecentItemsUI();
 
     }
 
     void updateRecentItemsUI() {
-        ListView lvRecentItems = (ListView)findViewById(R.id.lvRecentItems);
-        lvRecentItems.setAdapter(new ArrayAdapter<RecentItem>(this,R.layout.list_text,recentItems));
+        ListView lvRecentItems = (ListView) findViewById(R.id.lvRecentItems);
+        lvRecentItems.setAdapter(new ArrayAdapter<RecentItem>(this, R.layout.list_text, recentItems));
     }
 
     private TextView getMessageWidget() {
@@ -322,7 +340,9 @@ public class MainActivity extends Activity {
 
     private String extractFileNameFromURI(Uri uri) {
         String result = null;
-        if (uri.getScheme().equals("content")) {
+
+        /*Let us have content URI*/
+        if (uri.getScheme()!=null && uri.getScheme().equals("content")) {
             Cursor cursor = getContentResolver().query(uri, null, null, null, null);
             try {
                 if (cursor != null && cursor.moveToFirst()) {
@@ -332,8 +352,9 @@ public class MainActivity extends Activity {
                 cursor.close();
             }
         }
+        /*If not content URI, consider it a file*/
         if (result == null) {
-            File f = new File (uri.getPath());
+            File f = new File(uri.toString());
             result = f.getName();
         }
         return result;
@@ -349,7 +370,12 @@ public class MainActivity extends Activity {
         SeekBar volume = findViewById(R.id.sbVolume);
         volume.setProgress(sPref.getInt("c2a_volume", 5));
         lastChooserDirectory = new File(sPref.getString("c2a_last_dir", ""));
-        RecentItem.parsePersistenceString(sPref.getString("c2a_recents",""),recentItems);
+        try {
+            RecentItem.parsePersistenceString(sPref.getString("c2a_recents", ""), recentItems);
+        }
+        catch (Exception e) {
+            recentItems.clear();
+        }
         updateRecentItemsUI();
         userSettings = UserSettings.createFromPersistentStorage(sPref);
     }
@@ -366,12 +392,17 @@ public class MainActivity extends Activity {
             editor.putString("c2a_last_dir", lastChooserDirectory.getAbsolutePath());
         }
         String recentString = RecentItem.createPersistenceString(recentItems);
-        editor.putString("c2a_recents",recentString);
+        editor.putString("c2a_recents", recentString);
         editor.apply();
 
         /*General settings*/
+        UserSettings.flushToPersistentStorage(userSettings, sPref);
 
+    }
 
+    public final void onEraseHistory(android.view.View view) {
+        this.recentItems.clear();
+        updateRecentItemsUI();
     }
 
 

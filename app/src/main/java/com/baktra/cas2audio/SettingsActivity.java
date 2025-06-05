@@ -45,18 +45,21 @@ public class SettingsActivity extends Activity {
 
     protected final void onResume() {
         super.onResume();
-        userSettings = (UserSettings)getIntent().getSerializableExtra("user_settings");
+        userSettings = (UserSettings) getIntent().getSerializableExtra("user_settings");
         setUI();
 
     }
 
-    protected final void onStop() {
-        System.out.println("Stopping settings");
+    public void onConfirm(View view) {
         super.onStop();
         flushUIToSettings();
-        setResult(RESULT_OK,new Intent().putExtra("user_settings",this.userSettings));
-        System.out.println("Result was set");
+        setResult(RESULT_OK, new Intent().putExtra("user_settings", this.userSettings));
         finish();
+    }
+
+    public void onDefaults(View view) {
+        userSettings = new UserSettings();
+        setUI();
     }
 
     protected final void onDestroy() {
@@ -88,7 +91,7 @@ public class SettingsActivity extends Activity {
         userSettings.setDoInvertPolarity(sInvertPulses.isChecked());
         userSettings.setDoSquareWave(sSquare.isChecked());
 
-        System.out.println("Flushed");
+
 
     }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Cas2Audio</string>
-    <string name="lbl_stereo">Stereo</string>
+    <string name="lbl_mono">Mono</string>
     <string name="lbl_48kHz">48 kHz</string>
     <string name="lbl_app_title">CAS2Audio</string>
     <string name="lbl_square">Fala kwadratowa (turbo)</string>
@@ -21,4 +21,8 @@
     <string name="lbl_short_leader">Skróć sygnał pilota (normal)</string>
     <string name="lbl_invert_polarity">Odwrócić polaryzację</string>
     <string name="btn_settings">Ustawienia...</string>
+    <string name="title_activity_settings">Ustawienia</string>
+    <string name="btn_confirm">Potwierdzać</string>
+    <string name="btn_defaults">Domyślne</string>
+    <string name="btn_clear_history">Wymaż historię</string>
 </resources>

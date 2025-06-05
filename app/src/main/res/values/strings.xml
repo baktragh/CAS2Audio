@@ -4,7 +4,7 @@
     <string name="btn_play">PLAY</string>
     <string name="btn_stop">STOP</string>
     <string name="lbl_square">Square waveform (turbo)</string>
-    <string name="lbl_stereo">Stereo</string>
+    <string name="lbl_mono">Mono</string>
     <string name="lbl_48kHz">48 kHz</string>
     <string name="lbl_amplitude">Amplitude:</string>
     <string name="lbl_app_title">CAS2Audio</string>
@@ -21,5 +21,8 @@
     <string name="lbl_invert_polarity">Invert Polarity</string>
     <string name="btn_settings">Settings...</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="btn_confirm">Confirm</string>
+    <string name="btn_defaults">Defaults</string>
+    <string name="btn_clear_history">Clear history</string>
 
 </resources>
