@@ -15,8 +15,6 @@ import android.widget.*;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.obsez.android.lib.filechooser.ChooserDialog;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
