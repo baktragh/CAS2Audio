@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
-    android:onClick="onEraseHistory"
+    android:paddingHorizontal="8dp"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -135,6 +135,15 @@
             android:layout_height="4dp"
             android:background="?android:attr/listDivider" />
 
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:text="Recent tape images"
+            android:textAlignment="viewStart"
+            android:textStyle="bold" />
+
         <ListView
             android:id="@+id/lvRecentItems"
             android:layout_width="match_parent"
@@ -148,6 +157,14 @@
             android:layout_width="match_parent"
             android:layout_height="4dp"
             android:background="?android:attr/listDivider" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:text="Messages"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/mltMessages"
