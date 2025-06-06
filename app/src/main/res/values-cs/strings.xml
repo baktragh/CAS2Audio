@@ -25,4 +25,6 @@
     <string name="btn_confirm">Potvrdit</string>
     <string name="btn_defaults">Výchozí</string>
     <string name="btn_clear_history">Vymazat historii</string>
+    <string name="btn_yes">Ano</string>
+    <string name="btn_no">Ne</string>
 </resources>

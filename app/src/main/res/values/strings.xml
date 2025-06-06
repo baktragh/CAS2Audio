@@ -24,5 +24,7 @@
     <string name="btn_confirm">Confirm</string>
     <string name="btn_defaults">Defaults</string>
     <string name="btn_clear_history">Clear history</string>
+    <string name="btn_yes">Yes</string>
+    <string name="btn_no">No</string>
 
 </resources>

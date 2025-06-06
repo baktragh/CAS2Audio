@@ -1,7 +1,9 @@
 package com.baktra.cas2audio;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -399,8 +401,23 @@ public class MainActivity extends Activity {
     }
 
     public final void onEraseHistory(android.view.View view) {
-        this.recentItems.clear();
-        updateRecentItemsUI();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setPositiveButton(R.string.btn_yes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                MainActivity.this.recentItems.clear();
+                updateRecentItemsUI();
+            }
+        });
+        builder.setNegativeButton(R.string.btn_no, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+            }
+        });
+
+        builder.setMessage(R.string.btn_clear_history);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
     }
 
 
