@@ -27,4 +27,6 @@
     <string name="btn_clear_history">Wymaż historię</string>
     <string name="btn_yes">Tak</string>
     <string name="btn_no">Nie</string>
+    <string name="lbl_messages">Wiadomości</string>
+    <string name="lbl_recent_tape_images">Ostatnie obrazy taśmy</string>
 </resources>

@@ -140,7 +140,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="8dp"
-            android:text="Recent tape images"
+            android:text="@string/lbl_recent_tape_images"
             android:textAlignment="viewStart"
             android:textStyle="bold" />
 
@@ -163,7 +163,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="8dp"
-            android:text="Messages"
+            android:text="@string/lbl_messages"
             android:textStyle="bold" />
 
         <TextView

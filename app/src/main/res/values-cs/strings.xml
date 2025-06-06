@@ -27,4 +27,6 @@
     <string name="btn_clear_history">Vymazat historii</string>
     <string name="btn_yes">Ano</string>
     <string name="btn_no">Ne</string>
+    <string name="lbl_messages">Zprávy</string>
+    <string name="lbl_recent_tape_images">Poslední obrazy kazet</string>
 </resources>

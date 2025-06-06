@@ -26,5 +26,7 @@
     <string name="btn_clear_history">Clear history</string>
     <string name="btn_yes">Yes</string>
     <string name="btn_no">No</string>
+    <string name="lbl_messages">Messages</string>
+    <string name="lbl_recent_tape_images">Recent tape images</string>
 
 </resources>
