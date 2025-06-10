@@ -28,5 +28,7 @@
     <string name="btn_no">No</string>
     <string name="lbl_messages">Messages</string>
     <string name="lbl_recent_tape_images">Recent tape images</string>
+    <string name="btn_ok">OK</string>
+    <string name="msg_notape_image">The selected file is not a tape image</string>
 
 </resources>

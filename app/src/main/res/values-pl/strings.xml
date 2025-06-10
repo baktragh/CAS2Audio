@@ -29,4 +29,6 @@
     <string name="btn_no">Nie</string>
     <string name="lbl_messages">Wiadomości</string>
     <string name="lbl_recent_tape_images">Ostatnie obrazy taśmy</string>
+    <string name="btn_ok">OK</string>
+    <string name="msg_notape_image">Wybrany plik nie jest obrazem taśmy</string>
 </resources>

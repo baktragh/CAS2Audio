@@ -17,8 +17,11 @@ import android.widget.*;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.baktra.cas2audio.tapeimage.TapeImage;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -218,17 +221,54 @@ public class MainActivity extends Activity {
                 this.userSettings = (UserSettings) data.getSerializableExtra("user_settings");
             }
         }
+
         /*Handle .CAS file pickup*/
         else if (requestCode==PICK_CAS_FILE && resultCode==Activity.RESULT_OK) {
             if (data != null) {
-                Uri uri = data.getData();
-                /*Get permissions for that URI*/
-                getContentResolver().takePersistableUriPermission(uri,Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                Uri candidateUri = data.getData();
 
-                if (uri!=null) {
-                    currentUri=uri;
-                    updateUIForFile();
+                /*If no URI, just be done*/
+                if (candidateUri==null) return;
+
+                /*Get permissions for that URI*/
+                getContentResolver().takePersistableUriPermission(candidateUri,Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                /*Check if valid tape image*/
+                /*Try to open the tape image - short, can be in  the even thread*/
+                InputStream iStream=null;
+
+                try  {
+                    iStream = getContentResolver().openInputStream(candidateUri);
+                    TapeImage ti = new TapeImage();
+                    ti.parse(iStream);
+
+                } catch (Exception e) {
+                    candidateUri=null;
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                        }
+                    });
+                    builder.setMessage(String.format("%s%n%s",getString(R.string.msg_notape_image),Utils.getExceptionMessage(e)));
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
                 }
+
+                finally {
+                    try {
+                        if (iStream != null) iStream.close();
+                    }
+                    catch(IOException ioe) {
+                        /*Nothing we can do*/
+                    }
+
+                    /*Update the user interface*/
+                    if (candidateUri!=null) {
+                        currentUri=candidateUri;
+                        updateUIForFile();
+                    }
+                }
+
             }
 
         }
