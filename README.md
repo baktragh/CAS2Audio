@@ -3,14 +3,14 @@ Play back tape images for 8-bit Atari computers on mobile devices with Android.
 
 ## Overview
 
-* CAS2Audio allows you to play back Atari 8-bit tape images (.cas) files on small portable devices (phones, tablets) running Android. Full description of the tape image format is available at http://a8cas.sourceforge.net/format-cas.html
-* CAS2Audio is a satellite project of TURGEN - http://turgen.sourceforge.net/
+* CAS2Audio allows you to play back Atari 8-bit tape images (.cas) files on small portable devices (phones, tablets) running Android. Full description of the tape image format is available at https://a8cas.sourceforge.io/format-cas.html
+* CAS2Audio is a satellite project of TURGEN - https://turgen.sourceforge.io/
 
 ### Highlights
 
 * The signal is generated on-the-fly (no temporary wave files)
-* Standard records (FUJI,baud,data,fsk)
-* Turbo records (pwms,pwmc,pwmd,pwml)
+* Standard records (FUJI, baud, data, fsk)
+* Turbo records (pwms, pwmc, pwmd, pwml)
 * 44100 Hz and 48000 Hz sampling rates
 * Mono or Stereo output
 * For turbo records, you can choose waveform - sine wave or square wave
