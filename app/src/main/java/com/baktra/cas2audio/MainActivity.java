@@ -64,9 +64,9 @@ public class MainActivity extends Activity {
         playBackViewsDisabled.add(findViewById(R.id.btnPlay));
         playBackViewsDisabled.add(findViewById(R.id.sbVolume));
         playBackViewsDisabled.add(findViewById(R.id.tvAmplitude));
-        playBackViewsDisabled.add(findViewById(R.id.lvRecentItems));
+        //playBackViewsDisabled.add(findViewById(R.id.lvRecentItems));
         playBackViewsDisabled.add(findViewById(R.id.btnSettings));
-        playBackViewsDisabled.add(findViewById(R.id.btnClearHistory));
+        //playBackViewsDisabled.add(findViewById(R.id.btnClearHistory));
 
         /*Widgets to be enabled during playback*/
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
@@ -83,14 +83,14 @@ public class MainActivity extends Activity {
         }
 
         /*Allow the Recent items to be clicked*/
-        ListView lv = (ListView) findViewById(R.id.lvRecentItems);
+        /*ListView lv = (ListView) findViewById(R.id.lvRecentItems);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 currentUri = recentItems.get(i).uri;
                 updateUIForFile();
             }
-        });
+        });*/
 
 
     }
@@ -99,7 +99,7 @@ public class MainActivity extends Activity {
     protected final void onResume() {
 
         super.onResume();
-        TextView msgText = getMessageWidget();
+        //TextView msgText = getMessageWidget();
 
         /*If playback in progress, keep components as they were*/
         if (playbackInProgress) return;
@@ -120,7 +120,7 @@ public class MainActivity extends Activity {
             /*There was some intent, but no valid path selected.*/
             else {
                 setCurrentFileName("CAS2Audio 1.0.5");
-                msgText.setText(R.string.msg_notape);
+                //msgText.setText(R.string.msg_notape);
                 setPlayBackViewsEnabled(false);
                 currentUri = null;
             }
@@ -147,8 +147,6 @@ public class MainActivity extends Activity {
 
     public final void onPlay(View v) {
 
-        /*Clear text and progress*/
-        getMessageWidget().setText("");
         getProgressBar().setProgress(0);
 
         int[] instructions;
@@ -156,17 +154,16 @@ public class MainActivity extends Activity {
 
         /*Check if anything was selected*/
         if (currentUri == null) {
-            getMessageWidget().setText(R.string.msg_nothing_to_play);
+            displaySimpleAlert("",getResources().getString(R.string.msg_nothing_to_play));
             return;
         }
-
 
         /*Try to open the tape image - short, can be in  the even thread*/
         try {
             iStream = getContentResolver().openInputStream(currentUri);
 
         } catch (Exception e) {
-            getMessageWidget().setText(R.string.msg_unable_to_open + ":" + LN_SP + Utils.getExceptionMessage(e));
+            displaySimpleAlert("",getResources().getString(R.string.msg_unable_to_open)+":" + LN_SP + Utils.getExceptionMessage(e));
             return;
         }
 
@@ -177,7 +174,7 @@ public class MainActivity extends Activity {
             TapeImageProcessor tip = new TapeImageProcessor();
             instructions = tip.convertItem(iStream, sampleRate, false);
         } catch (Exception e) {
-            getMessageWidget().setText(R.string.msg_unable_to_process + ":" + LN_SP + Utils.getExceptionMessage(e));
+            displaySimpleAlert("",getResources().getString(R.string.msg_unable_to_process)+":" + LN_SP + Utils.getExceptionMessage(e));
             return;
         }
 
@@ -185,7 +182,7 @@ public class MainActivity extends Activity {
         try {
             casTask = new CasTask(instructions, this, !userSettings.isDoMono(), userSettings.isDoSquareWave(), getVolume(), sampleRate, userSettings.isDoInvertPolarity());
         } catch (Exception e) {
-            getMessageWidget().setText(Utils.getExceptionMessage(e));
+            displaySimpleAlert("",Utils.getExceptionMessage(e));
         }
         /*Execute the task*/
         casTask.execute();
@@ -303,7 +300,6 @@ public class MainActivity extends Activity {
         String filename = extractFileNameFromURI(currentUri);
         setCurrentFileName(filename);
         setPlayBackViewsEnabled(false);
-        getMessageWidget().setText("");
         addRecentItem(currentUri,filename);
     }
 
@@ -329,13 +325,13 @@ public class MainActivity extends Activity {
     }
 
     void updateRecentItemsUI() {
-        ListView lvRecentItems = (ListView) findViewById(R.id.lvRecentItems);
-        lvRecentItems.setAdapter(new ArrayAdapter<RecentItem>(this, R.layout.list_text, recentItems));
+        //ListView lvRecentItems = (ListView) findViewById(R.id.lvRecentItems);
+        //lvRecentItems.setAdapter(new ArrayAdapter<RecentItem>(this, R.layout.list_text, recentItems));
     }
 
-    private TextView getMessageWidget() {
+    /*private TextView getMessageWidget() {
         return ((TextView) findViewById(R.id.mltMessages));
-    }
+    }*/
 
     private int getVolume() {
         return ((SeekBar) findViewById(R.id.sbVolume)).getProgress();
@@ -345,8 +341,8 @@ public class MainActivity extends Activity {
         return ((ProgressBar) findViewById(R.id.pbProgress));
     }
 
-    private Button getBrowseButton() {
-        return ((Button) findViewById(R.id.btnBrowse));
+    private ImageButton getBrowseButton() {
+        return ((ImageButton) findViewById(R.id.btnBrowse));
     }
 
     private void setCurrentFileName(String filename) {
@@ -367,11 +363,11 @@ public class MainActivity extends Activity {
     }
 
     final void setErrorText(String s) {
-        getMessageWidget().setText(s);
+        displaySimpleAlert("",s);
     }
 
     public final void setErrorText(int msgId) {
-        getMessageWidget().setText(msgId);
+        setErrorText(getResources().getString(msgId));
     }
 
     final void setProgressBar(int value) {
@@ -440,25 +436,40 @@ public class MainActivity extends Activity {
 
     }
 
-    public final void onEraseHistory(android.view.View view) {
+    private void displaySimpleAlert(String title, String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setPositiveButton(R.string.btn_yes, new DialogInterface.OnClickListener() {
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                MainActivity.this.recentItems.clear();
-                updateRecentItemsUI();
+                dialog.dismiss();
             }
         });
-        builder.setNegativeButton(R.string.btn_no, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-            }
-        });
-
-        builder.setMessage(R.string.btn_clear_history);
 
         AlertDialog dialog = builder.create();
         dialog.show();
-
     }
+
+
+//    public final void onEraseHistory(android.view.View view) {
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setPositiveButton(R.string.btn_yes, new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface dialog, int id) {
+//                MainActivity.this.recentItems.clear();
+//                updateRecentItemsUI();
+//            }
+//        });
+//        builder.setNegativeButton(R.string.btn_no, new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface dialog, int id) {
+//            }
+//        });
+//
+//        builder.setMessage(R.string.btn_clear_history);
+//
+//        AlertDialog dialog = builder.create();
+//        dialog.show();
+//
+//    }
 
 
 }

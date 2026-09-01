@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
 
     android:layout_width="match_parent"
@@ -13,6 +14,15 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:cropToPadding="false"
+            android:rotation="180"
+            android:src="@drawable/tapecassette" />
+
         <ProgressBar
             android:id="@+id/pbProgress"
             style="?android:attr/progressBarStyleHorizontal"
@@ -23,48 +33,6 @@
             android:max="100"
             android:padding="5dp"
             android:progress="0" />
-
-        <View
-            android:id="@+id/divider5"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnPlay"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:drawableStart="@android:drawable/ic_media_play"
-                android:drawableLeft="@android:drawable/ic_media_play"
-                android:onClick="onPlay"
-                android:padding="2dp"
-                android:text="@string/btn_play" />
-
-            <Button
-                android:id="@+id/btnStop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:drawableStart="@android:drawable/ic_media_pause"
-                android:drawableLeft="@android:drawable/ic_media_pause"
-                android:enabled="false"
-                android:onClick="onStopPlaying"
-                android:padding="2dp"
-                android:text="@string/btn_stop" />
-
-        </LinearLayout>
-
-        <View
-            android:id="@+id/divider2"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="?android:attr/listDivider" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -89,93 +57,56 @@
                 android:progress="5" />
         </LinearLayout>
 
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
         <View
-            android:id="@+id/divider4"
+            android:id="@+id/divider5"
             android:layout_width="match_parent"
-            android:layout_height="2dp"
+            android:layout_height="1dp"
             android:background="?android:attr/listDivider" />
-
-        <Button
-            android:id="@+id/btnBrowse"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="onBrowseTapeImage"
-            android:text="@string/btn_browse" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <Button
+            <ImageButton
+                android:id="@+id/btnPlay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onPlay"
+                android:src="@android:drawable/ic_media_play" />
+
+            <ImageButton
+                android:id="@+id/btnStop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onStopPlaying"
+                android:src="@android:drawable/ic_media_pause" />
+
+            <ImageButton
+                android:id="@+id/btnBrowse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onBrowseTapeImage"
+                android:src="@android:drawable/ic_menu_more" />
+
+            <ImageButton
+                android:id="@+id/btnRecent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@android:drawable/btn_star" />
+
+            <ImageButton
                 android:id="@+id/btnSettings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:onClick="onSettings"
-                android:text="@string/btn_settings" />
-
-            <Button
-                android:id="@+id/btnClearHistory"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="onEraseHistory"
-                android:text="@string/btn_clear_history" />
-
+                android:src="@android:drawable/ic_menu_manage" />
         </LinearLayout>
-
-        <View
-            android:id="@+id/divider3"
-            android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:background="?android:attr/listDivider" />
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="8dp"
-            android:text="@string/lbl_recent_tape_images"
-            android:textAlignment="viewStart"
-            android:textStyle="bold" />
-
-        <ListView
-            android:id="@+id/lvRecentItems"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp">
-
-        </ListView>
-
-        <View
-            android:id="@+id/divider"
-            android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:background="?android:attr/listDivider" />
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="8dp"
-            android:text="@string/lbl_messages"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/mltMessages"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:ems="10"
-            android:gravity="start|top"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:textIsSelectable="true" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
