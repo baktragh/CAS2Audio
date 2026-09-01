@@ -87,8 +87,6 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         if (lastException != null) {
             parentActivity.get().setErrorText(Utils.getExceptionMessage(lastException));
             lastException.printStackTrace();
-        } else {
-            parentActivity.get().setErrorText(R.string.msg_proc_ok);
         }
         parentActivity.get().setPlaybackInProgress(false);
     }
