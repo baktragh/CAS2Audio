@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -34,6 +35,16 @@ public class RecentActivity extends Activity implements AdapterView.OnItemClickL
         recentItems = new ArrayList<>();
         RecentItem.parsePersistenceString((String)getIntent().getSerializableExtra("recent_items"),recentItems);
         setUI();
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void setUI() {

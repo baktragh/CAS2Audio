@@ -52,6 +52,7 @@ public class MainActivity extends Activity {
         lastChooserDirectory = null;
         recentItems = new ArrayList<>();
         userSettings = new UserSettings();
+
     }
 
     @Override
@@ -79,16 +80,8 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
 
-        /*Allow the Recent items to be clicked*/
-        /*ListView lv = (ListView) findViewById(R.id.lvRecentItems);
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                currentUri = recentItems.get(i).uri;
-                updateUIForFile();
-            }
-        });*/
-
+        /*Set the title*/
+        setTitle("CAS2Audio 1.0.5");
 
     }
 
@@ -96,7 +89,7 @@ public class MainActivity extends Activity {
     protected final void onResume() {
 
         super.onResume();
-        setTitle("CAS2Audio 1.0.5");
+
 
         /*If playback in progress, keep components as they were*/
         if (playbackInProgress) return;
@@ -107,7 +100,7 @@ public class MainActivity extends Activity {
             Intent intent = getIntent();
             Uri u = intent.getData();
 
-            /*Valid path selected*/
+            /*Valid path selected with intent*/
             if (u != null && u.toString() != null) {
                 String filename = extractFileNameFromURI(u);
                 setCurrentFileName(filename);
@@ -205,6 +198,28 @@ public class MainActivity extends Activity {
         intent.putExtra("recent_items", RecentItem.createPersistenceString(recentItems));
         startActivityForResult(intent, OPEN_RECENT);
     }
+
+    /*Browse for a tape image*/
+    public final void onBrowseTapeImage(android.view.View view) {
+
+        /*First, stop playing, this will set the controls*/
+        onStopPlaying(view);
+
+        /*Ask for document selection*/
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        if (lastChooserDirectory!=null && lastChooserDirectory.exists() && lastChooserDirectory.isDirectory()) {
+            Uri pickerInitialUri = Uri.fromFile(lastChooserDirectory);
+            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
+        }
+        startActivityForResult(intent, PICK_CAS_FILE);
+
+    }
     private static final int PICK_CAS_FILE = 102;
     private static final int OPEN_SETTINGS =103;
     private static final int OPEN_RECENT = 104;
@@ -276,28 +291,7 @@ public class MainActivity extends Activity {
     }
 
 
-    /*Browse for a tape image*/
-    public final void onBrowseTapeImage(android.view.View view) {
 
-        /*First, stop playing, this will set the controls*/
-        onStopPlaying(view);
-
-        /*Ask for document selection*/
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("*/*");
-
-        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-        if (lastChooserDirectory!=null && lastChooserDirectory.exists() && lastChooserDirectory.isDirectory()) {
-            Uri pickerInitialUri = Uri.fromFile(lastChooserDirectory);
-            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
-        }
-
-        startActivityForResult(intent, PICK_CAS_FILE);
-
-    }
 
     void updateUIForFile() {
         String filename = extractFileNameFromURI(currentUri);

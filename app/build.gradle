@@ -9,10 +9,10 @@ android {
         minSdk 29
         //noinspection ExpiredTargetSdkVersion,OldTargetApi
         targetSdkVersion 29
-        versionName '1.0.4'
+        versionName '1.0.5'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug
-        versionCode = 14
+        versionCode = 15
     }
     buildTypes {
         release {
