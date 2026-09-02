@@ -11,11 +11,14 @@ class UserSettings implements Serializable {
     private boolean doSquareWave = false;
     private boolean doInvertPolarity = false;
 
-    public UserSettings(final boolean doMono, final boolean do48kHz, final boolean doSquareWave, final boolean doInvertPolarity) {
+    private int amplitude = 50;
+
+    public UserSettings(final boolean doMono, final boolean do48kHz, final boolean doSquareWave, final boolean doInvertPolarity, final int amplitude) {
         this.doMono = doMono;
         this.do48kHz = do48kHz;
         this.doSquareWave = doSquareWave;
         this.doInvertPolarity = doInvertPolarity;
+        this.amplitude=amplitude;
     }
 
     public UserSettings() {
@@ -38,6 +41,8 @@ class UserSettings implements Serializable {
         return this.doInvertPolarity;
     }
 
+    public int getAmplitude() {return this.amplitude;}
+
     public void setDoMono(final boolean doMono) {
         this.doMono = doMono;
     }
@@ -54,6 +59,8 @@ class UserSettings implements Serializable {
         this.doInvertPolarity = doInvertPolarity;
     }
 
+    public void setAmplitude(final int amplitude) {this.amplitude = amplitude;}
+
     public static UserSettings createFromPersistentStorage(SharedPreferences sPref) {
         UserSettings s = new UserSettings();
 
@@ -61,6 +68,7 @@ class UserSettings implements Serializable {
         s.doMono = sPref.getBoolean("c2a_mono", false);
         s.doSquareWave = sPref.getBoolean("c2a_square", false);
         s.doInvertPolarity = sPref.getBoolean("c2a_invert_pulses", false);
+        s.amplitude = sPref.getInt("c2a_amplitude",50);
 
         return s;
     }
@@ -72,11 +80,12 @@ class UserSettings implements Serializable {
         editor.putBoolean("c2a_mono", s.doMono);
         editor.putBoolean("c2a_square", s.doSquareWave);
         editor.putBoolean("c2a_invert_pulses", s.doInvertPolarity);
+        editor.putInt("c2a_amplitude",s.amplitude);
         editor.apply();
     }
 
     public String toString() {
-        return "Settings:" + do48kHz + "," + doMono + "," + doSquareWave + "," + doInvertPolarity;
+        return "Settings:" + do48kHz + "," + doMono + "," + doSquareWave + "," + doInvertPolarity+","+amplitude;
 
     }
 }

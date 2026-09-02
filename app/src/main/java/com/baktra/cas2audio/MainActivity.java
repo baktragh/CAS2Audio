@@ -62,11 +62,8 @@ public class MainActivity extends Activity {
         /*Widgets to be disabled during playback*/
         playBackViewsDisabled.add(getBrowseButton());
         playBackViewsDisabled.add(findViewById(R.id.btnPlay));
-        playBackViewsDisabled.add(findViewById(R.id.sbVolume));
-        playBackViewsDisabled.add(findViewById(R.id.tvAmplitude));
-        //playBackViewsDisabled.add(findViewById(R.id.lvRecentItems));
+        playBackViewsDisabled.add(findViewById(R.id.btnRecent));
         playBackViewsDisabled.add(findViewById(R.id.btnSettings));
-        //playBackViewsDisabled.add(findViewById(R.id.btnClearHistory));
 
         /*Widgets to be enabled during playback*/
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
@@ -99,7 +96,7 @@ public class MainActivity extends Activity {
     protected final void onResume() {
 
         super.onResume();
-        //TextView msgText = getMessageWidget();
+        setTitle("CAS2Audio 1.0.5");
 
         /*If playback in progress, keep components as they were*/
         if (playbackInProgress) return;
@@ -119,8 +116,7 @@ public class MainActivity extends Activity {
             }
             /*There was some intent, but no valid path selected.*/
             else {
-                setCurrentFileName("CAS2Audio 1.0.5");
-                //msgText.setText(R.string.msg_notape);
+                setCurrentFileName(getResources().getString(R.string.msg_notape));
                 setPlayBackViewsEnabled(false);
                 currentUri = null;
             }
@@ -203,8 +199,15 @@ public class MainActivity extends Activity {
         startActivityForResult(intent, OPEN_SETTINGS);
     }
 
+    public final void onRecent(View v) {
+        Intent intent = new Intent(this, RecentActivity.class);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.putExtra("recent_items", RecentItem.createPersistenceString(recentItems));
+        startActivityForResult(intent, OPEN_RECENT);
+    }
     private static final int PICK_CAS_FILE = 102;
     private static final int OPEN_SETTINGS =103;
+    private static final int OPEN_RECENT = 104;
 
 
     protected final void onActivityResult(int requestCode,
@@ -220,7 +223,7 @@ public class MainActivity extends Activity {
         }
 
         /*Handle .CAS file pickup*/
-        else if (requestCode==PICK_CAS_FILE && resultCode==Activity.RESULT_OK) {
+        else if ((requestCode==PICK_CAS_FILE || requestCode==OPEN_RECENT) && resultCode==Activity.RESULT_OK) {
             if (data != null) {
                 Uri candidateUri = data.getData();
 
@@ -320,21 +323,9 @@ public class MainActivity extends Activity {
         /*Move to front*/
         recentItems.add(0, candidateItem);
         if (recentItems.size() > 12) recentItems.remove(11);
-        updateRecentItemsUI();
-
     }
-
-    void updateRecentItemsUI() {
-        //ListView lvRecentItems = (ListView) findViewById(R.id.lvRecentItems);
-        //lvRecentItems.setAdapter(new ArrayAdapter<RecentItem>(this, R.layout.list_text, recentItems));
-    }
-
-    /*private TextView getMessageWidget() {
-        return ((TextView) findViewById(R.id.mltMessages));
-    }*/
-
     private int getVolume() {
-        return ((SeekBar) findViewById(R.id.sbVolume)).getProgress();
+        return userSettings.getAmplitude();
     }
 
     private ProgressBar getProgressBar() {
@@ -346,7 +337,8 @@ public class MainActivity extends Activity {
     }
 
     private void setCurrentFileName(String filename) {
-        setTitle(filename);
+        TextView tv = (TextView) findViewById(R.id.tvTapeImageName);
+        tv.setText(filename);
     }
 
     final void setPlaybackInProgress(boolean b) {
@@ -403,8 +395,6 @@ public class MainActivity extends Activity {
 
     private void restorePreferences() {
         SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
-        SeekBar volume = findViewById(R.id.sbVolume);
-        volume.setProgress(sPref.getInt("c2a_volume", 5));
         lastChooserDirectory = new File(sPref.getString("c2a_last_dir", ""));
         try {
             RecentItem.parsePersistenceString(sPref.getString("c2a_recents", ""), recentItems);
@@ -412,18 +402,15 @@ public class MainActivity extends Activity {
         catch (Exception e) {
             recentItems.clear();
         }
-        updateRecentItemsUI();
         userSettings = UserSettings.createFromPersistentStorage(sPref);
     }
 
     private void storePreferences() {
 
         SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
-        SeekBar volume = findViewById(R.id.sbVolume);
         SharedPreferences.Editor editor = sPref.edit();
 
         /*Current state of the UI*/
-        editor.putInt("c2a_volume", (byte) volume.getProgress());
         if (lastChooserDirectory != null) {
             editor.putString("c2a_last_dir", lastChooserDirectory.getAbsolutePath());
         }
@@ -450,26 +437,6 @@ public class MainActivity extends Activity {
         dialog.show();
     }
 
-
-//    public final void onEraseHistory(android.view.View view) {
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//        builder.setPositiveButton(R.string.btn_yes, new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int id) {
-//                MainActivity.this.recentItems.clear();
-//                updateRecentItemsUI();
-//            }
-//        });
-//        builder.setNegativeButton(R.string.btn_no, new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int id) {
-//            }
-//        });
-//
-//        builder.setMessage(R.string.btn_clear_history);
-//
-//        AlertDialog dialog = builder.create();
-//        dialog.show();
-//
-//    }
 
 
 }

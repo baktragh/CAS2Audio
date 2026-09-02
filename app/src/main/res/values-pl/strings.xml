@@ -15,7 +15,7 @@
     <string name="msg_unable_to_process">Błąd przetwarzania obrazu taśmy</string>
     <string name="msg_unable_to_open">Błąd otwierania obrazu taśmy</string>
     <string name="msg_nothing_to_play">Nie można odtworzyć. Nie wybrano obrazu taśmy.</string>
-    <string name="msg_notape">Nie wybrano obrazu taśmy. Kliknij \'Otwórz obraz taśmy&#8230;\'</string>
+    <string name="msg_notape">Nie wybrano obrazu taśmy</string>
     <string name="msg_proc_ok">Zakończono przetwarzanie obrazu taśmy</string>
     <string name="msg_proc_cancel">Anulowano przetwarzanie obrazu taśmy</string>
     <string name="lbl_short_leader">Skróć sygnał pilota (normal)</string>
@@ -28,7 +28,7 @@
     <string name="btn_yes">Tak</string>
     <string name="btn_no">Nie</string>
     <string name="lbl_messages">Wiadomości</string>
-    <string name="lbl_recent_tape_images">Ostatnie obrazy taśmy</string>
+    <string name="tit_recent">Ostatnie obrazy taśmy</string>
     <string name="btn_ok">OK</string>
     <string name="msg_notape_image">Wybrany plik nie jest obrazem taśmy</string>
 </resources>

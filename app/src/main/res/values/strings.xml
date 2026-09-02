@@ -8,7 +8,7 @@
     <string name="lbl_48kHz">48 kHz</string>
     <string name="lbl_amplitude">Amplitude:</string>
     <string name="lbl_app_title">CAS2Audio</string>
-    <string name="msg_notape">No tape image selected. Click the \'Browse for tape image&#8230;\' button to select one.</string>
+    <string name="msg_notape">No tape image selected</string>
     <string name="msg_nothing_to_play">Unable to play. No tape image selected.</string>
     <string name="msg_unable_to_open">Unable to open the tape image</string>
     <string name="msg_unable_to_process">Unable to process the tape image</string>
@@ -27,7 +27,7 @@
     <string name="btn_yes">Yes</string>
     <string name="btn_no">No</string>
     <string name="lbl_messages">Messages</string>
-    <string name="lbl_recent_tape_images">Recent tape images</string>
+    <string name="tit_recent">Recent tape images</string>
     <string name="btn_ok">OK</string>
     <string name="msg_notape_image">The selected file is not a tape image</string>
 
