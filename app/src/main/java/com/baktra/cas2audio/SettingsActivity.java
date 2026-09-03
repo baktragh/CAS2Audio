@@ -18,12 +18,12 @@ public class SettingsActivity extends Activity {
     }
 
     @Override
-    protected final void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
     }
 
-    protected final void onResume() {
+    protected void onResume() {
         super.onResume();
         userSettings = (UserSettings) getIntent().getSerializableExtra("user_settings");
         setUI();
@@ -42,7 +42,7 @@ public class SettingsActivity extends Activity {
         setUI();
     }
 
-    protected final void onDestroy() {
+    protected void onDestroy() {
         super.onDestroy();
     }
 
@@ -57,7 +57,7 @@ public class SettingsActivity extends Activity {
         }
     }
 
-    private final void setUI() {
+    private void setUI() {
 
         Switch s48Khz = findViewById(R.id.sw48kHz);
         Switch sMono = findViewById(R.id.swChannels);
@@ -73,7 +73,7 @@ public class SettingsActivity extends Activity {
 
     }
 
-    private final void flushUIToSettings() {
+    private void flushUIToSettings() {
         Switch s48Khz = findViewById(R.id.sw48kHz);
         Switch sMono = findViewById(R.id.swChannels);
         Switch sInvertPulses = findViewById(R.id.swInvertPulses);

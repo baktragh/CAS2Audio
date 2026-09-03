@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -40,7 +41,7 @@ public class MainActivity extends Activity {
 
     public MainActivity() {
         super();
-        LN_SP = System.getProperty("line.separator");
+        LN_SP = System.lineSeparator();
         casTask = null;
         currentUri = null;
         playbackInProgress = false;
@@ -53,7 +54,7 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected final void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -83,7 +84,7 @@ public class MainActivity extends Activity {
     }
 
 
-    protected final void onResume() {
+    protected void onResume() {
 
         super.onResume();
 
@@ -98,7 +99,7 @@ public class MainActivity extends Activity {
             Uri u = intent.getData();
 
             /*Valid path selected with intent*/
-            if (u != null && u.toString() != null) {
+            if (u != null) {
                 String filename = extractFileNameFromURI(u);
                 setCurrentFileName(filename);
                 setPlayBackViewsEnabled(false);
@@ -119,19 +120,19 @@ public class MainActivity extends Activity {
 
     }
 
-    protected final void onStop() {
+    protected void onStop() {
         super.onStop();
         storePreferences();
     }
 
-    protected final void onDestroy() {
+    protected void onDestroy() {
         super.onDestroy();
         if (casTask != null) {
             casTask.cancel(true);
         }
     }
 
-    public final void onPlay(View v) {
+    public void onPlay(View v) {
 
         getProgressBar().setProgress(0);
 
@@ -173,23 +174,24 @@ public class MainActivity extends Activity {
         /*Execute the task*/
         casTask.execute();
         setPlaybackInProgress(true);
+        changeTapePicture(true);
 
     }
 
-    public final void onStopPlaying(View v) {
+    public void onStopPlaying(View v) {
         if (casTask != null) {
             casTask.cancel(true);
         }
     }
 
-    public final void onSettings(View v) {
+    public void onSettings(View v) {
         Intent intent = new Intent(this, SettingsActivity.class);
         intent.setAction(Intent.ACTION_GET_CONTENT);
         intent.putExtra("user_settings", this.userSettings);
         startActivityForResult(intent, OPEN_SETTINGS);
     }
 
-    public final void onRecent(View v) {
+    public void onRecent(View v) {
         Intent intent = new Intent(this, RecentActivity.class);
         intent.setAction(Intent.ACTION_GET_CONTENT);
         intent.putExtra("recent_items", RecentItem.createPersistenceString(recentItems));
@@ -197,7 +199,7 @@ public class MainActivity extends Activity {
     }
 
     /*Browse for a tape image*/
-    public final void onBrowseTapeImage(android.view.View view) {
+    public void onBrowseTapeImage(android.view.View view) {
 
         /*First, stop playing, this will set the controls*/
         onStopPlaying(view);
@@ -222,9 +224,9 @@ public class MainActivity extends Activity {
     private static final int OPEN_RECENT = 104;
 
 
-    protected final void onActivityResult(int requestCode,
-                                          int resultCode,
-                                          Intent data) {
+    protected void onActivityResult(int requestCode,
+                                    int resultCode,
+                                    Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         /*Handle the settings activity*/
@@ -321,23 +323,42 @@ public class MainActivity extends Activity {
     }
 
     private ProgressBar getProgressBar() {
-        return ((ProgressBar) findViewById(R.id.pbProgress));
+        return findViewById(R.id.pbProgress);
     }
 
     private ImageButton getBrowseButton() {
-        return ((ImageButton) findViewById(R.id.btnBrowse));
+        return findViewById(R.id.btnBrowse);
     }
 
     private void setCurrentFileName(String filename) {
-        TextView tv = (TextView) findViewById(R.id.tvTapeImageName);
+        TextView tv = findViewById(R.id.tvTapeImageName);
         tv.setText(filename);
     }
 
-    final void setPlaybackInProgress(boolean b) {
+    void setPlaybackInProgress(boolean b) {
         playbackInProgress = b;
     }
 
-    final void setPlayBackViewsEnabled(boolean b) {
+    void changeTapePicture(boolean isActive) {
+
+        ImageView iv = findViewById(R.id.ivCassette);
+
+        if (isActive) {
+            iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation));
+            AnimationDrawable ad = (AnimationDrawable)iv.getDrawable();
+            ad.start();
+        }
+        else {
+            iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation));
+            if (iv.getDrawable() instanceof AnimationDrawable) {
+                AnimationDrawable ad = (AnimationDrawable) iv.getDrawable();
+                ad.stop();
+            }
+            iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_inactive));
+        }
+    }
+
+    void setPlayBackViewsEnabled(boolean b) {
         for (View v : playBackViewsDisabled) {
             v.setEnabled(!b);
         }
@@ -346,11 +367,11 @@ public class MainActivity extends Activity {
         }
     }
 
-    public final void displayPostTaskAlert(int titleId, String msg) {
+    public void displayPostTaskAlert(int titleId, String msg) {
         displaySimpleAlert(getResources().getString(titleId),msg);
     }
 
-    final void setProgressBar(int value) {
+    void setProgressBar(int value) {
         getProgressBar().setProgress(value);
     }
 
@@ -361,7 +382,7 @@ public class MainActivity extends Activity {
         if (uri.getScheme()!=null && uri.getScheme().equals("content")) {
             Cursor cursor = getContentResolver().query(uri, null, null, null, null);
             try {
-                if (cursor != null && cursor.moveToFirst()) {
+                if (cursor != null && cursor.moveToFirst() &&cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)>=0) {
                     result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
                 }
             } finally {
@@ -377,7 +398,7 @@ public class MainActivity extends Activity {
 
     }
 
-    public final PowerManager getPowerManager() {
+    public PowerManager getPowerManager() {
         return powerManager;
     }
 

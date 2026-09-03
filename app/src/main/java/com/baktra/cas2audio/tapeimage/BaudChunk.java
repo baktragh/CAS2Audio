@@ -44,29 +44,29 @@ public class BaudChunk implements TapeImageChunk {
     }
 
     @Override
-    public final String getType() {
+    public String getType() {
         return type;
     }
 
     @Override
-    public final int getLength() {
+    public int getLength() {
         return length;
     }
 
     @Override
-    public final int[] getData() {
+    public int[] getData() {
         return data;
     }
 
     @Override
-    public final boolean isGeneratedUsingParent() {
+    public boolean isGeneratedUsingParent() {
         return false;
     }
 
     /**
      * @return
      */
-    public final int getBaudRate() {
+    public int getBaudRate() {
         return baudRate;
     }
 
@@ -76,7 +76,7 @@ public class BaudChunk implements TapeImageChunk {
      * @throws Exception
      */
     @Override
-    public final void readFromStream(InputStream s) throws Exception {
+    public void readFromStream(InputStream s) throws Exception {
 
         /*Read length and baud rate*/
         int lengthLo = s.read();
@@ -108,7 +108,7 @@ public class BaudChunk implements TapeImageChunk {
      * @throws Exception
      */
     @Override
-    public final void writeToStream(java.io.DataOutputStream s) throws Exception {
+    public void writeToStream(java.io.DataOutputStream s) throws Exception {
         s.writeBytes("baud");
         s.write(length % 256);
         s.write(length / 256);
@@ -124,12 +124,12 @@ public class BaudChunk implements TapeImageChunk {
      * @return
      */
     @Override
-    public final String toString() {
+    public String toString() {
         return "baud: [" + baudRate + " bd] (" + length + ")";
     }
 
     @Override
-    public final TapeImageChunk getParent() {
+    public TapeImageChunk getParent() {
         return null;
     }
 
@@ -138,7 +138,7 @@ public class BaudChunk implements TapeImageChunk {
      * @param newAuxValue
      */
     @Override
-    public final void setAux(int newAuxValue) {
+    public void setAux(int newAuxValue) {
         baudRate = newAuxValue;
     }
 

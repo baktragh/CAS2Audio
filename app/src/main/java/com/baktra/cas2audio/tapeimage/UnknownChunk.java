@@ -24,22 +24,22 @@ public class UnknownChunk implements TapeImageChunk {
     }
 
     @Override
-    public final String getType() {
+    public String getType() {
         return type;
     }
 
     @Override
-    public final int getLength() {
+    public int getLength() {
         return length;
     }
 
     @Override
-    public final int[] getData() {
+    public int[] getData() {
         return data;
     }
 
     @Override
-    public final boolean isGeneratedUsingParent() {
+    public boolean isGeneratedUsingParent() {
         return false;
     }
 
@@ -48,7 +48,7 @@ public class UnknownChunk implements TapeImageChunk {
      * @throws Exception
      */
     @Override
-    public final void readFromStream(InputStream s) throws Exception {
+    public void readFromStream(InputStream s) throws Exception {
 
         /*Read length and aux*/
         int lengthLo = s.read();
@@ -80,7 +80,7 @@ public class UnknownChunk implements TapeImageChunk {
      * @throws Exception
      */
     @Override
-    public final void writeToStream(java.io.DataOutputStream s) throws Exception {
+    public void writeToStream(java.io.DataOutputStream s) throws Exception {
         s.writeBytes(type);
         s.write(length % 256);
         s.write(length / 256);
@@ -96,12 +96,12 @@ public class UnknownChunk implements TapeImageChunk {
      * @return
      */
     @Override
-    public final String toString() {
+    public String toString() {
         return type + ": [" + aux + "] (" + length + ")";
     }
 
     @Override
-    public final TapeImageChunk getParent() {
+    public TapeImageChunk getParent() {
         return null;
     }
 

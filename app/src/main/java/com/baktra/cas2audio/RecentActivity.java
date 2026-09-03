@@ -30,7 +30,7 @@ public class RecentActivity extends Activity implements AdapterView.OnItemClickL
         setContentView(R.layout.activity_recent);
     }
 
-    protected final void onResume() {
+    protected void onResume() {
         super.onResume();
         recentItems = new ArrayList<>();
         RecentItem.parsePersistenceString((String)getIntent().getSerializableExtra("recent_items"),recentItems);
@@ -53,8 +53,7 @@ public class RecentActivity extends Activity implements AdapterView.OnItemClickL
         lv.setOnItemClickListener(this);
     }
 
-    public void onItemClick(View view) {
-    }
+
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {

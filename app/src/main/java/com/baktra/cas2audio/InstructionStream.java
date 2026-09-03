@@ -30,7 +30,7 @@ class InstructionStream {
      *
      * @param instruction
      */
-    public final void add(int instruction) {
+    public void add(int instruction) {
 
         /* Check capacity*/
         if (pointer == storage.length - 1) {
@@ -47,7 +47,7 @@ class InstructionStream {
      *
      * @param instructions Instructions
      */
-    public final void add(int[] instructions) {
+    public void add(int[] instructions) {
 
         /* Check capacity*/
         int free = storage.length - 1 - pointer;
@@ -61,7 +61,7 @@ class InstructionStream {
     /**
      * @return
      */
-    public final int[] getInstructions() {
+    public int[] getInstructions() {
         int[] instructions = new int[pointer];
         System.arraycopy(storage, 0, instructions, 0, instructions.length);
         return instructions;

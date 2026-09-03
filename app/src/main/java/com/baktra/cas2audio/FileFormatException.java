@@ -10,7 +10,7 @@ public class FileFormatException extends Exception {
     }
 
     @Override
-    public final String getMessage() {
+    public String getMessage() {
         if (message != null) {
             return message;
         } else {

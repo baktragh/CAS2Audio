@@ -105,7 +105,7 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }
 
     @Override
-    public final void prepare() throws Exception {
+    public void prepare() throws Exception {
 
         track = getOldStyleAudioTrack();
         track.play();
@@ -150,7 +150,7 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }*/
 
     @Override
-    public final void write(byte[] signal) throws Exception {
+    public void write(byte[] signal) throws Exception {
 
         int remainingBytes = signal.length;
         int inputPos = 0;
@@ -181,12 +181,12 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }
 
     @Override
-    public final void writeInitialSignal(byte[] signal) throws Exception {
+    public void writeInitialSignal(byte[] signal) throws Exception {
         write(signal);
     }
 
     @Override
-    public final void flush() throws Exception {
+    public void flush() throws Exception {
         track.write(internalBuffer, 0, internalBufferPos);
         internalBufferPos = 0;
         internalBufferAvail = internalBuffer.length;
@@ -194,7 +194,7 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }
 
     @Override
-    public final void prepareForClose() throws Exception {
+    public void prepareForClose() throws Exception {
         if (internalBufferPos != 0) {
             track.write(internalBuffer, 0, internalBuffer.length - internalBufferAvail);
         }
@@ -202,7 +202,7 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }
 
     @Override
-    public final void prepareForTerminationSignal(byte[] signal) {
+    public void prepareForTerminationSignal(byte[] signal) {
         if (signal == null) {
             return;
         }
@@ -216,7 +216,7 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }
 
     @Override
-    public final boolean writeTerminationSignal() throws Exception {
+    public boolean writeTerminationSignal() throws Exception {
         if (terminationSignal == null || terminationSignalCounter < 1) {
             return false;
         }
@@ -226,12 +226,12 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     }
 
     @Override
-    public final long getNumberOfSamples() {
+    public long getNumberOfSamples() {
         return numSamples;
     }
 
     @Override
-    public final void close() throws Exception {
+    public void close() throws Exception {
         track.stop();
     }
 

@@ -45,7 +45,6 @@
             android:padding="8dp">
 
             <TextView
-                android:id="@+id/tvAmplitude"
                 style="@android:style/Widget.TextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -73,7 +72,6 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btnConfirm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -81,7 +79,6 @@
                 android:text="@string/btn_confirm" />
 
             <Button
-                android:id="@+id/btnReset"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

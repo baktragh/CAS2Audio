@@ -214,7 +214,7 @@ public class SignalGenerator implements SampleConsumer {
      *
      * @throws Exception When anything fails
      */
-    public final void run() throws Exception {
+    public void run() throws Exception {
 
 
         /*Prepare for output*/
@@ -540,7 +540,7 @@ public class SignalGenerator implements SampleConsumer {
      */
     private void generateByte(int i) throws Exception {
 
-        /*Bit order from highest to lowest*/
+        /*Bit order from the highest to the lowest*/
         if (loHiOrder == false) {
 
             for (int k = 0; k < 8; k++) {
@@ -553,7 +553,7 @@ public class SignalGenerator implements SampleConsumer {
                 /*Left shift*/
                 i <<= 1;
             }
-        } /*Bit order from lowest to highest*/ else {
+        } /*Bit order from the lowest to the highest*/ else {
             for (int k = 0; k < 8; k++) {
                 if ((i & 0x0000_0001) == 0) {
                     signalWriter.write(NARROW_PULSE);
@@ -585,8 +585,8 @@ public class SignalGenerator implements SampleConsumer {
             if (polarity==SignalGenerator.FLAG_POLARITY_01) {
                 polarity=SignalGenerator.FLAG_POLARITY_10;
             }
-            if (polarity==SignalGenerator.FLAG_POLARITY_01) {
-                polarity=SignalGenerator.FLAG_POLARITY_10;
+            else {
+                polarity=SignalGenerator.FLAG_POLARITY_01;
             }
         }
 
@@ -696,7 +696,7 @@ public class SignalGenerator implements SampleConsumer {
     }
 
     @Override
-    public final void consumeSamples(byte[] b) throws Exception {
+    public void consumeSamples(byte[] b) throws Exception {
         signalWriter.write(b);
     }
 

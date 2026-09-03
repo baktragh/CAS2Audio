@@ -32,7 +32,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     }
 
     @Override
-    protected final Void doInBackground(Void... voids) {
+    protected Void doInBackground(Void... voids) {
 
         try {
             PowerManager pm = parentActivity.get().getPowerManager();
@@ -78,20 +78,21 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     }
 
     @Override
-    protected final void onProgressUpdate(Integer... progress) {
+    protected void onProgressUpdate(Integer... progress) {
         parentActivity.get().setProgressBar(progress[0]);
     }
 
-    protected final void onPostExecute(Void v) {
+    protected void onPostExecute(Void v) {
         setControlsForTermination();
         if (lastException != null) {
             parentActivity.get().displayPostTaskAlert(R.string.msg_unable_to_process_tit,Utils.getExceptionMessage(lastException));
             lastException.printStackTrace();
         }
         parentActivity.get().setPlaybackInProgress(false);
+        parentActivity.get().changeTapePicture(false);
     }
 
-    protected final void onCancelled() {
+    protected void onCancelled() {
         setControlsForTermination();
         if (lastException != null) {
             parentActivity.get().displayPostTaskAlert(R.string.msg_unable_to_process_tit,Utils.getExceptionMessage(lastException));
@@ -101,17 +102,18 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         }
         parentActivity.get().setProgressBar(0);
         parentActivity.get().setPlaybackInProgress(false);
+        parentActivity.get().changeTapePicture(false);
     }
 
     private void setControlsForTermination() {
         parentActivity.get().setPlayBackViewsEnabled(false);
     }
 
-    protected final void onPreExecute() {
+    protected void onPreExecute() {
         parentActivity.get().setPlayBackViewsEnabled(true);
     }
 
-    public final void setProgress(int statusPercent) {
+    public void setProgress(int statusPercent) {
         publishProgress(statusPercent);
     }
 }

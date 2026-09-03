@@ -25,7 +25,7 @@ public class TapeImage {
     /**
      * @return
      */
-    public final int[] getChunkBalance() {
+    public int[] getChunkBalance() {
 
         int[] retVal = new int[2];
         int l = chunkList.size();
@@ -55,7 +55,7 @@ public class TapeImage {
         return retVal;
     }
 
-    public final void parse(InputStream is) throws Exception {
+    public void parse(InputStream is) throws Exception {
 
         BufferedInputStream bis = null;
 
@@ -198,7 +198,7 @@ public class TapeImage {
      *
      * @return
      */
-    public final int getChunkCount() {
+    public int getChunkCount() {
         return chunkList.size();
     }
 
@@ -207,7 +207,7 @@ public class TapeImage {
      * @param index
      * @return
      */
-    public final TapeImageChunk getChunkAt(int index) {
+    public TapeImageChunk getChunkAt(int index) {
         return chunkList.get(index);
     }
 
@@ -215,7 +215,7 @@ public class TapeImage {
      *
      * @return
      */
-    public final String[] getListing() {
+    public String[] getListing() {
 
         int l = getChunkCount();
         String[] listing = new String[l];

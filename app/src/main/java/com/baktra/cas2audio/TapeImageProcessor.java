@@ -19,7 +19,7 @@ public class TapeImageProcessor {
     }
 
     /*Convert tape image to the signal generator instructions*/
-    public final int[] convertItem(InputStream iStream, int sampleRate, boolean shortenLeader) throws Exception {
+    public int[] convertItem(InputStream iStream, int sampleRate, boolean shortenLeader) throws Exception {
 
         InstructionStream is = new InstructionStream();
 
@@ -30,7 +30,7 @@ public class TapeImageProcessor {
             /*Find first data chunk*/
             for (int i = 0; i < ti.getChunkCount(); i++) {
                 TapeImageChunk c = ti.getChunkAt(i);
-                if (c.getType() == "data") {
+                if (c.getType().equals("data")) {
                     DataChunk dc = (DataChunk) c;
                     /*Shorten to 15 seconds*/
                     if (dc.getAux() > 15000) {

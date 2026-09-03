@@ -1,35 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Cas2Audio</string>
-    <string name="btn_browse">Otevřít obraz kazety&#8230;</string>
-    <string name="btn_play">Přehrát</string>
-    <string name="btn_stop">Zastavit</string>
     <string name="lbl_square">Obdélníkový signál (turbo)</string>
     <string name="lbl_mono">Mono</string>
     <string name="lbl_48kHz">48 kHz</string>
     <string name="lbl_amplitude">Síla signálu:</string>
-    <string name="lbl_app_title">CAS2Audio</string>
     <string name="msg_nothing_to_play">Nebyl vybrán obraz kazety</string>
     <string name="msg_nothing_to_play_tit">Nic k přehrání</string>
     <string name="msg_unable_to_open">Nelze otevřít obraz kazety</string>
     <string name="msg_unable_to_open_tit">Nelze otevřít</string>
     <string name="msg_unable_to_process">Chyba při zpracování obrazu kazety</string>
     <string name="msg_unable_to_process_tit">Chyba při zpracování</string>
-    <string name="tit_choose_image">Vyberte obraz kazety (*.cas)</string>
-    <string name="btn_choose">Vybrat</string>
-    <string name="btn_cancel">Zrušit</string>
     <string name="msg_proc_cancel">Zpracování obrazu kazety zrušeno</string>
     <string name="msg_proc_cancel_tit">Zrušeno</string>
-    <string name="lbl_short_leader">Zkrátit standardní zav. tón</string>
     <string name="lbl_invert_polarity">Obrátit polaritu</string>
-    <string name="btn_settings">Nastavení...</string>
     <string name="title_activity_settings">Nastavení</string>
     <string name="btn_confirm">Potvrdit</string>
     <string name="btn_defaults">Výchozí</string>
-    <string name="btn_clear_history">Vymazat historii</string>
-    <string name="btn_yes">Ano</string>
-    <string name="btn_no">Ne</string>
-    <string name="lbl_messages">Zprávy</string>
     <string name="tit_recent">Poslední obrazy kazet</string>
     <string name="btn_ok">OK</string>
     <string name="msg_not_a_tape_image">Vybraný soubor není obraz kazety</string>

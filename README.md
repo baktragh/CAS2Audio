@@ -3,19 +3,19 @@ Play back tape images for 8-bit Atari computers on mobile devices with Android.
 
 ## Overview
 
-* CAS2Audio allows you to play back Atari 8-bit tape images (.cas) files on small portable devices (phones, tablets) running Android. Full description of the tape image format is available at https://a8cas.sourceforge.io/format-cas.html
+* CAS2Audio plays back Atari 8-bit tape images (.cas) files on small portable devices
+(phones, tablets) running Android. 
 * CAS2Audio is a satellite project of TURGEN - https://turgen.sourceforge.io/
 
 ### Highlights
 
-* The signal is generated on-the-fly (no temporary wave files)
-* Standard records (FUJI, baud, data, fsk)
-* Turbo records (pwms, pwmc, pwmd, pwml)
-* 44100 Hz and 48000 Hz sampling rates
+* Simple, easy to use user interface with easy access to the recently selected tape images
+* Support for both standard records (FUJI, baud, data, fsk) and turbo records (pwms, pwmc, pwmd, pwml)
 * Mono or Stereo output
+* 44100 Hz and 48000 Hz sampling rates
 * For turbo records, you can choose waveform - sine wave or square wave
-* Adjustable amplitude
-* Convenient tape image selection
+* Adjustable signal amplitude
+*The signal is generated on-the-fly (no temporary wave files are needed)
 
 ## Technical information
 
@@ -25,7 +25,8 @@ At least Android 10.0 is required to run the most recent version
 ### Installation
 
 * Download the .apk package from the "Releases" section
-* Ensure that the application you will use to open the .apk package has permission to install unknown apps. To do so, go to Settings/Apps/Advanced and enabled the "Install unknown apps" options.
+* Ensure that the application you will use to open the .apk package has permission to install unknown apps.
+To do so, go to Settings/Apps/Advanced and enabled the "Install unknown apps" options.
 * Open and install the .apk package
 * You might need to uninstall the previous version first
 

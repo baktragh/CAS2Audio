@@ -34,27 +34,27 @@ public class FSKChunk implements TapeImageChunk {
     private int aux;
 
     @Override
-    public final String getType() {
+    public String getType() {
         return type;
     }
 
     @Override
-    public final int getLength() {
+    public int getLength() {
         return length;
     }
 
     @Override
-    public final int[] getData() {
+    public int[] getData() {
         return data;
     }
 
     @Override
-    public final boolean isGeneratedUsingParent() {
+    public boolean isGeneratedUsingParent() {
         return false;
     }
 
     @Override
-    public final TapeImageChunk getParent() {
+    public TapeImageChunk getParent() {
         return null;
     }
 
@@ -63,7 +63,7 @@ public class FSKChunk implements TapeImageChunk {
      * @throws Exception
      */
     @Override
-    public final void readFromStream(InputStream s) throws Exception {
+    public void readFromStream(InputStream s) throws Exception {
         int lengthLo = s.read();
         int lengthHi = s.read();
 
@@ -93,7 +93,7 @@ public class FSKChunk implements TapeImageChunk {
      * @throws Exception
      */
     @Override
-    public final void writeToStream(java.io.DataOutputStream s) throws Exception {
+    public void writeToStream(java.io.DataOutputStream s) throws Exception {
         s.writeBytes("fsk ");
         s.write(length % 256);
         s.write(length / 256);
@@ -108,7 +108,7 @@ public class FSKChunk implements TapeImageChunk {
      *
      * @return
      */
-    public final int getAux() {
+    public int getAux() {
         return aux;
     }
 
@@ -117,7 +117,7 @@ public class FSKChunk implements TapeImageChunk {
      * @return
      */
     @Override
-    public final String toString() {
+    public String toString() {
         return "fsk: [" + aux + " ms] (" + length + ")";
     }
 
@@ -126,7 +126,7 @@ public class FSKChunk implements TapeImageChunk {
      * @param newAuxValue
      */
     @Override
-    public final void setAux(int newAuxValue) {
+    public void setAux(int newAuxValue) {
         aux = newAuxValue;
     }
 
