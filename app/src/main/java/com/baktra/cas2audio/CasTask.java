@@ -85,7 +85,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     protected final void onPostExecute(Void v) {
         setControlsForTermination();
         if (lastException != null) {
-            parentActivity.get().setErrorText(Utils.getExceptionMessage(lastException));
+            parentActivity.get().displayPostTaskAlert(R.string.msg_unable_to_process_tit,Utils.getExceptionMessage(lastException));
             lastException.printStackTrace();
         }
         parentActivity.get().setPlaybackInProgress(false);
@@ -94,14 +94,13 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     protected final void onCancelled() {
         setControlsForTermination();
         if (lastException != null) {
-            parentActivity.get().setErrorText(Utils.getExceptionMessage(lastException));
+            parentActivity.get().displayPostTaskAlert(R.string.msg_unable_to_process_tit,Utils.getExceptionMessage(lastException));
             lastException.printStackTrace();
         } else {
-            parentActivity.get().setErrorText(R.string.msg_proc_cancel);
+            parentActivity.get().displayPostTaskAlert(R.string.msg_proc_cancel_tit,parentActivity.get().getString(R.string.msg_proc_cancel));
         }
         parentActivity.get().setProgressBar(0);
         parentActivity.get().setPlaybackInProgress(false);
-
     }
 
     private void setControlsForTermination() {

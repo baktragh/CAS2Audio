@@ -15,12 +15,9 @@ import android.provider.OpenableColumns;
 import android.view.View;
 import android.widget.*;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.baktra.cas2audio.tapeimage.TapeImage;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -109,7 +106,7 @@ public class MainActivity extends Activity {
             }
             /*There was some intent, but no valid path selected.*/
             else {
-                setCurrentFileName(getResources().getString(R.string.msg_notape));
+                setCurrentFileName("");
                 setPlayBackViewsEnabled(false);
                 currentUri = null;
             }
@@ -143,7 +140,7 @@ public class MainActivity extends Activity {
 
         /*Check if anything was selected*/
         if (currentUri == null) {
-            displaySimpleAlert("",getResources().getString(R.string.msg_nothing_to_play));
+            displaySimpleAlert(getString(R.string.msg_nothing_to_play_tit),getResources().getString(R.string.msg_nothing_to_play));
             return;
         }
 
@@ -152,7 +149,7 @@ public class MainActivity extends Activity {
             iStream = getContentResolver().openInputStream(currentUri);
 
         } catch (Exception e) {
-            displaySimpleAlert("",getResources().getString(R.string.msg_unable_to_open)+":" + LN_SP + Utils.getExceptionMessage(e));
+            displaySimpleAlert(getString(R.string.msg_unable_to_open_tit),getResources().getString(R.string.msg_unable_to_open)+":" + LN_SP + Utils.getExceptionMessage(e));
             return;
         }
 
@@ -163,7 +160,7 @@ public class MainActivity extends Activity {
             TapeImageProcessor tip = new TapeImageProcessor();
             instructions = tip.convertItem(iStream, sampleRate, false);
         } catch (Exception e) {
-            displaySimpleAlert("",getResources().getString(R.string.msg_unable_to_process)+":" + LN_SP + Utils.getExceptionMessage(e));
+            displaySimpleAlert(getString(R.string.msg_unable_to_process_tit),getResources().getString(R.string.msg_unable_to_process)+":" + LN_SP + Utils.getExceptionMessage(e));
             return;
         }
 
@@ -171,7 +168,7 @@ public class MainActivity extends Activity {
         try {
             casTask = new CasTask(instructions, this, !userSettings.isDoMono(), userSettings.isDoSquareWave(), getVolume(), sampleRate, userSettings.isDoInvertPolarity());
         } catch (Exception e) {
-            displaySimpleAlert("",Utils.getExceptionMessage(e));
+            displaySimpleAlert(getString(R.string.msg_unable_to_process_tit),Utils.getExceptionMessage(e));
         }
         /*Execute the task*/
         casTask.execute();
@@ -264,7 +261,8 @@ public class MainActivity extends Activity {
                         public void onClick(DialogInterface dialog, int id) {
                         }
                     });
-                    builder.setMessage(String.format("%s%n%s",getString(R.string.msg_notape_image),Utils.getExceptionMessage(e)));
+                    builder.setMessage(String.format("%s%n%s",getString(R.string.msg_not_a_tape_image),Utils.getExceptionMessage(e)));
+                    builder.setTitle(getString(R.string.msg_not_a_tape_image_tit));
                     AlertDialog dialog = builder.create();
                     dialog.show();
                 }
@@ -348,12 +346,8 @@ public class MainActivity extends Activity {
         }
     }
 
-    final void setErrorText(String s) {
-        displaySimpleAlert("",s);
-    }
-
-    public final void setErrorText(int msgId) {
-        setErrorText(getResources().getString(msgId));
+    public final void displayPostTaskAlert(int titleId, String msg) {
+        displaySimpleAlert(getResources().getString(titleId),msg);
     }
 
     final void setProgressBar(int value) {

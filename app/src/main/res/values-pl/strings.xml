@@ -13,11 +13,13 @@
     <string name="btn_cancel">Anuluj</string>
     <string name="btn_play">Odtwarzaj</string>
     <string name="msg_unable_to_process">Błąd przetwarzania obrazu taśmy</string>
+    <string name="msg_unable_to_process_tit">Błąd przetwarzania</string>
     <string name="msg_unable_to_open">Błąd otwierania obrazu taśmy</string>
-    <string name="msg_nothing_to_play">Nie można odtworzyć. Nie wybrano obrazu taśmy.</string>
-    <string name="msg_notape">Nie wybrano obrazu taśmy</string>
-    <string name="msg_proc_ok">Zakończono przetwarzanie obrazu taśmy</string>
+    <string name="msg_unable_to_open_tit">Błąd otwierania</string>
+    <string name="msg_nothing_to_play">Nie wybrano obrazu taśmy</string>
+    <string name="msg_nothing_to_play_tit">Nic do odtworzenia</string>
     <string name="msg_proc_cancel">Anulowano przetwarzanie obrazu taśmy</string>
+    <string name="msg_proc_cancel_tit">Anulowano</string>
     <string name="lbl_short_leader">Skróć sygnał pilota (normal)</string>
     <string name="lbl_invert_polarity">Odwrócić polaryzację</string>
     <string name="btn_settings">Ustawienia...</string>
@@ -30,5 +32,6 @@
     <string name="lbl_messages">Wiadomości</string>
     <string name="tit_recent">Ostatnie obrazy taśmy</string>
     <string name="btn_ok">OK</string>
-    <string name="msg_notape_image">Wybrany plik nie jest obrazem taśmy</string>
+    <string name="msg_not_a_tape_image">Wybrany plik nie jest obrazem taśmy</string>
+    <string name="msg_not_a_tape_image_tit">Nie jest obrazem taśmy</string>
 </resources>

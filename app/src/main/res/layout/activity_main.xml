@@ -28,6 +28,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
+                    android:contentDescription="Cassette"
                     android:cropToPadding="false"
                     android:rotation="180"
                     android:scaleType="centerInside"
@@ -39,7 +40,6 @@
                     android:id="@+id/tvTapeImageName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/msg_notape"
                     android:textAlignment="center" />
 
                 <ProgressBar
@@ -50,8 +50,10 @@
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="4dp"
                     android:max="100"
+                    android:minHeight="32dip"
                     android:padding="5dp"
-                    android:progress="0" />
+                    android:progress="0"
+                    android:scaleY="2" />
 
             </LinearLayout>
 
@@ -73,6 +75,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:contentDescription="Play"
                 android:onClick="onPlay"
                 android:src="@drawable/play_arrow_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
 
@@ -81,6 +84,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:contentDescription="Stop"
                 android:onClick="onStopPlaying"
                 android:src="@drawable/stop_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
 
@@ -89,6 +93,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:contentDescription="Browse"
                 android:onClick="onBrowseTapeImage"
                 android:src="@drawable/file_open_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
 
@@ -97,6 +102,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:contentDescription="Recent"
                 android:onClick="onRecent"
                 android:src="@drawable/history_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
 
@@ -105,6 +111,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:contentDescription="Settings"
                 android:onClick="onSettings"
                 android:src="@drawable/settings_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
         </LinearLayout>
