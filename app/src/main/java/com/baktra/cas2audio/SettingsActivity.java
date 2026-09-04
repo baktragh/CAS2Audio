@@ -5,17 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Switch;
 
 public class SettingsActivity extends Activity {
 
     private UserSettings userSettings;
-
-    public SettingsActivity() {
-        super();
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,20 +25,16 @@ public class SettingsActivity extends Activity {
 
     }
 
-    public void onConfirm(View view) {
-        super.onStop();
+    void onConfirm(View view) {
+        onStop();
         flushUIToSettings();
-        setResult(RESULT_OK, new Intent().putExtra("user_settings", this.userSettings));
+        setResult(RESULT_OK, new Intent().putExtra("user_settings", userSettings));
         finish();
     }
 
-    public void onDefaults(View view) {
+    void onDefaults(View view) {
         userSettings = new UserSettings();
         setUI();
-    }
-
-    protected void onDestroy() {
-        super.onDestroy();
     }
 
     @Override

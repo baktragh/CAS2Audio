@@ -19,6 +19,8 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     private final int sampleRate;
     private PowerManager.WakeLock wakeLock;
 
+    public static final int WAKELOCK_TIMEOUT = 120 * 60 * 1000;
+
     public CasTask(int[] instructions, MainActivity mainActivity, boolean stereo, boolean square, int volume, int sampleRate,boolean invertPolarity) {
         this.instructions=instructions;
         this.stereo=stereo;
@@ -38,7 +40,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
             PowerManager pm = parentActivity.get().getPowerManager();
             if (pm != null) {
                 wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CAS2Audio::TaskWakeLock");
-                wakeLock.acquire(120 * 60 * 1000);
+                wakeLock.acquire(WAKELOCK_TIMEOUT);
             } else {
                 wakeLock = null;
             }
