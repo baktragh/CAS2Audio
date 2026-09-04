@@ -10,19 +10,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
-import java.util.ArrayList;
-import java.util.List;
-
 public class RecentActivity extends Activity implements AdapterView.OnItemClickListener {
 
-
-    private ArrayList<RecentItem> recentItems = null;
+    private TapeImageHistory localHistory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +22,8 @@ public class RecentActivity extends Activity implements AdapterView.OnItemClickL
 
     protected void onResume() {
         super.onResume();
-        recentItems = new ArrayList<>();
-        RecentItem.parsePersistenceString((String)getIntent().getSerializableExtra("recent_items"),recentItems);
+        localHistory = new TapeImageHistory();
+        localHistory.parsePersistenceString((String)getIntent().getSerializableExtra("recent_items"));
         setUI();
     }
 
@@ -49,7 +39,7 @@ public class RecentActivity extends Activity implements AdapterView.OnItemClickL
 
     private void setUI() {
         ListView lv = findViewById(R.id.lvRecentItems);
-        lv.setAdapter(new ArrayAdapter<RecentItem>(this, R.layout.recent_item, recentItems));
+        lv.setAdapter(new ArrayAdapter<HistoryItem>(this, R.layout.recent_item, localHistory.getAsArray()));
         lv.setOnItemClickListener(this);
     }
 
@@ -58,7 +48,7 @@ public class RecentActivity extends Activity implements AdapterView.OnItemClickL
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         super.onStop();
-        RecentItem item = (RecentItem) adapterView.getItemAtPosition(i);
+        HistoryItem item = (HistoryItem) adapterView.getItemAtPosition(i);
         Uri selectedUri = item.uri;
         setResult(RESULT_OK, new Intent().setData(selectedUri));
         finish();

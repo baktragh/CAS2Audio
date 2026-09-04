@@ -90,6 +90,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         }
         parentActivity.get().setPlaybackInProgress(false);
         parentActivity.get().changeTapePicture(false);
+
     }
 
     protected void onCancelled() {
@@ -107,6 +108,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
 
     private void setControlsForTermination() {
         parentActivity.get().setPlayBackViewsEnabled(false);
+        parentActivity.get().setProgressBar(0);
     }
 
     protected void onPreExecute() {

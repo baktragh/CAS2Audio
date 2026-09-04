@@ -37,7 +37,9 @@ public class MainActivity extends Activity {
     private final ArrayList<View> playBackViewsDisabled;
     private final ArrayList<View> playBackViewsEnabled;
 
-    private final ArrayList<RecentItem> recentItems;
+    private TapeImageHistory tapeImageHistory;
+
+
 
     public MainActivity() {
         super();
@@ -48,7 +50,7 @@ public class MainActivity extends Activity {
         playBackViewsDisabled = new ArrayList<>(8);
         playBackViewsEnabled = new ArrayList<>(8);
         lastChooserDirectory = null;
-        recentItems = new ArrayList<>();
+        tapeImageHistory = new TapeImageHistory();
         userSettings = new UserSettings();
 
     }
@@ -194,7 +196,7 @@ public class MainActivity extends Activity {
     public void onRecent(View v) {
         Intent intent = new Intent(this, RecentActivity.class);
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        intent.putExtra("recent_items", RecentItem.createPersistenceString(recentItems));
+        intent.putExtra("recent_items", tapeImageHistory.createPersistenceString());
         startActivityForResult(intent, OPEN_RECENT);
     }
 
@@ -297,27 +299,10 @@ public class MainActivity extends Activity {
         String filename = extractFileNameFromURI(currentUri);
         setCurrentFileName(filename);
         setPlayBackViewsEnabled(false);
-        addRecentItem(currentUri,filename);
+        tapeImageHistory.addHistoryItem(currentUri,filename);
     }
 
-    void addRecentItem(Uri uri, String filename) {
-        RecentItem candidateItem = new RecentItem(uri,filename);
 
-        /*Check if already there*/
-        boolean found = false;
-        for (RecentItem item : recentItems) {
-            if (item.uri.toString().equals(candidateItem.uri.toString())) {
-                found = true;
-                break;
-            }
-        }
-        /*If already there, just return*/
-        if (found) return;
-
-        /*Move to front*/
-        recentItems.add(0, candidateItem);
-        if (recentItems.size() > 12) recentItems.remove(11);
-    }
     private int getVolume() {
         return userSettings.getAmplitude();
     }
@@ -406,10 +391,10 @@ public class MainActivity extends Activity {
         SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
         lastChooserDirectory = new File(sPref.getString("c2a_last_dir", ""));
         try {
-            RecentItem.parsePersistenceString(sPref.getString("c2a_recents", ""), recentItems);
+            tapeImageHistory.parsePersistenceString(sPref.getString("c2a_recents", ""));
         }
         catch (Exception e) {
-            recentItems.clear();
+            tapeImageHistory.clear();
         }
         userSettings = UserSettings.createFromPersistentStorage(sPref);
     }
@@ -423,7 +408,7 @@ public class MainActivity extends Activity {
         if (lastChooserDirectory != null) {
             editor.putString("c2a_last_dir", lastChooserDirectory.getAbsolutePath());
         }
-        String recentString = RecentItem.createPersistenceString(recentItems);
+        String recentString = tapeImageHistory.createPersistenceString();
         editor.putString("c2a_recents", recentString);
         editor.apply();
 
