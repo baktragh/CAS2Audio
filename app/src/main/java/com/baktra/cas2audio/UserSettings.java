@@ -11,7 +11,7 @@ class UserSettings implements Serializable {
     private boolean doSquareWave = false;
     private boolean doInvertPolarity = false;
 
-    private int amplitude = 50;
+    private int amplitude = 5;
 
     public UserSettings(final boolean doMono, final boolean do48kHz, final boolean doSquareWave, final boolean doInvertPolarity, final int amplitude) {
         this.doMono = doMono;
@@ -68,8 +68,10 @@ class UserSettings implements Serializable {
         s.doMono = sPref.getBoolean("c2a_mono", false);
         s.doSquareWave = sPref.getBoolean("c2a_square", false);
         s.doInvertPolarity = sPref.getBoolean("c2a_invert_pulses", false);
-        s.amplitude = sPref.getInt("c2a_amplitude",50);
+        s.amplitude = sPref.getInt("c2a_amplitude",5);
 
+        /*Correct possibly wrong amplitude*/
+        if (s.amplitude<2 || s.amplitude >9) s.amplitude=5;
         return s;
     }
 
