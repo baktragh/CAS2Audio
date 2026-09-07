@@ -2,12 +2,7 @@ package com.baktra.cas2audio.signal;
 
 import com.baktra.cas2audio.CasTask;
 
-/**
- * Electric signal generator
- */
 public class SignalGenerator implements SampleConsumer {
-
-    /*Instruction constants*/
 
     private static final int INSTR_NARROW = 0;
     private static final int INSTR_WIDE = 1;
@@ -38,6 +33,7 @@ public class SignalGenerator implements SampleConsumer {
     public static final int FLAG_ORDER_LH = 0;
     public static final int FLAG_ORDER_HL = 1;
     private boolean cInvertPolarity;
+    private DummySignalWriter dummySignalWriter;
 
     public static class SignalGeneratorConfig {
         public int numChannels;
@@ -54,67 +50,38 @@ public class SignalGenerator implements SampleConsumer {
         public int initialSilence;
 
         public boolean invertPolarity;
+        public int resumeIp;
     }
 
 
-    /*Postprocessing enabled flag*/
     private final SignalGeneratorConfig asConfig;
 
-    /*Total number of instructions*/
     private final int genLength;
 
     private int ip;
-    /*Current instruction*/
 
     private final int[] mem;
-    /*Memory*/
 
-    /**
-     * Wide pulse
-     */
     private byte[] WIDE_PULSE;
-    /**
-     * Short pulse
-     */
     private byte[] NARROW_PULSE;
-    /**
-     * Pilot tone pulse
-     */
     private byte[] PILOTTONE_PULSE;
-    /**
-     * Sync pulse
-     */
     private byte[] SYNC_PULSE;
-    /**
-     * Silence 0.1 seconds
-     */
     private byte[] SILENCE_SHORT;
-    /**
-     * Block separator
-     */
     private byte[] BLOCKSEP;
-    /**
-     * Stop pulse
-     */
     private byte[] STOP_PULSE;
 
-    /*Auxiliary samples*/
     private byte[] LOW_SAMPLE;
     private byte[] HIGH_SAMPLE;
     private byte[] SILENCE_SAMPLE;
 
-    /*Order of bits*/
     private boolean loHiOrder = false;
 
-    /*Pwm instructions*/
     private int pwmPolarity;
     private boolean pwmLoHiOrder;
     private int pwmSampleRate;
 
-    /*FSK related*/
     private FSKGenerator fskGenerator;
 
-    /*Configuration copy*/
     private boolean cSigned;
     private int cBits;
     private int cSampleRate;
@@ -126,21 +93,12 @@ public class SignalGenerator implements SampleConsumer {
     private int cTerminalSilence;
 
     private int cHarmonic;
+    private int cResumeIp;
 
-    /**
-     * Signal writer
-     */
-    private SignalWriter signalWriter;
+    private SignalWriter currentSignalWriter;
+    private SignalWriter audioSignalWriter;
     private final CasTask parentTask;
 
-
-
-    /**
-     * Create new SignalGenerator
-     *
-     * @param dta Generator instructions
-     * @param asc
-     */
     public SignalGenerator(int[] dta, SignalGeneratorConfig asc, CasTask parentTask) {
         mem = dta;
         genLength = mem.length;
@@ -173,23 +131,31 @@ public class SignalGenerator implements SampleConsumer {
             cBufferSize = ((cBufferSize / cSampleRate) + 1) * cSampleRate;
         }
 
+        /*Resume IP*/
+        cResumeIp= asConfig.resumeIp;
     }
 
 
-    /**
-     * Prepare to generate signal
-     *
-     * @throws java.lang.Exception when preparing for generation goes wrong
-     */
     private void prepare() throws Exception {
 
         /*Copy configuration*/
         copyConfiguration();
 
+        /*Create signal writers, both real and dummy*/
+        audioSignalWriter = new AudioSignalBufferedWriter(cBits, cChannels, cBufferSize, cSampleRate, cTerminalSilence);
+        dummySignalWriter = new DummySignalWriter(cBits, cChannels, cBufferSize, cSampleRate, cTerminalSilence);
 
-        signalWriter = new AudioSignalBufferedWriter(cBits, cChannels, cBufferSize, cSampleRate, cTerminalSilence);
-        /*Prepare writer*/
-        signalWriter.prepare();
+        /*Prepare writers*/
+        audioSignalWriter.prepare();
+        dummySignalWriter.prepare();
+
+        /*Determine writer*/
+        if (cResumeIp==-1) {
+            currentSignalWriter = audioSignalWriter;
+        }
+        else {
+            currentSignalWriter = dummySignalWriter;
+        }
 
         /*Create silence*/
         SILENCE_SHORT = PulseCreator.createPulse(cChannels, cPulseVolume, cSampleRate / 10, cBits, cSigned, 1, 1, cSignalInRightChannelOnly, 0);
@@ -209,42 +175,36 @@ public class SignalGenerator implements SampleConsumer {
 
     }
 
-    /**
-     * Generate the signal
-     *
-     * @throws Exception When anything fails
-     */
     public void run() throws Exception {
 
 
         /*Prepare for output*/
         prepare();
 
-
-        /*Start writing signal*/
-
         /*Initial signal*/
         for (int k = 0; k < cInitialSilence; k++) {
-                signalWriter.writeInitialSignal(SILENCE_SHORT);
+                currentSignalWriter.writeInitialSignal(SILENCE_SHORT);
             }
 
-            int lastIp=0;
+
             ip = 0;
         /*Loop counter*/
         int op = INSTR_NOP;
 
             while (op != SignalGenerator.INSTR_END && !parentTask.isCancelled()) {
 
-                op = mem[ip];
-
-                /*Show progress every 2nd instruction*/
-                if (ip-lastIp>=2) {
-                    parentTask.setProgress(getStatusPercent());
-                    lastIp=ip;
+                /*Did we reach the resume point ?*/
+                if (ip==cResumeIp) {
+                    cResumeIp=-1;
+                    currentSignalWriter=audioSignalWriter;
                 }
 
-                /*Execution of instructions*/
-                /*Index of current instruction*/
+                /*Show progress*/
+                parentTask.setProgress(getStatusPercent());
+
+                /*Determine what is the current operation and execute it*/
+                op = mem[ip];
+
                 int cx;
                 switch (op) {
 
@@ -363,7 +323,7 @@ public class SignalGenerator implements SampleConsumer {
                         int silence = getPWMMillis2Samples(mem[ip]);
                         ip++;
                         for (int i = 0; i < silence; i++) {
-                            signalWriter.write(SILENCE_SAMPLE);
+                            currentSignalWriter.write(SILENCE_SAMPLE);
                         }
 
                         cx = mem[ip];
@@ -373,7 +333,7 @@ public class SignalGenerator implements SampleConsumer {
                             byte[] pulse = PulseCreator.createPulse(cChannels, cPulseVolume, getPWMLength(mem[ip]), cBits, cSigned, 0, pwmPolarity, cSignalInRightChannelOnly, cHarmonic);
                             ip++;
                             for (int j = 0; j < mem[ip]; j++) {
-                                signalWriter.write(pulse);
+                                currentSignalWriter.write(pulse);
                             }
                             ip++;
                         }
@@ -409,7 +369,7 @@ public class SignalGenerator implements SampleConsumer {
                         int silence = getPWMMillis2Samples(mem[ip]);
                         ip++;
                         for (int i = 0; i < silence; i++) {
-                            signalWriter.write(SILENCE_SAMPLE);
+                            currentSignalWriter.write(SILENCE_SAMPLE);
                         }
                         /*Number of lengths*/
                         cx = mem[ip];
@@ -424,7 +384,7 @@ public class SignalGenerator implements SampleConsumer {
                             sampleCount = getPWMLength(mem[ip]);
                             ip++;
                             for (int j = 0; j < sampleCount; j++) {
-                                signalWriter.write(high == true ? HIGH_SAMPLE : LOW_SAMPLE);
+                                currentSignalWriter.write(high == true ? HIGH_SAMPLE : LOW_SAMPLE);
                             }
                             high = !high;
                         }
@@ -461,83 +421,53 @@ public class SignalGenerator implements SampleConsumer {
 
             /*Generator canceled*/
             if (parentTask.isCancelled()) {
-                signalWriter.prepareForClose();
-                signalWriter.close();
+                currentSignalWriter.prepareForClose();
+                currentSignalWriter.close();
             }
             /*Generator ended normally*/
             else {
-                signalWriter.prepareForTerminationSignal(SILENCE_SHORT);
-                signalWriter.prepareForClose();
-                signalWriter.close();
+                currentSignalWriter.prepareForTerminationSignal(SILENCE_SHORT);
+                currentSignalWriter.prepareForClose();
+                currentSignalWriter.close();
             }
 
         /*Everything OK*/
     }
 
-    /**
-     * Generate pilot tone
-     *
-     * @param num Number of pilot tone pulses
-     * @throws Exception When pilot tone generation fails
-     */
     private void generatePilotTone(int num) throws Exception {
 
         for (int i = 0; i < num && !parentTask.isCancelled(); i++) {
-            signalWriter.write(PILOTTONE_PULSE);
+            currentSignalWriter.write(PILOTTONE_PULSE);
         }
 
     }
 
-    /**
-     * Generate sync pulse
-     */
     private void generateSync() throws Exception {
-        signalWriter.write(SYNC_PULSE);
+        currentSignalWriter.write(SYNC_PULSE);
     }
 
-    /**
-     * Generate silence
-     *
-     * @param tenths Number of 0.1 second ticks
-     * @throws Exception
-     */
     private void generateSilence(int tenths) throws Exception {
         for (int p = 0; p < tenths && !parentTask.isCancelled(); p++) {
-            signalWriter.write(SILENCE_SHORT);
+            currentSignalWriter.write(SILENCE_SHORT);
         }
     }
 
-    /**
-     * Generate block separator
-     */
     private void generateBlockSep() throws Exception {
-        signalWriter.write(BLOCKSEP);
+        currentSignalWriter.write(BLOCKSEP);
     }
 
-    /**
-     * Generate stop pulse
-     */
     private void generateStop() throws Exception {
-        signalWriter.write(STOP_PULSE);
+        currentSignalWriter.write(STOP_PULSE);
     }
 
-    /**
-     * Generates 0 or 1
-     */
     private void generateWide() throws Exception {
-        signalWriter.write(WIDE_PULSE);
+        currentSignalWriter.write(WIDE_PULSE);
     }
 
     private void generateNarrow() throws Exception {
-        signalWriter.write(NARROW_PULSE);
+        currentSignalWriter.write(NARROW_PULSE);
     }
 
-    /**
-     * Generate byte
-     *
-     * @param i Byte to be generated
-     * @throws Exception
-     */
     private void generateByte(int i) throws Exception {
 
         /*Bit order from the highest to the lowest*/
@@ -545,9 +475,9 @@ public class SignalGenerator implements SampleConsumer {
 
             for (int k = 0; k < 8; k++) {
                 if ((i & 0x0000_0080) == 0) {
-                    signalWriter.write(NARROW_PULSE);
+                    currentSignalWriter.write(NARROW_PULSE);
                 } else {
-                    signalWriter.write(WIDE_PULSE);
+                    currentSignalWriter.write(WIDE_PULSE);
                 }
 
                 /*Left shift*/
@@ -556,9 +486,9 @@ public class SignalGenerator implements SampleConsumer {
         } /*Bit order from the lowest to the highest*/ else {
             for (int k = 0; k < 8; k++) {
                 if ((i & 0x0000_0001) == 0) {
-                    signalWriter.write(NARROW_PULSE);
+                    currentSignalWriter.write(NARROW_PULSE);
                 } else {
-                    signalWriter.write(WIDE_PULSE);
+                    currentSignalWriter.write(WIDE_PULSE);
                 }
 
                 /*Shift to right*/
@@ -567,9 +497,6 @@ public class SignalGenerator implements SampleConsumer {
         }
     }
 
-    /**
-     * Handle setup instruction
-     */
     private void handleSetup() {
 
         int dab = cBits;
@@ -619,19 +546,12 @@ public class SignalGenerator implements SampleConsumer {
         return (int) Math.round(i * (((double) cSampleRate) / 1000));
     }
 
-    /**
-     * Generate BAUD instruction 00 OPCODE 01 BAUDRATE
-     */
     private void generateBAUD() {
         ip++;
         fskGenerator = new FSKGenerator(mem[ip], cSigned, cChannels, cBits, this, cPulseVolume, cSignalInRightChannelOnly, cSampleRate);
         ip++;
     }
 
-    /**
-     * Generate STDDATA instruction 00 OPCODE 01 IRG LENGTH 02 DATA LENGTH 03
-     * ... DATA
-     */
     private void generateSTDDATA() throws Exception {
         ip++;
 
@@ -670,12 +590,6 @@ public class SignalGenerator implements SampleConsumer {
 
     }
 
-    /**
-     * Generate FSK instruction 00 IRG 01 LENGTH 02 ... DATA (0 and 1 durations
-     * in 0.1 milliseconds)
-     *
-     * @throws Exception when FSK generation fails
-     */
     private void generateFSK() throws Exception {
         ip++;
         int irgLen = mem[ip];
@@ -697,7 +611,7 @@ public class SignalGenerator implements SampleConsumer {
 
     @Override
     public void consumeSamples(byte[] b) throws Exception {
-        signalWriter.write(b);
+        currentSignalWriter.write(b);
     }
 
 

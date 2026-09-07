@@ -76,4 +76,8 @@ class InstructionStream {
 
     }
 
+    public int getPointer() {
+        return pointer;
+    }
+
 }

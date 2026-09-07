@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
+    android:onClick="onPausePlaying"
     android:paddingHorizontal="8dp"
     tools:context=".MainActivity">
 
@@ -65,53 +66,76 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <ImageButton
-                android:id="@+id/btnPlay"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="Play"
-                android:onClick="onPlay"
-                android:src="@drawable/play_arrow_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+                android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/btnStop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="Stop"
-                android:onClick="onStopPlaying"
-                android:src="@drawable/stop_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+                <ImageButton
+                    android:id="@+id/btnPlay"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:contentDescription="Play"
+                    android:onClick="onPlay"
+                    android:src="@drawable/play_arrow_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
 
-            <ImageButton
-                android:id="@+id/btnBrowse"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="Browse"
-                android:onClick="onBrowseTapeImage"
-                android:src="@drawable/file_open_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+                <ImageButton
+                    android:id="@+id/btnStop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:contentDescription="Stop"
+                    android:onClick="onStopPlaying"
+                    android:src="@drawable/stop_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
 
-            <ImageButton
-                android:id="@+id/btnRecent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="Recent"
-                android:onClick="onRecent"
-                android:src="@drawable/history_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+                <ImageButton
+                    android:id="@+id/btnPause"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:contentDescription="Pause"
+                    android:onClick="onPausePlaying"
+                    android:src="@drawable/pause_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
 
-            <ImageButton
-                android:id="@+id/btnSettings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:contentDescription="Settings"
-                android:onClick="onSettings"
-                android:src="@drawable/settings_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/btnBrowse"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:contentDescription="Browse"
+                    android:onClick="onBrowseTapeImage"
+                    android:src="@drawable/file_open_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+
+                <ImageButton
+                    android:id="@+id/btnRecent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:contentDescription="Recent"
+                    android:onClick="onRecent"
+                    android:src="@drawable/history_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+
+                <ImageButton
+                    android:id="@+id/btnSettings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:contentDescription="Settings"
+                    android:onClick="onSettings"
+                    android:src="@drawable/settings_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+            </LinearLayout>
+
         </LinearLayout>
 
     </LinearLayout>

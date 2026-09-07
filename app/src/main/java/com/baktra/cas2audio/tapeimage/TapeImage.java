@@ -6,13 +6,7 @@ import com.baktra.cas2audio.TapeImageProcessor;
 import java.io.*;
 import java.util.*;
 
-
-
-/**
- *
- * @author  
- */
-public class TapeImage {
+public final class TapeImage {
 
     private final ArrayList<TapeImageChunk> chunkList;
     
@@ -22,9 +16,6 @@ public class TapeImage {
         
     }
 
-    /**
-     * @return
-     */
     public int[] getChunkBalance() {
 
         int[] retVal = new int[2];
@@ -64,9 +55,7 @@ public class TapeImage {
 
         try {
 
-            /*
-              Open tape image file
-             */
+            /* Open tape image file*/
             bis = new BufferedInputStream(is);
 
             boolean isFujiRead = false;
@@ -194,27 +183,14 @@ public class TapeImage {
         }
     }
 
-    /**
-     *
-     * @return
-     */
     public int getChunkCount() {
         return chunkList.size();
     }
 
-    /**
-     *
-     * @param index
-     * @return
-     */
     public TapeImageChunk getChunkAt(int index) {
         return chunkList.get(index);
     }
 
-    /**
-     *
-     * @return
-     */
     public String[] getListing() {
 
         int l = getChunkCount();

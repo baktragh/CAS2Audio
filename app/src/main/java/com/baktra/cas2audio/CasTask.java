@@ -14,6 +14,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     private final int volume;
     private final int[] instructions;
     private final boolean invertPolarity;
+    private final int resumeIp;
     private Exception lastException;
     private final WeakReference<MainActivity> parentActivity;
     private final int sampleRate;
@@ -21,7 +22,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
 
     public static final int WAKELOCK_TIMEOUT = 120 * 60 * 1000;
 
-    public CasTask(int[] instructions, MainActivity mainActivity, boolean stereo, boolean square, int volume, int sampleRate,boolean invertPolarity) {
+    public CasTask(int[] instructions, MainActivity mainActivity, boolean stereo, boolean square, int volume, int sampleRate,boolean invertPolarity,int resumeIp) {
         this.instructions=instructions;
         this.stereo=stereo;
         this.lastException = null;
@@ -31,6 +32,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         this.sampleRate=sampleRate;
         this.invertPolarity=invertPolarity;
         this.wakeLock = null;
+        this.resumeIp=resumeIp;
     }
 
     @Override
@@ -64,7 +66,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
                 sgc.terminalSilence=1;
                 sgc.waveForm=square?0:-1;
                 sgc.invertPolarity=invertPolarity;
-
+                sgc.resumeIp = resumeIp;
                 SignalGenerator sg = new SignalGenerator(instructions,sgc,this);
                 sg.run();
             }
@@ -100,8 +102,6 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         if (lastException != null) {
             parentActivity.get().displayPostTaskAlert(R.string.msg_unable_to_process_tit,Utils.getExceptionMessage(lastException));
             lastException.printStackTrace();
-        } else {
-            parentActivity.get().displayPostTaskAlert(R.string.msg_proc_cancel_tit,parentActivity.get().getString(R.string.msg_proc_cancel));
         }
         parentActivity.get().setProgressBar(0);
         parentActivity.get().setPlaybackInProgress(false);

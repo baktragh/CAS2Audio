@@ -19,8 +19,9 @@ public class TapeImageProcessor {
     }
 
     /*Convert tape image to the signal generator instructions*/
-    public int[] convertItem(InputStream iStream, int sampleRate, boolean shortenLeader) throws Exception {
+    public ConversionCrate convertItem(InputStream iStream, int sampleRate, boolean shortenLeader) throws Exception {
 
+        ConversionCrate crate = new ConversionCrate();
         InstructionStream is = new InstructionStream();
 
         TapeImage ti = new TapeImage();
@@ -49,15 +50,25 @@ public class TapeImageProcessor {
 
             chunk = ti.getChunkAt(i);
             parent = chunk.getParent();
+            ResumePoint rsp  = new ResumePoint(i,is.getPointer(),chunk);
+            crate.addResumePoint(rsp);
             addInstructionsForChunk(is, chunk);
         }
 
         is.add(SignalGenerator.INSTR_END);
-        return is.getInstructions();
+
+        crate.setInstructions(is.getInstructions());
+
+        /*Temporary listing:*/
+        crate.listing();
+
+        return crate;
     }
 
 
     private void addInstructionsForChunk(InstructionStream is, TapeImageChunk chunk) throws Exception {
+
+
 
         if (chunk.getType().equals("pwmc")) {
             processPWMC(is, (PWMChunk) chunk);

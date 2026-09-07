@@ -68,6 +68,7 @@ public class MainActivity extends Activity {
 
         /*Widgets to be enabled during playback*/
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
+        playBackViewsEnabled.add(findViewById(R.id.btnPause));
 
         /*Restore preferences from permanent storage*/
         restorePreferences();
@@ -81,7 +82,7 @@ public class MainActivity extends Activity {
         }
 
         /*Set the title*/
-        setTitle("CAS2Audio 1.0.5");
+        setTitle("CAS2Audio 1.0.6");
 
     }
 
@@ -161,7 +162,7 @@ public class MainActivity extends Activity {
         /*Try to process the tape image*/
         try {
             TapeImageProcessor tip = new TapeImageProcessor();
-            instructions = tip.convertItem(iStream, sampleRate, false);
+            instructions = tip.convertItem(iStream, sampleRate, false).getInstructions();
         } catch (Exception e) {
             displaySimpleAlert(getString(R.string.msg_unable_to_process_tit),getResources().getString(R.string.msg_unable_to_process)+":" + LN_SP + Utils.getExceptionMessage(e));
             return;
@@ -169,7 +170,16 @@ public class MainActivity extends Activity {
 
         /*Create new background task*/
         try {
-            casTask = new CasTask(instructions, this, !userSettings.isDoMono(), userSettings.isDoSquareWave(), getVolume(), sampleRate, userSettings.isDoInvertPolarity());
+            casTask = new CasTask(
+                    instructions,
+                    this,
+                    !userSettings.isDoMono(),
+                    userSettings.isDoSquareWave(),
+                    getVolume(),
+                    sampleRate,
+                    userSettings.isDoInvertPolarity(),
+                    -1
+            );
         } catch (Exception e) {
             displaySimpleAlert(getString(R.string.msg_unable_to_process_tit),Utils.getExceptionMessage(e));
         }
@@ -182,6 +192,12 @@ public class MainActivity extends Activity {
 
     public void onStopPlaying(View v) {
         if (casTask != null) {
+            casTask.cancel(true);
+        }
+    }
+
+    public void onPausePlaying(View v) {
+        if (casTask !=null ) {
             casTask.cancel(true);
         }
     }
