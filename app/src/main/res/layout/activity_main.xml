@@ -90,7 +90,7 @@
                     android:contentDescription="@string/cd_chunks"
                     android:onClick="onDisplayChunks"
                     android:paddingVertical="18dp"
-                    android:src="@drawable/icon_settings" />
+                    android:src="@drawable/icon_list" />
 
             </LinearLayout>
 
