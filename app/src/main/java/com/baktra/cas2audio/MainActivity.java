@@ -282,14 +282,17 @@ public class MainActivity extends Activity {
                 /*If no URI, just be done*/
                 if (candidateUri==null) return;
 
-                /*Get permissions for that URI*/
-                getContentResolver().takePersistableUriPermission(candidateUri,Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
                 /*Check if valid tape image*/
-                /*Try to open the tape image - short, can be in  the even thread*/
+                /*Try to open the tape image - short, can be in the event thread*/
                 InputStream iStream=null;
 
                 try  {
+
+
+                    /*Get the persmission*/
+                    getContentResolver().takePersistableUriPermission(candidateUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    /*Open for input stream*/
                     iStream = getContentResolver().openInputStream(candidateUri);
                     TapeImage ti = new TapeImage();
                     ti.parse(iStream);
@@ -305,6 +308,7 @@ public class MainActivity extends Activity {
                     builder.setTitle(getString(R.string.msg_not_a_tape_image_tit));
                     AlertDialog dialog = builder.create();
                     dialog.show();
+                    e.printStackTrace();
                 }
 
                 finally {
