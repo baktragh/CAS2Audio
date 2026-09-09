@@ -193,10 +193,13 @@ public class MainActivity extends Activity {
 
     private void setChunkDisplay(ArrayList<ResumePoint> resumePoints) {
 
-        ResumePoint[] rPoints = new ResumePoint[resumePoints.size()];
-        ArrayAdapter<ResumePoint> aa = new ArrayAdapter<>(getApplicationContext(),R.layout.recent_item,resumePoints.toArray(rPoints));
+        //ResumePoint[] rPoints = new ResumePoint[resumePoints.size()];
+        //ArrayAdapter<ResumePoint> aa = new ArrayAdapter<>(getApplicationContext(),R.layout.recent_item,resumePoints.toArray(rPoints));
         ListView lv = (ListView)findViewById(R.id.lvChunks);
-        lv.setAdapter(aa);
+        ResumePointAdapter rpa = new ResumePointAdapter(this,lv,resumePoints,0);
+        lv.setAdapter(rpa);
+        rpa.notifyDataSetChanged();
+
     }
 
     public void onDisplayChunks(View v) {
