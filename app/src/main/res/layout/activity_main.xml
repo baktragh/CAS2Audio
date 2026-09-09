@@ -4,69 +4,57 @@
     xmlns:tools="http://schemas.android.com/tools"
 
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:keepScreenOn="true"
-    android:onClick="onPausePlaying"
-    android:paddingHorizontal="8dp"
     tools:context=".MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:id="@+id/ivCassette"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:adjustViewBounds="true"
-                    android:contentDescription="Cassette"
-                    android:cropToPadding="false"
-                    android:scaleType="centerInside"
-                    android:scaleX="0.5"
-                    android:scaleY="0.5"
-                    android:src="@drawable/tape_inactive" />
-
-                <TextView
-                    android:id="@+id/tvTapeImageName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="center" />
-
-                <ProgressBar
-                    android:id="@+id/pbProgress"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:max="100"
-                    android:minHeight="32dip"
-                    android:padding="5dp"
-                    android:progress="0"
-                    android:scaleY="2" />
-
-            </LinearLayout>
-
-        </FrameLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider" />
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/ivCassette"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/cd_cassette"
+                android:cropToPadding="true"
+                android:paddingHorizontal="0dp"
+                android:paddingVertical="0dp"
+                android:scaleType="center"
+                android:src="@drawable/tape_inactive" />
+
+            <TextView
+                android:id="@+id/tvTapeImageName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="center" />
+
+            <ProgressBar
+                android:id="@+id/pbProgress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
+                android:max="100"
+                android:minHeight="32dip"
+                android:padding="5dp"
+                android:progress="0"
+                android:scaleY="2" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <LinearLayout
@@ -79,33 +67,36 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:contentDescription="Play"
+                    android:contentDescription="@string/cd_play"
                     android:onClick="onPlay"
-                    android:src="@drawable/play_arrow_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+                    android:paddingVertical="18dp"
+                    android:src="@drawable/icon_play" />
 
                 <ImageButton
                     android:id="@+id/btnStop"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:contentDescription="Stop"
+                    android:contentDescription="@string/cd_stop"
                     android:onClick="onStopPlaying"
-                    android:src="@drawable/stop_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+                    android:paddingVertical="18dp"
+                    android:src="@drawable/icon_stop" />
 
                 <ImageButton
-                    android:id="@+id/btnPause"
+                    android:id="@+id/btnShowChunks"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:contentDescription="Pause"
-                    android:onClick="onPausePlaying"
-                    android:src="@drawable/pause_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+                    android:contentDescription="@string/cd_chunks"
+                    android:onClick="onDisplayChunks"
+                    android:paddingVertical="18dp"
+                    android:src="@drawable/icon_settings" />
 
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <ImageButton
@@ -113,30 +104,42 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:contentDescription="Browse"
+                    android:contentDescription="@string/cd_browse"
                     android:onClick="onBrowseTapeImage"
-                    android:src="@drawable/file_open_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+                    android:paddingVertical="18dp"
+                    android:src="@drawable/icon_open" />
 
                 <ImageButton
                     android:id="@+id/btnRecent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:contentDescription="Recent"
+                    android:contentDescription="@string/cd_recent"
                     android:onClick="onRecent"
-                    android:src="@drawable/history_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+                    android:paddingVertical="18dp"
+                    android:src="@drawable/icon_history" />
 
                 <ImageButton
                     android:id="@+id/btnSettings"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:contentDescription="Settings"
+                    android:contentDescription="@string/cd_settings"
                     android:onClick="onSettings"
-                    android:src="@drawable/settings_24dp_1f1f1f_fill0_wght400_grad0_opsz24" />
+                    android:paddingVertical="18dp"
+                    android:src="@drawable/icon_settings" />
+
             </LinearLayout>
 
         </LinearLayout>
 
+        <ListView
+            android:id="@+id/lvChunks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:soundEffectsEnabled="false" />
+
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

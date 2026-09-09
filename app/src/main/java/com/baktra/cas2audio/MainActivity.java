@@ -68,7 +68,6 @@ public class MainActivity extends Activity {
 
         /*Widgets to be enabled during playback*/
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
-        playBackViewsEnabled.add(findViewById(R.id.btnPause));
 
         /*Restore preferences from permanent storage*/
         restorePreferences();
@@ -162,7 +161,9 @@ public class MainActivity extends Activity {
         /*Try to process the tape image*/
         try {
             TapeImageProcessor tip = new TapeImageProcessor();
-            instructions = tip.convertItem(iStream, sampleRate, false).getInstructions();
+            ConversionCrate convCrate = tip.convertItem(iStream, sampleRate, false);
+            instructions = convCrate.getInstructions();
+            setChunkDisplay(convCrate.resumePoints);
         } catch (Exception e) {
             displaySimpleAlert(getString(R.string.msg_unable_to_process_tit),getResources().getString(R.string.msg_unable_to_process)+":" + LN_SP + Utils.getExceptionMessage(e));
             return;
@@ -190,13 +191,29 @@ public class MainActivity extends Activity {
 
     }
 
-    public void onStopPlaying(View v) {
-        if (casTask != null) {
-            casTask.cancel(true);
-        }
+    private void setChunkDisplay(ArrayList<ResumePoint> resumePoints) {
+
+        ResumePoint[] rPoints = new ResumePoint[resumePoints.size()];
+        ArrayAdapter<ResumePoint> aa = new ArrayAdapter<>(getApplicationContext(),R.layout.recent_item,resumePoints.toArray(rPoints));
+        ListView lv = (ListView)findViewById(R.id.lvChunks);
+        lv.setAdapter(aa);
     }
 
-    public void onPausePlaying(View v) {
+    public void onDisplayChunks(View v) {
+        View lv = findViewById(R.id.lvChunks);
+
+        int visibility = lv.getVisibility();
+        if (visibility==View.VISIBLE) {
+            visibility=View.INVISIBLE;
+        }
+        else {
+            visibility=View.VISIBLE;
+        }
+
+        lv.setVisibility(visibility);
+    }
+
+    public void onStopPlaying(View v) {
         if (casTask !=null ) {
             casTask.cancel(true);
         }
@@ -220,7 +237,7 @@ public class MainActivity extends Activity {
     public void onBrowseTapeImage(android.view.View view) {
 
         /*First, stop playing, this will set the controls*/
-        onStopPlaying(view);
+        onDisplayChunks(view);
 
         /*Ask for document selection*/
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);

@@ -20,6 +20,13 @@
     <string name="btn_ok">OK</string>
     <string name="msg_not_a_tape_image">The selected file is not a tape image</string>
     <string name="msg_not_a_tape_image_tit">Not a tape image</string>
+    <string name="cd_play">Play</string>
+    <string name="cd_stop">Stop</string>
+    <string name="cd_chunks">Tape image chunks</string>
+    <string name="cd_browse">Browse</string>
+    <string name="cd_recent">Recent</string>
+    <string name="cd_settings">Settings</string>
+    <string name="cd_cassette">Cassette</string>
 
 
 </resources>

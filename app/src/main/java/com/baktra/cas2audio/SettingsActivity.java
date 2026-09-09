@@ -25,14 +25,13 @@ public class SettingsActivity extends Activity {
 
     }
 
-    void onConfirm(View view) {
-        onStop();
+    public void onConfirm(View view) {
         flushUIToSettings();
         setResult(RESULT_OK, new Intent().putExtra("user_settings", userSettings));
         finish();
     }
 
-    void onDefaults(View view) {
+    public void onDefaults(View view) {
         userSettings = new UserSettings();
         setUI();
     }

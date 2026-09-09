@@ -56,12 +56,7 @@ public class TapeImageProcessor {
         }
 
         is.add(SignalGenerator.INSTR_END);
-
         crate.setInstructions(is.getInstructions());
-
-        /*Temporary listing:*/
-        crate.listing();
-
         return crate;
     }
 
