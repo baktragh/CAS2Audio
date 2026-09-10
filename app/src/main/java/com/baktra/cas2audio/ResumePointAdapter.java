@@ -140,8 +140,11 @@ public class ResumePointAdapter extends BaseAdapter {
         /*Notify for the change*/
         currentSelectedIndex=currentResumePointIndex;
         notifyDataSetChanged();
-        parentView.setSelection(currentSelectedIndex);
 
+        /*Programmatic selection, scroll to two items above, when possible*/
+        int selectionIndex = currentSelectedIndex-2;
+        if (selectionIndex<0) selectionIndex=0;
+        parentView.setSelection(selectionIndex);
 
     }
 }
