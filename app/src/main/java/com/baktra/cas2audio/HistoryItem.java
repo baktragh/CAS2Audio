@@ -14,10 +14,6 @@ final class HistoryItem {
         this.uri=uri;
     }
 
-
-
-
-
     public String toString() {
         return filename;
     }

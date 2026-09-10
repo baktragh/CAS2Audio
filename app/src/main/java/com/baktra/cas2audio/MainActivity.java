@@ -162,10 +162,12 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             displaySimpleAlert(getString(R.string.msg_unable_to_process_tit),Utils.getExceptionMessage(e));
         }
+
         /*Execute the task*/
-        casTask.execute();
         setPlaybackInProgress(true);
         changeTapePicture(true);
+        casTask.execute();
+
 
     }
 

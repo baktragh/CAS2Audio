@@ -161,8 +161,6 @@ public class SignalGenerator implements SampleConsumer {
             currentSignalWriter = dummySignalWriter;
         }
 
-        System.out.println("Resume IP: "+cResumeIp);
-
         /*Create silence*/
         SILENCE_SHORT = PulseCreator.createPulse(cChannels, cPulseVolume, cSampleRate / 10, cBits, cSigned, 1, 1, cSignalInRightChannelOnly, 0);
         BLOCKSEP = PulseCreator.createPulse(cChannels, cPulseVolume, cSampleRate / 44, cBits, cSigned, 1, 1, cSignalInRightChannelOnly, 0);

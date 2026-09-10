@@ -3,6 +3,7 @@ package com.baktra.cas2audio;
 import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,9 +73,6 @@ public class ResumePointAdapter extends BaseAdapter {
             normalBackground=Color.TRANSPARENT;
         }
 
-        System.out.println("Select "+selectionBackground);
-        System.out.println("Normal "+normalBackground);
-
     }
 
     @Override
@@ -101,7 +99,11 @@ public class ResumePointAdapter extends BaseAdapter {
         String resumePointText = resumePoints.get(i).toString();
 
         if (i==currentResumePointIndex) {
-            resumePointText = "<"+resumePointText+">";
+            resumePointText += "<--";
+            tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+        }
+        else {
+            tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
         }
 
         tv.setText(resumePointText);
