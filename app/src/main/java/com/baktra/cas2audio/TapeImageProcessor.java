@@ -19,13 +19,11 @@ public class TapeImageProcessor {
     }
 
     /*Convert tape image to the signal generator instructions*/
-    public ConversionCrate convertItem(InputStream iStream, int sampleRate, boolean shortenLeader) throws Exception {
+    public ConversionCrate convertItem(TapeImage ti, int sampleRate, boolean shortenLeader) throws Exception {
 
         ConversionCrate crate = new ConversionCrate();
         InstructionStream is = new InstructionStream();
-
-        TapeImage ti = new TapeImage();
-        ti.parse(iStream);
+        crate.sampleRate=sampleRate;
 
         if (shortenLeader == true) {
             /*Find first data chunk*/

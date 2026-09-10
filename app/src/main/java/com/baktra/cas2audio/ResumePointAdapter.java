@@ -109,6 +109,39 @@ public class ResumePointAdapter extends BaseAdapter {
         return tv;
 
     }
+    public void setSelectedIndex(int i) {
+        this.currentSelectedIndex=i;
+        notifyDataSetChanged();
+    }
+
+    public Object getSelectedItem() {
+        if (currentSelectedIndex>=0 && currentSelectedIndex<resumePoints.size()) {
+            return resumePoints.get(currentSelectedIndex);
+        }
+        else {
+            return null;
+        }
+    }
+
+    public void setResumePoint(int ip) {
+
+        /*Fallback value*/
+        currentResumePointIndex=0;
+
+        /*Find the closest resume point*/
+        for (int i=resumePoints.size()-1;i>=0;i--) {
+            ResumePoint p = resumePoints.get(i);
+            if (p.resumeIp<ip) {
+                currentResumePointIndex=i;
+                break;
+            }
+        }
+
+        /*Notify for the change*/
+        currentSelectedIndex=currentResumePointIndex;
+        notifyDataSetChanged();
+        parentView.setSelection(currentSelectedIndex);
 
 
+    }
 }

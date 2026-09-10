@@ -8,7 +8,6 @@
     <string name="msg_nothing_to_play">Nebyl vybrán obraz kazety</string>
     <string name="msg_nothing_to_play_tit">Nic k přehrání</string>
     <string name="msg_unable_to_open">Nelze otevřít obraz kazety</string>
-    <string name="msg_unable_to_open_tit">Nelze otevřít</string>
     <string name="msg_unable_to_process">Chyba při zpracování obrazu kazety</string>
     <string name="msg_unable_to_process_tit">Chyba při zpracování</string>
     <string name="msg_proc_cancel">Zpracování obrazu kazety zrušeno</string>
@@ -19,6 +18,7 @@
     <string name="btn_defaults">Výchozí</string>
     <string name="tit_recent">Poslední obrazy kazet</string>
     <string name="btn_ok">OK</string>
-    <string name="msg_not_a_tape_image">Vybraný soubor není obraz kazety</string>
-    <string name="msg_not_a_tape_image_tit">Není obraz kazety</string>
+    <string name="msg_file_unable_open">Vybraný soubor nelze otevřít</string>
+    <string name="msg_file_not_tape_image">Vybraný soubor není obraz kazety</string>
+    <string name="msg_file_unable_open_tit">Nelze otevřít</string>
 </resources>

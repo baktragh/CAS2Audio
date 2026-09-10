@@ -20,6 +20,8 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     private final int sampleRate;
     private PowerManager.WakeLock wakeLock;
 
+    SignalGenerator sg;
+
     public static final int WAKELOCK_TIMEOUT = 120 * 60 * 1000;
 
     public CasTask(int[] instructions, MainActivity mainActivity, boolean stereo, boolean square, int volume, int sampleRate,boolean invertPolarity,int resumeIp) {
@@ -33,6 +35,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         this.invertPolarity=invertPolarity;
         this.wakeLock = null;
         this.resumeIp=resumeIp;
+        this.sg=null;
     }
 
     @Override
@@ -51,6 +54,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
             e.printStackTrace();
         }
 
+
             try {
                 SignalGenerator.SignalGeneratorConfig sgc = new SignalGenerator.SignalGeneratorConfig();
                 sgc.amplitude=volume*10;
@@ -67,7 +71,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
                 sgc.waveForm=square?0:-1;
                 sgc.invertPolarity=invertPolarity;
                 sgc.resumeIp = resumeIp;
-                SignalGenerator sg = new SignalGenerator(instructions,sgc,this);
+                sg = new SignalGenerator(instructions,sgc,this);
                 sg.run();
             }
             catch (Exception e) {
@@ -94,7 +98,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         }
         parentActivity.get().setPlaybackInProgress(false);
         parentActivity.get().changeTapePicture(false);
-
+        parentActivity.get().setResumePoint(0);
     }
 
     protected void onCancelled() {
@@ -106,6 +110,11 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         parentActivity.get().setProgressBar(0);
         parentActivity.get().setPlaybackInProgress(false);
         parentActivity.get().changeTapePicture(false);
+
+        int lastIp = 0;
+        if (sg!=null) lastIp=sg.getLastIp();
+
+        parentActivity.get().setResumePoint(lastIp);
     }
 
     private void setControlsForTermination() {

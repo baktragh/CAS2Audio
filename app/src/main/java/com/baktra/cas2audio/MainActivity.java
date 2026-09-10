@@ -26,6 +26,8 @@ import java.util.ArrayList;
 public class MainActivity extends Activity {
 
     private CasTask casTask;
+    private ConversionCrate currentConversionCrate;
+
     private final String LN_SP;
     Uri currentUri;
     private boolean playbackInProgress;
@@ -82,14 +84,12 @@ public class MainActivity extends Activity {
 
         /*Set the title*/
         setTitle("CAS2Audio 1.0.6");
-
     }
 
 
     protected void onResume() {
 
         super.onResume();
-
 
         /*If playback in progress, keep components as they were*/
         if (playbackInProgress) return;
@@ -142,44 +142,22 @@ public class MainActivity extends Activity {
         InputStream iStream;
 
         /*Check if anything was selected*/
-        if (currentUri == null) {
+        if (currentUri == null || currentConversionCrate == null) {
             displaySimpleAlert(getString(R.string.msg_nothing_to_play_tit),getResources().getString(R.string.msg_nothing_to_play));
-            return;
-        }
-
-        /*Try to open the tape image - short, can be in  the even thread*/
-        try {
-            iStream = getContentResolver().openInputStream(currentUri);
-
-        } catch (Exception e) {
-            displaySimpleAlert(getString(R.string.msg_unable_to_open_tit),getResources().getString(R.string.msg_unable_to_open)+":" + LN_SP + Utils.getExceptionMessage(e));
-            return;
-        }
-
-        int sampleRate = userSettings.isDo48kHz() ? 48000 : 44100;
-
-        /*Try to process the tape image*/
-        try {
-            TapeImageProcessor tip = new TapeImageProcessor();
-            ConversionCrate convCrate = tip.convertItem(iStream, sampleRate, false);
-            instructions = convCrate.getInstructions();
-            setChunkDisplay(convCrate.resumePoints);
-        } catch (Exception e) {
-            displaySimpleAlert(getString(R.string.msg_unable_to_process_tit),getResources().getString(R.string.msg_unable_to_process)+":" + LN_SP + Utils.getExceptionMessage(e));
             return;
         }
 
         /*Create new background task*/
         try {
             casTask = new CasTask(
-                    instructions,
+                    currentConversionCrate.getInstructions(),
                     this,
                     !userSettings.isDoMono(),
                     userSettings.isDoSquareWave(),
                     getVolume(),
-                    sampleRate,
+                    currentConversionCrate.sampleRate,
                     userSettings.isDoInvertPolarity(),
-                    -1
+                    getResumeIp()
             );
         } catch (Exception e) {
             displaySimpleAlert(getString(R.string.msg_unable_to_process_tit),Utils.getExceptionMessage(e));
@@ -191,14 +169,23 @@ public class MainActivity extends Activity {
 
     }
 
+
+
     private void setChunkDisplay(ArrayList<ResumePoint> resumePoints) {
 
-        //ResumePoint[] rPoints = new ResumePoint[resumePoints.size()];
-        //ArrayAdapter<ResumePoint> aa = new ArrayAdapter<>(getApplicationContext(),R.layout.recent_item,resumePoints.toArray(rPoints));
         ListView lv = (ListView)findViewById(R.id.lvChunks);
         ResumePointAdapter rpa = new ResumePointAdapter(this,lv,resumePoints,0);
         lv.setAdapter(rpa);
         rpa.notifyDataSetChanged();
+
+        if (lv.getOnItemClickListener()==null) {
+            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    onClickChunks(adapterView,view,i,l);
+                }
+            });
+        }
 
     }
 
@@ -214,6 +201,24 @@ public class MainActivity extends Activity {
         }
 
         lv.setVisibility(visibility);
+    }
+
+    public void onClickChunks(AdapterView<?> adapterView, View view, int i, long l) {
+        ListView lv = (ListView)adapterView;
+        ResumePointAdapter rpa = (ResumePointAdapter) lv.getAdapter();
+        rpa.setSelectedIndex(i);
+    }
+
+    private int getResumeIp() {
+        ListView lv = (ListView)findViewById((R.id.lvChunks));
+        ResumePointAdapter rpa = (ResumePointAdapter)lv.getAdapter();
+        ResumePoint rp = (ResumePoint)rpa.getSelectedItem();
+        if (rp==null) {
+            return -1;
+        }
+        else {
+            return rp.resumeIp;
+        }
     }
 
     public void onStopPlaying(View v) {
@@ -238,9 +243,6 @@ public class MainActivity extends Activity {
 
     /*Browse for a tape image*/
     public void onBrowseTapeImage(android.view.View view) {
-
-        /*First, stop playing, this will set the controls*/
-        onDisplayChunks(view);
 
         /*Ask for document selection*/
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -287,8 +289,6 @@ public class MainActivity extends Activity {
                 InputStream iStream=null;
 
                 try  {
-
-
                     /*Get the persmission*/
                     getContentResolver().takePersistableUriPermission(candidateUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
@@ -297,15 +297,31 @@ public class MainActivity extends Activity {
                     TapeImage ti = new TapeImage();
                     ti.parse(iStream);
 
+                    /*Perform the conversion*/
+                    TapeImageProcessor tip = new TapeImageProcessor();
+                    currentConversionCrate = tip.convertItem(ti,userSettings.isDo48kHz()?48000:44100 , false);
+                    setChunkDisplay(currentConversionCrate.resumePoints);
+
                 } catch (Exception e) {
                     candidateUri=null;
+                    currentConversionCrate=null;
+                    setChunkDisplay(new ArrayList<>());
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                         }
                     });
-                    builder.setMessage(String.format("%s%n%s",getString(R.string.msg_not_a_tape_image),Utils.getExceptionMessage(e)));
-                    builder.setTitle(getString(R.string.msg_not_a_tape_image_tit));
+
+                    String primaryReasonString;
+
+                    if (e instanceof FileFormatException) {
+                        primaryReasonString = getString(R.string.msg_file_not_tape_image);
+                    }
+                    else {
+                        primaryReasonString = getString(R.string.msg_file_unable_open);
+                    }
+                    builder.setMessage(String.format("%s%n%s",primaryReasonString,Utils.getExceptionMessage(e)));
+                    builder.setTitle(getString(R.string.msg_file_unable_open_tit));
                     AlertDialog dialog = builder.create();
                     dialog.show();
                     e.printStackTrace();
@@ -400,6 +416,12 @@ public class MainActivity extends Activity {
         getProgressBar().setProgress(value);
     }
 
+    void setResumePoint(int ip) {
+        ListView lv = (ListView)findViewById(R.id.lvChunks);
+        ResumePointAdapter rpa = (ResumePointAdapter)lv.getAdapter();
+        rpa.setResumePoint(ip);
+    }
+
     private String extractFileNameFromURI(Uri uri) {
         String result = null;
 
@@ -437,6 +459,7 @@ public class MainActivity extends Activity {
             tapeImageHistory.clear();
         }
         userSettings = UserSettings.createFromPersistentStorage(sPref);
+        findViewById(R.id.lvChunks).setVisibility(sPref.getInt("c2a_chunks",View.INVISIBLE));
     }
 
     private void storePreferences() {
@@ -450,6 +473,7 @@ public class MainActivity extends Activity {
         }
         String recentString = tapeImageHistory.createPersistenceString();
         editor.putString("c2a_recents", recentString);
+        editor.putInt("c2a_chunks",findViewById(R.id.lvChunks).getVisibility());
         editor.apply();
 
         /*General settings*/

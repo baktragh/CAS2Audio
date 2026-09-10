@@ -3,6 +3,7 @@ package com.baktra.cas2audio;
 import java.util.ArrayList;
 
 public class ConversionCrate {
+    int sampleRate;
     int[] instructions;
     ArrayList<ResumePoint> resumePoints;
     ConversionCrate() {

@@ -35,6 +35,10 @@ public class SignalGenerator implements SampleConsumer {
     private boolean cInvertPolarity;
     private DummySignalWriter dummySignalWriter;
 
+    public int getLastIp() {
+        return ip;
+    }
+
     public static class SignalGeneratorConfig {
         public int numChannels;
         public int bitsPerSample;
@@ -156,6 +160,8 @@ public class SignalGenerator implements SampleConsumer {
         else {
             currentSignalWriter = dummySignalWriter;
         }
+
+        System.out.println("Resume IP: "+cResumeIp);
 
         /*Create silence*/
         SILENCE_SHORT = PulseCreator.createPulse(cChannels, cPulseVolume, cSampleRate / 10, cBits, cSigned, 1, 1, cSignalInRightChannelOnly, 0);

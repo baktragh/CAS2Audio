@@ -7,7 +7,6 @@
     <string name="msg_nothing_to_play">No tape image selected</string>
     <string name="msg_nothing_to_play_tit">Nothing to play</string>
     <string name="msg_unable_to_open">Unable to open the tape image</string>
-    <string name="msg_unable_to_open_tit">Unable to open</string>
     <string name="msg_unable_to_process">Unable to process the tape image</string>
     <string name="msg_unable_to_process_tit">Unable to process</string>
     <string name="msg_proc_cancel">Tape image processing cancelled</string>
@@ -18,8 +17,10 @@
     <string name="btn_defaults">Defaults</string>
     <string name="tit_recent">Recent tape images</string>
     <string name="btn_ok">OK</string>
-    <string name="msg_not_a_tape_image">The selected file is not a tape image</string>
-    <string name="msg_not_a_tape_image_tit">Not a tape image</string>
+    <string name="msg_file_unable_open">Unable to open the selected file</string>
+    <string name="msg_file_unable_open_tit">Unable to open</string>
+    <string name="msg_file_not_tape_image">The selected file is not a tape image</string>
+
     <string name="cd_play">Play</string>
     <string name="cd_stop">Stop</string>
     <string name="cd_chunks">Tape image chunks</string>

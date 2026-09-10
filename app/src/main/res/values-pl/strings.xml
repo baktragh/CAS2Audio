@@ -8,7 +8,6 @@
     <string name="msg_unable_to_process">Błąd przetwarzania obrazu taśmy</string>
     <string name="msg_unable_to_process_tit">Błąd przetwarzania</string>
     <string name="msg_unable_to_open">Błąd otwierania obrazu taśmy</string>
-    <string name="msg_unable_to_open_tit">Błąd otwierania</string>
     <string name="msg_nothing_to_play">Nie wybrano obrazu taśmy</string>
     <string name="msg_nothing_to_play_tit">Nic do odtworzenia</string>
     <string name="msg_proc_cancel">Anulowano przetwarzanie obrazu taśmy</string>
@@ -19,6 +18,9 @@
     <string name="btn_defaults">Domyślne</string>
     <string name="tit_recent">Ostatnie obrazy taśmy</string>
     <string name="btn_ok">OK</string>
-    <string name="msg_not_a_tape_image">Wybrany plik nie jest obrazem taśmy</string>
-    <string name="msg_not_a_tape_image_tit">Nie jest obrazem taśmy</string>
+
+    <string name="msg_file_unable_open">Nie można otworzyć wybranego pliku</string>
+    <string name="msg_file_not_tape_image">Wybrany plik nie jest obrazem taśmy</string>
+    <string name="msg_file_unable_open_tit">Błąd otwierania</string>
+
 </resources>
