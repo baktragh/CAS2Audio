@@ -167,8 +167,6 @@ public class MainActivity extends Activity {
         setPlaybackInProgress(true);
         changeTapePicture(true);
         casTask.execute();
-
-
     }
 
 

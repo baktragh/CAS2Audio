@@ -21,4 +21,13 @@
     <string name="msg_file_unable_open">Vybraný soubor nelze otevřít</string>
     <string name="msg_file_not_tape_image">Vybraný soubor není obraz kazety</string>
     <string name="msg_file_unable_open_tit">Nelze otevřít</string>
+
+    <string name="cd_play">Přehrát</string>
+    <string name="cd_stop">Zastavit</string>
+    <string name="cd_chunks">Bloky obrazu kazety</string>
+    <string name="cd_browse">Procházet</string>
+    <string name="cd_recent">Poslední obrazy kazet</string>
+    <string name="cd_settings">Nastavení</string>
+    <string name="cd_cassette">Kazeta</string>
+
 </resources>

@@ -23,4 +23,12 @@
     <string name="msg_file_not_tape_image">Wybrany plik nie jest obrazem taśmy</string>
     <string name="msg_file_unable_open_tit">Błąd otwierania</string>
 
+    <string name="cd_play">Odtwarzanie</string>
+    <string name="cd_stop">Zatrzymywać</string>
+    <string name="cd_chunks">Bloki obrazu kasety</string>
+    <string name="cd_browse">Przeglądać</string>
+    <string name="cd_recent">Ostatnie obrazy kaset</string>
+    <string name="cd_settings">Ustawienia</string>
+    <string name="cd_cassette">Kaseta</string>
+
 </resources>
