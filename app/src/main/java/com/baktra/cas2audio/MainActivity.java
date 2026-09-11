@@ -41,6 +41,10 @@ public class MainActivity extends Activity {
 
     private TapeImageHistory tapeImageHistory;
 
+    public static final int STOP_REASON_STOP=0;
+    public static final int STOP_REASON_PAUSE=1;
+    private int stopReason;
+
 
 
     public MainActivity() {
@@ -83,7 +87,7 @@ public class MainActivity extends Activity {
         }
 
         /*Set the title*/
-        setTitle("CAS2Audio 1.0.6");
+        setTitle("CAS2Audio 1.0.6-test-02");
     }
 
 
@@ -222,6 +226,14 @@ public class MainActivity extends Activity {
     }
 
     public void onStopPlaying(View v) {
+
+        if (v==findViewById(R.id.btnPause)) {
+            stopReason=STOP_REASON_PAUSE;
+        }
+        else {
+            stopReason=STOP_REASON_STOP;
+        }
+
         if (casTask !=null ) {
             casTask.cancel(true);
         }
@@ -419,7 +431,13 @@ public class MainActivity extends Activity {
     void setResumePoint(int ip) {
         ListView lv = (ListView)findViewById(R.id.lvChunks);
         ResumePointAdapter rpa = (ResumePointAdapter)lv.getAdapter();
-        rpa.setResumePoint(ip);
+
+        if (stopReason==STOP_REASON_PAUSE) {
+            rpa.setResumePoint(ip);
+        }
+        else {
+            rpa.setResumePoint(0);
+        }
     }
 
     private String extractFileNameFromURI(Uri uri) {

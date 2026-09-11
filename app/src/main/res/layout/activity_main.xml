@@ -73,6 +73,16 @@
                     android:src="@drawable/icon_play" />
 
                 <ImageButton
+                    android:id="@+id/btnPause"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:contentDescription="@string/cd_stop"
+                    android:onClick="onStopPlaying"
+                    android:paddingVertical="18dp"
+                    android:src="@drawable/icon_pause" />
+
+                <ImageButton
                     android:id="@+id/btnStop"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -81,16 +91,6 @@
                     android:onClick="onStopPlaying"
                     android:paddingVertical="18dp"
                     android:src="@drawable/icon_stop" />
-
-                <ImageButton
-                    android:id="@+id/btnShowChunks"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:contentDescription="@string/cd_chunks"
-                    android:onClick="onDisplayChunks"
-                    android:paddingVertical="18dp"
-                    android:src="@drawable/icon_list" />
 
             </LinearLayout>
 
@@ -128,6 +128,16 @@
                     android:onClick="onSettings"
                     android:paddingVertical="18dp"
                     android:src="@drawable/icon_settings" />
+
+                <ImageButton
+                    android:id="@+id/btnShowChunks"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:contentDescription="@string/cd_chunks"
+                    android:onClick="onDisplayChunks"
+                    android:paddingVertical="18dp"
+                    android:src="@drawable/icon_list" />
 
             </LinearLayout>
 
