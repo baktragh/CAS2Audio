@@ -96,10 +96,10 @@ public class ResumePointAdapter extends BaseAdapter {
             tv.setBackgroundColor(normalBackground);
         }
 
-        String resumePointText = resumePoints.get(i).toString();
+        String resumePointText = resumePoints.get(i).toUIString();
 
         if (i==currentResumePointIndex) {
-            resumePointText += "<--";
+            resumePointText += " <==";
             tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
         }
         else {

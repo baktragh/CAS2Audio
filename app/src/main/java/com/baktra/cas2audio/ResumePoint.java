@@ -18,6 +18,10 @@ public class ResumePoint {
         return String.format("%04d: %s, %04d ",index,chunk.toString(),resumeIp);
     }
 
+    public String toUIString() {
+        return String.format("%04d: %s",index,chunk.toString());
+    }
+
 
 
 }

@@ -546,7 +546,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onAbout(MenuItem mi) {
-        Toast.makeText(getApplicationContext(),"CAS2Audio by BAKTRA Software",Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(),getString(R.string.toast_about),Toast.LENGTH_LONG).show();
     }
 
 

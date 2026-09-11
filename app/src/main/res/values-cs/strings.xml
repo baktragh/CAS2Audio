@@ -29,5 +29,7 @@
     <string name="cd_recent">Poslední obrazy kazet</string>
     <string name="cd_settings">Nastavení</string>
     <string name="cd_cassette">Kazeta</string>
+    <string name="cd_about">O Aplikaci</string>
+    <string name="toast_about">CAS2Audio od BAKTRA Software</string>
 
 </resources>
