@@ -76,7 +76,7 @@
                     android:id="@+id/btnPause"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0"
+                    android:layout_weight="1"
                     android:contentDescription="@string/cd_stop"
                     android:onClick="onStopPlaying"
                     android:paddingVertical="18dp"
@@ -118,16 +118,6 @@
                     android:onClick="onRecent"
                     android:paddingVertical="18dp"
                     android:src="@drawable/icon_history" />
-
-                <ImageButton
-                    android:id="@+id/btnSettings"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:contentDescription="@string/cd_settings"
-                    android:onClick="onSettings"
-                    android:paddingVertical="18dp"
-                    android:src="@drawable/icon_settings" />
 
                 <ImageButton
                     android:id="@+id/btnShowChunks"

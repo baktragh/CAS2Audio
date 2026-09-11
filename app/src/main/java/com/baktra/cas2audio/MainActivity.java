@@ -13,8 +13,13 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.DocumentsContract;
 import android.provider.OpenableColumns;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.baktra.cas2audio.tapeimage.TapeImage;
 
@@ -23,7 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     private CasTask casTask;
     private ConversionCrate currentConversionCrate;
@@ -37,7 +42,9 @@ public class MainActivity extends Activity {
     private UserSettings userSettings;
 
     private final ArrayList<View> playBackViewsDisabled;
+    private final ArrayList<MenuItem> playBackMenuItemsDisabled;
     private final ArrayList<View> playBackViewsEnabled;
+    private final ArrayList<MenuItem> playBackMenuItemsEnabled;
 
     private TapeImageHistory tapeImageHistory;
 
@@ -55,6 +62,9 @@ public class MainActivity extends Activity {
         playbackInProgress = false;
         playBackViewsDisabled = new ArrayList<>(8);
         playBackViewsEnabled = new ArrayList<>(8);
+        playBackMenuItemsDisabled = new ArrayList<>(1);
+        playBackMenuItemsEnabled = new ArrayList<>(1);
+
         lastChooserDirectory = null;
         tapeImageHistory = new TapeImageHistory();
         userSettings = new UserSettings();
@@ -70,10 +80,10 @@ public class MainActivity extends Activity {
         playBackViewsDisabled.add(getBrowseButton());
         playBackViewsDisabled.add(findViewById(R.id.btnPlay));
         playBackViewsDisabled.add(findViewById(R.id.btnRecent));
-        playBackViewsDisabled.add(findViewById(R.id.btnSettings));
 
         /*Widgets to be enabled during playback*/
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
+        playBackViewsEnabled.add(findViewById(R.id.btnPause));
 
         /*Restore preferences from permanent storage*/
         restorePreferences();
@@ -88,6 +98,14 @@ public class MainActivity extends Activity {
 
         /*Set the title*/
         setTitle("CAS2Audio 1.0.6-test-02");
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        playBackMenuItemsDisabled.add(menu.findItem(R.id.miSettings));
+
+        return true;
     }
 
 
@@ -240,6 +258,13 @@ public class MainActivity extends Activity {
     }
 
     public void onSettings(View v) {
+        doSettings();
+
+    }
+    public void onSettings(MenuItem item) {
+        doSettings();
+    }
+    public void doSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
         intent.setAction(Intent.ACTION_GET_CONTENT);
         intent.putExtra("user_settings", this.userSettings);
@@ -418,6 +443,13 @@ public class MainActivity extends Activity {
         for (View v : playBackViewsEnabled) {
             v.setEnabled(b);
         }
+
+        for (MenuItem mi: playBackMenuItemsDisabled) {
+            mi.setEnabled(!b);
+        }
+        for (MenuItem mi: playBackMenuItemsEnabled) {
+            mi.setEnabled(b);
+        }
     }
 
     public void displayPostTaskAlert(int titleId, String msg) {
@@ -511,6 +543,10 @@ public class MainActivity extends Activity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    public void onAbout(MenuItem mi) {
+        Toast.makeText(getApplicationContext(),"CAS2Audio by BAKTRA Software",Toast.LENGTH_LONG).show();
     }
 
 

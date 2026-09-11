@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/miSettings"
+        android:onClick="onSettings"
+        android:title="@string/cd_settings">
+
+    </item>
+    <item
+        android:title="@string/cd_about"
+        android:onClick="onAbout">
+    </item>
+
+</menu>

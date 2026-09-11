@@ -4,13 +4,17 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class RecentActivity extends Activity implements AdapterView.OnItemClickListener {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class RecentActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private TapeImageHistory localHistory;
 
@@ -37,7 +41,7 @@ public class RecentActivity extends Activity implements AdapterView.OnItemClickL
         }
     }
 
-    private void setUI() {
+       private void setUI() {
         ListView lv = findViewById(R.id.lvRecentItems);
         lv.setAdapter(new ArrayAdapter<HistoryItem>(this, R.layout.recent_item, localHistory.getAsArray()));
         lv.setOnItemClickListener(this);

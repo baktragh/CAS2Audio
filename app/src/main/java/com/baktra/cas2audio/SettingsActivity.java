@@ -8,7 +8,9 @@ import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Switch;
 
-public class SettingsActivity extends Activity {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class SettingsActivity extends AppCompatActivity {
 
     private UserSettings userSettings;
 
