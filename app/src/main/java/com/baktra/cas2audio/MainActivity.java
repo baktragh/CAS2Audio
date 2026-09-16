@@ -147,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         storePreferences();
-        System.out.println("   ====== onStop()");
     }
 
     protected void onDestroy() {
@@ -395,7 +394,6 @@ public class MainActivity extends AppCompatActivity {
         setPlayBackViewsEnabled(false);
         tapeImageHistory.addHistoryItem(currentUri,filename);
     }
-
 
     private int getVolume() {
         return userSettings.getAmplitude();
