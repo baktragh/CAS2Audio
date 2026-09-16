@@ -73,6 +73,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
                 sgc.resumeIp = resumeIp;
                 sg = new SignalGenerator(instructions,sgc,this);
                 sg.run();
+                setProgress(100,-1);
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -81,13 +82,16 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
                 if (wakeLock != null) wakeLock.release();
             }
 
-            setProgress(100);
+
         return null;
     }
 
     @Override
     protected void onProgressUpdate(Integer... progress) {
         parentActivity.get().setProgressBar(progress[0]);
+        if (progress[1]!=-1) {
+            parentActivity.get().setResumePointProgress(progress[1]);
+        }
     }
 
     protected void onPostExecute(Void v) {
@@ -126,7 +130,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         parentActivity.get().setPlayBackViewsEnabled(true);
     }
 
-    public void setProgress(int statusPercent) {
-        publishProgress(statusPercent);
+    public void setProgress(int statusPercent,int ip) {
+        publishProgress(statusPercent,ip);
     }
 }

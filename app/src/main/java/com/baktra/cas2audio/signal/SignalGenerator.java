@@ -204,7 +204,7 @@ public class SignalGenerator implements SampleConsumer {
                 }
 
                 /*Show progress*/
-                parentTask.setProgress(getStatusPercent());
+                parentTask.setProgress(getStatusPercent(),ip);
 
                 /*Determine what is the current operation and execute it*/
                 op = mem[ip];

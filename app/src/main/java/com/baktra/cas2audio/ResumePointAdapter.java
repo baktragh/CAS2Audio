@@ -125,17 +125,29 @@ public class ResumePointAdapter extends BaseAdapter {
         }
     }
 
-    public void setResumePoint(int ip) {
+    public void setResumePoint(int ip, boolean forProgress) {
 
         /*Fallback value*/
         currentResumePointIndex=0;
 
-        /*Find the closest resume point*/
-        for (int i=resumePoints.size()-1;i>=0;i--) {
-            ResumePoint p = resumePoints.get(i);
-            if (p.resumeIp<ip) {
-                currentResumePointIndex=i;
-                break;
+        if (!forProgress) {
+            /*Find the closest resume point*/
+            for (int i = resumePoints.size() - 1; i >= 0; i--) {
+                ResumePoint p = resumePoints.get(i);
+                if (p.resumeIp < ip) {
+                    currentResumePointIndex = i;
+                    break;
+                }
+            }
+        }
+        else {
+            /*Find the closest resume point*/
+            for (int i = resumePoints.size() - 1; i >= 0; i--) {
+                ResumePoint p = resumePoints.get(i);
+                if (p.resumeIp <= ip) {
+                    currentResumePointIndex = i;
+                    break;
+                }
             }
         }
 
@@ -149,4 +161,6 @@ public class ResumePointAdapter extends BaseAdapter {
         parentView.setSelection(selectionIndex);
 
     }
+
+
 }
