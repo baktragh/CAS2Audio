@@ -16,6 +16,18 @@ Play back tape images for 8-bit Atari computers on mobile devices with Android.
 * The signal is generated on-the-fly (no temporary wave files are needed)
 * Displays animated cassette during playback
 
+### Quick Start
+You need an 8-bit Atari computer, data recorder, cassette adapter, and a smartphone running Android.
+
+* Install CAS2Audio on your smartphone running Android
+* Download some tape images (.CAS files) to your smartphone
+* Connect your data recorder to the Atari computer
+* Insert a cassette adapter in the data recorder and connect the cassette adapter to the headphone jack of your smartphone
+* Prepare the Atari computer to load data
+* Press PLAY on your data recorder
+* Open your tape image in the CAS2Audio and click the PLAY button
+* Press a key on your computer to begin the loading
+
 ## Technical information
 
 ### OS Version
