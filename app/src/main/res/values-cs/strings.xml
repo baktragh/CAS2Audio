@@ -31,5 +31,6 @@
     <string name="cd_cassette">Kazeta</string>
     <string name="cd_about">O Aplikaci</string>
     <string name="toast_about">CAS2Audio od BAKTRA Software</string>
+    <string name="clear_recents">Vymazat poslední</string>
 
 </resources>

@@ -5,19 +5,19 @@ import android.net.Uri;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-class TapeImageHistory {
+class TapeImageRecents {
 
-    private final ArrayList<HistoryItem> historyItems;
-    public static final int HISTORY_CAPACITY=24;
+    private final ArrayList<RecentItem> recentItems;
+    public static final int RECENT_CAPACITY =24;
 
-    TapeImageHistory() {
-        historyItems = new ArrayList<>();
+    TapeImageRecents() {
+        recentItems = new ArrayList<>();
     }
 
     String createPersistenceString() {
         StringBuilder sb = new StringBuilder();
 
-        for (HistoryItem ri : historyItems) {
+        for (RecentItem ri : recentItems) {
             String p1 = ri.uri.toString();
             String p2 = ri.filename;
             sb.append("{");
@@ -31,12 +31,12 @@ class TapeImageHistory {
         return sb.toString();
     }
 
-    void addHistoryItem(Uri uri, String filename) {
-        HistoryItem candidateItem = new HistoryItem(uri,filename);
+    void addRecentItem(Uri uri, String filename) {
+        RecentItem candidateItem = new RecentItem(uri,filename);
 
         /*Check if already there*/
         boolean found = false;
-        for (HistoryItem item : historyItems) {
+        for (RecentItem item : recentItems) {
             if (item.uri.toString().equals(candidateItem.uri.toString())) {
                 found = true;
                 break;
@@ -46,12 +46,12 @@ class TapeImageHistory {
         if (found) return;
 
         /*Move to front*/
-        historyItems.add(0, candidateItem);
-        if (historyItems.size() > HISTORY_CAPACITY) historyItems.remove(HISTORY_CAPACITY-1);
+        recentItems.add(0, candidateItem);
+        if (recentItems.size() > RECENT_CAPACITY) recentItems.remove(RECENT_CAPACITY -1);
     }
 
     void parsePersistenceString(String s) {
-        historyItems.clear();
+        recentItems.clear();
         StringTokenizer tk = new StringTokenizer(s, ";");
 
         while (tk.hasMoreTokens()) {
@@ -60,16 +60,16 @@ class TapeImageHistory {
             StringTokenizer tk2 = new StringTokenizer(pair,",");
             String p1 = tk2.nextToken().replace("{", "").replace("}", "");
             String p2 = tk2.nextToken().replace("{", "").replace("}", "");
-            historyItems.add(new HistoryItem(Uri.parse(p1),p2));
+            recentItems.add(new RecentItem(Uri.parse(p1),p2));
         }
     }
 
     void clear() {
-        historyItems.clear();
+        recentItems.clear();
     }
 
-    public HistoryItem[] getAsArray() {
-        HistoryItem[] retVal = new HistoryItem[historyItems.size()];
-        return historyItems.toArray(retVal);
+    public RecentItem[] getAsArray() {
+        RecentItem[] retVal = new RecentItem[recentItems.size()];
+        return recentItems.toArray(retVal);
     }
 }

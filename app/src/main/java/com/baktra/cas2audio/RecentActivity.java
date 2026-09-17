@@ -1,6 +1,5 @@
 package com.baktra.cas2audio;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,7 +15,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class RecentActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
-    private TapeImageHistory localHistory;
+    private TapeImageRecents localRecents;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,14 +26,32 @@ public class RecentActivity extends AppCompatActivity implements AdapterView.OnI
 
     protected void onResume() {
         super.onResume();
-        localHistory = new TapeImageHistory();
-        localHistory.parsePersistenceString((String)getIntent().getSerializableExtra("recent_items"));
+        localRecents = new TapeImageRecents();
+        localRecents.parsePersistenceString((String) getIntent().getSerializableExtra("recent_items"));
         setUI();
+    }
+
+    protected void onPause() {
+        closeOptionsMenu();
+        super.onPause();
+    }
+
+    protected void onDestroy() {
+        closeOptionsMenu();
+        super.onDestroy();
+    }
+
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.recent_menu, menu);
+        return true;
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                setResult(RESULT_OK, createResultIntent(null));
                 finish();
                 return true;
             default:
@@ -41,20 +59,32 @@ public class RecentActivity extends AppCompatActivity implements AdapterView.OnI
         }
     }
 
-       private void setUI() {
+    private void setUI() {
         ListView lv = findViewById(R.id.lvRecentItems);
-        lv.setAdapter(new ArrayAdapter<HistoryItem>(this, R.layout.recent_item, localHistory.getAsArray()));
+        lv.setAdapter(new ArrayAdapter<RecentItem>(this, R.layout.recent_item, localRecents.getAsArray()));
         lv.setOnItemClickListener(this);
     }
-
 
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         super.onStop();
-        HistoryItem item = (HistoryItem) adapterView.getItemAtPosition(i);
+        RecentItem item = (RecentItem) adapterView.getItemAtPosition(i);
         Uri selectedUri = item.uri;
-        setResult(RESULT_OK, new Intent().setData(selectedUri));
+        setResult(RESULT_OK, createResultIntent(selectedUri));
         finish();
     }
+
+    public void onClearRecents(MenuItem menuItem) {
+        localRecents.clear();
+        setUI();
+    }
+
+    private Intent createResultIntent(Uri selectedUri) {
+        Intent i = new Intent();
+        i.setData(selectedUri);
+        i.putExtra("recents", localRecents.createPersistenceString());
+        return i;
+    }
+
 }

@@ -46,13 +46,11 @@ public class MainActivity extends AppCompatActivity {
     private final ArrayList<View> playBackViewsEnabled;
     private final ArrayList<MenuItem> playBackMenuItemsEnabled;
 
-    private TapeImageHistory tapeImageHistory;
+    private TapeImageRecents tapeImageRecents;
 
     public static final int STOP_REASON_STOP=0;
     public static final int STOP_REASON_PAUSE=1;
     private int stopReason;
-
-
 
     public MainActivity() {
         super();
@@ -66,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         playBackMenuItemsEnabled = new ArrayList<>(1);
 
         lastChooserDirectory = null;
-        tapeImageHistory = new TapeImageHistory();
+        tapeImageRecents = new TapeImageRecents();
         userSettings = new UserSettings();
 
     }
@@ -80,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         playBackViewsDisabled.add(getBrowseButton());
         playBackViewsDisabled.add(findViewById(R.id.btnPlay));
         playBackViewsDisabled.add(findViewById(R.id.btnRecent));
+        playBackViewsDisabled.add(findViewById(R.id.lvChunks));
 
         /*Widgets to be enabled during playback*/
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
@@ -147,13 +146,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         storePreferences();
+
+    }
+
+    protected void onPause() {
+        closeOptionsMenu();
+        super.onPause();
     }
 
     protected void onDestroy() {
-        super.onDestroy();
         if (casTask != null) {
             casTask.cancel(true);
         }
+        closeOptionsMenu();
+        super.onDestroy();
     }
 
     public void onPlay(View v) {
@@ -274,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRecent(View v) {
         Intent intent = new Intent(this, RecentActivity.class);
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        intent.putExtra("recent_items", tapeImageHistory.createPersistenceString());
+        intent.putExtra("recent_items", tapeImageRecents.createPersistenceString());
         startActivityForResult(intent, OPEN_RECENT);
     }
 
@@ -311,10 +317,21 @@ public class MainActivity extends AppCompatActivity {
             if (data != null) {
                 this.userSettings = (UserSettings) data.getSerializableExtra("user_settings");
             }
+            return;
+        }
+
+        /*Pre-handle the Recent activity*/
+        if (requestCode==OPEN_RECENT) {
+            if (data != null) {
+                String recentString = data.getStringExtra("recents");
+                if (recentString!=null) {
+                    this.tapeImageRecents.parsePersistenceString(recentString);
+                }
+            }
         }
 
         /*Handle .CAS file pickup*/
-        else if ((requestCode==PICK_CAS_FILE || requestCode==OPEN_RECENT) && resultCode==Activity.RESULT_OK) {
+        if ((requestCode==PICK_CAS_FILE || requestCode==OPEN_RECENT) && resultCode==Activity.RESULT_OK) {
             if (data != null) {
                 Uri candidateUri = data.getData();
 
@@ -372,10 +389,11 @@ public class MainActivity extends AppCompatActivity {
                         /*Nothing we can do*/
                     }
 
-                    /*Update the user interface*/
+                    /*Update the user interface, and recents*/
                     if (candidateUri!=null) {
-                        currentUri=candidateUri;
-                        updateUIForFile();
+                       currentUri=candidateUri;
+                       tapeImageRecents.addRecentItem(currentUri,extractFileNameFromURI(currentUri));
+                       updateUIForFile();
                     }
                 }
 
@@ -392,7 +410,6 @@ public class MainActivity extends AppCompatActivity {
         String filename = extractFileNameFromURI(currentUri);
         setCurrentFileName(filename);
         setPlayBackViewsEnabled(false);
-        tapeImageHistory.addHistoryItem(currentUri,filename);
     }
 
     private int getVolume() {
@@ -509,10 +526,10 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
         lastChooserDirectory = new File(sPref.getString("c2a_last_dir", ""));
         try {
-            tapeImageHistory.parsePersistenceString(sPref.getString("c2a_recents", ""));
+            tapeImageRecents.parsePersistenceString(sPref.getString("c2a_recents", ""));
         }
         catch (Exception e) {
-            tapeImageHistory.clear();
+            tapeImageRecents.clear();
         }
         userSettings = UserSettings.createFromPersistentStorage(sPref);
         findViewById(R.id.lvChunks).setVisibility(sPref.getInt("c2a_chunks",View.INVISIBLE));
@@ -527,7 +544,7 @@ public class MainActivity extends AppCompatActivity {
         if (lastChooserDirectory != null) {
             editor.putString("c2a_last_dir", lastChooserDirectory.getAbsolutePath());
         }
-        String recentString = tapeImageHistory.createPersistenceString();
+        String recentString = tapeImageRecents.createPersistenceString();
         editor.putString("c2a_recents", recentString);
         editor.putInt("c2a_chunks",findViewById(R.id.lvChunks).getVisibility());
         editor.apply();
@@ -552,7 +569,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onAbout(MenuItem mi) {
-        Toast.makeText(getApplicationContext(),getString(R.string.toast_about),Toast.LENGTH_LONG).show();
+        Toast.makeText(this,getString(R.string.toast_about),Toast.LENGTH_LONG).show();
     }
 
 

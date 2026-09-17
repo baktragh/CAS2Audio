@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="Clear all">
+    <item android:title="@string/clear_recents"
+        android:id="@+id/miClearRecents"
+        android:onClick="onClearRecents">
     </item>
 
-    <item android:title="Prune" />
 </menu>
