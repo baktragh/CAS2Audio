@@ -8,10 +8,10 @@ android {
         minSdk=31
         compileSdk = 34
         /*targetSdkVersion(30)*/
-        versionName= '1.0.6'
+        versionName= '1.0.7'
         testInstrumentationRunner="androidx.test.runner.AndroidJUnitRunner"
         /*signingConfig=signingConfigs.all*/
-        versionCode = 16
+        versionCode = 17
     }
 
 
