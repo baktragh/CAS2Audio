@@ -4,6 +4,8 @@ package com.baktra.cas2audio.signal;
 /*import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;*/
+import android.content.Context;
+import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -107,7 +109,7 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     @Override
     public void prepare() throws Exception {
 
-        track = getOldStyleAudioTrack();
+        track = getNewStyleAudioTrack();
         track.play();
     }
 
@@ -126,20 +128,21 @@ public class AudioSignalBufferedWriter implements SignalWriter {
 
     }
 
-    /*private AudioTrack getNewStyleAudioTrack() {
+    private AudioTrack getNewStyleAudioTrack() {
 
+        AudioFormat audioFormat = getAudioFormat();
         AudioTrack.Builder builder = new AudioTrack.Builder();
-        builder=builder.setAudioFormat(audioFormat);
+        builder.setAudioFormat(audioFormat);
         return new AudioTrack(new AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                 .build(),
                 audioFormat, bufferSize, AudioTrack.MODE_STREAM, AudioManager.AUDIO_SESSION_ID_GENERATE);
-    }*/
+    }
 
-    /*private AudioFormat getAudioFormat(int sampleRate,int bitsPerChannel,int numChannels) {
+    private AudioFormat getAudioFormat() {
         AudioFormat.Builder afb = new AudioFormat.Builder().setSampleRate(sampleRate).setEncoding(bitsPerSample==16?AudioFormat.ENCODING_PCM_16BIT:AudioFormat.ENCODING_PCM_8BIT);
-        if (channels==1) {
+        if (numChannels==1) {
             afb.setChannelMask(AudioFormat.CHANNEL_OUT_MONO);
         }
         else {
@@ -147,7 +150,7 @@ public class AudioSignalBufferedWriter implements SignalWriter {
         }
         return afb.build();
 
-    }*/
+    }
 
     @Override
     public void write(byte[] signal) throws Exception {

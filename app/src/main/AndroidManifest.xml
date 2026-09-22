@@ -7,8 +7,8 @@
         android:maxSdkVersion="99" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <attribution android:tag="Conversion of tape images"
-        android:label="@string/app_name">
+    <attribution android:tag="cas2audio_audio_output"
+        android:label= "@string/lbl_c2a_audio_output">
     </attribution>
 
     <application

@@ -202,7 +202,7 @@ public class SignalGenerator implements SampleConsumer {
             }
 
             /*Show progress*/
-            parentTask.setProgress(getStatusPercent(), ip < cResumeIp ? -1 : ip);
+            parentTask.setProgress(getStatusPercent(ip), ip < cResumeIp ? -1 : ip);
 
             /*Determine what is the current operation and execute it*/
             op = mem[ip];
@@ -243,7 +243,7 @@ public class SignalGenerator implements SampleConsumer {
                     for (int i = 0; i < cx && !parentTask.isCancelled(); i++) {
                         generateByte(mem[ip]);
                         if ((ip % 512) == 0) {
-                            parentTask.setProgress(getStatusPercent(), -1);
+                            parentTask.setProgress(getStatusPercent(ip), -1);
                         }
                         ip++;
                     }
@@ -364,7 +364,7 @@ public class SignalGenerator implements SampleConsumer {
                         generateByte(mem[ip]);
 
                         if ((ip % 512) == 0) {
-                            parentTask.setProgress(getStatusPercent(), -1);
+                            parentTask.setProgress(getStatusPercent(ip), -1);
                         }
 
                         ip++;
@@ -535,9 +535,9 @@ public class SignalGenerator implements SampleConsumer {
 
     }
 
-    private int getStatusPercent() {
+    private int getStatusPercent(int effectiveIp) {
         float d;
-        d = ip;
+        d = effectiveIp;
         d /= genLength;
         d *= 100;
         if (d > 100) {
@@ -575,8 +575,7 @@ public class SignalGenerator implements SampleConsumer {
         int[] data = new int[dataLen];
         System.arraycopy(mem, ip, data, 0, dataLen);
 
-        /*Increase instruction pointer*/
-        ip += dataLen;
+
 
         int numPieces = irgLen / 2_000;
         int remainder = irgLen % 2_000;
@@ -587,6 +586,7 @@ public class SignalGenerator implements SampleConsumer {
             if (parentTask.isCancelled()) {
                 return;
             }
+
         }
         /*Remainder of IRG*/
         fskGenerator.generateIRG(remainder);
@@ -596,6 +596,9 @@ public class SignalGenerator implements SampleConsumer {
 
         /*Generate data*/
         fskGenerator.generateData(data);
+
+        /*Increase instruction pointer*/
+        ip += dataLen;
 
     }
 
@@ -619,8 +622,11 @@ public class SignalGenerator implements SampleConsumer {
     }
 
     @Override
-    public void consumeSamples(byte[] b) throws Exception {
+    public void consumeSamples(byte[] b,int dataIndex) throws Exception {
         currentSignalWriter.write(b);
+        if (dataIndex!=-1 && (dataIndex % 256) ==0) {
+            parentTask.setProgress(getStatusPercent(ip+dataIndex),-1);
+        }
     }
 
 

@@ -32,6 +32,7 @@
 
     <string name="toast_about">CAS2Audio by BAKTRA Software</string>
     <string name="clear_recents">Clear recents</string>
+    <string name="lbl_c2a_audio_output">CAS2Audio Audio Output</string>
 
 
 </resources>

@@ -72,7 +72,7 @@ class FSKGenerator {
 
         /*Generate marks repeatedly*/
         while (counter < max) {
-            generateMarkOrSpace(MARK_DEGREES_PER_SAMPLE);
+            generateMarkOrSpace(MARK_DEGREES_PER_SAMPLE,-1);
             counter += samplesPerMarkOrSpace;
         }
 
@@ -94,22 +94,22 @@ class FSKGenerator {
             dataByte = data[i];
 
             /*Start bit*/
-            generateMarkOrSpace(SPACE_DEGREES_PER_SAMPLE);
+            generateMarkOrSpace(SPACE_DEGREES_PER_SAMPLE,i);
 
             /*Data bits, LSB to MSB*/
             int mask = 1;
             for (int k = 0; k < 8; k++) {
                 p = dataByte & mask;
                 if (p != 0) {
-                    generateMarkOrSpace(MARK_DEGREES_PER_SAMPLE);
+                    generateMarkOrSpace(MARK_DEGREES_PER_SAMPLE,i);
                 } else {
-                    generateMarkOrSpace(SPACE_DEGREES_PER_SAMPLE);
+                    generateMarkOrSpace(SPACE_DEGREES_PER_SAMPLE,i);
                 }
                 mask <<= 1;
             }
 
             /*Stop bit*/
-            generateMarkOrSpace(MARK_DEGREES_PER_SAMPLE);
+            generateMarkOrSpace(MARK_DEGREES_PER_SAMPLE,i);
 
         }
 
@@ -121,10 +121,10 @@ class FSKGenerator {
      * @param degreesPerSample How many degrees per sample
      * @throws Exception
      */
-    private void generateMarkOrSpace(int degreesPerSample) throws Exception {
+    private void generateMarkOrSpace(int degreesPerSample,int dataIndex) throws Exception {
 
         for (int i = 0; i < samplesPerMarkOrSpace; i++) {
-            consumer.consumeSamples(sampleSineTable[angle]);
+            consumer.consumeSamples(sampleSineTable[angle],dataIndex);
             angle += degreesPerSample;
             if (angle > 3_599) {
                 angle -= 3_600;
@@ -153,7 +153,7 @@ class FSKGenerator {
             }
 
             for (int k = 0; k < durationInSamples; k++) {
-                consumer.consumeSamples(sampleSineTable[angle]);
+                consumer.consumeSamples(sampleSineTable[angle],-1);
                 angle += dps;
                 if (angle > 3_599) {
                     angle -= 3_600;
