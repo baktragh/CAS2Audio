@@ -88,13 +88,27 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
 
     @Override
     protected void onProgressUpdate(Integer... progress) {
-        parentActivity.get().setProgressBar(progress[0]);
-        if (progress[1]!=-1) {
-            parentActivity.get().setResumePointProgress(progress[1]);
-        }
+
+        if (parentActivity.get()==null) return;
+
+            parentActivity.get().setProgressBar(progress[0]);
+            if (progress[1] != -1) {
+                parentActivity.get().setResumePointProgress(progress[1]);
+            }
+
     }
 
     protected void onPostExecute(Void v) {
+
+        /*If the parent activity is gone, just handle the exception, if any*/
+        if (parentActivity.get()==null) {
+            if (lastException != null) {
+                lastException.printStackTrace();
+            }
+            return;
+        }
+
+        /*If the parent activity still exists, full termination*/
         setControlsForTermination();
         if (lastException != null) {
             parentActivity.get().displayPostTaskAlert(R.string.msg_unable_to_process_tit,Utils.getExceptionMessage(lastException));
@@ -106,6 +120,20 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     }
 
     protected void onCancelled() {
+
+        /*Calculate possible resume point*/
+        int lastIp = 0;
+        if (sg!=null) lastIp=sg.getLastIp();
+
+        /*If the parent activity is gone, just handle the exception, if any*/
+        if (parentActivity.get()==null) {
+            if (lastException != null) {
+                lastException.printStackTrace();
+            }
+            return;
+        }
+
+        /*If the parent activity still exists, full cancellation*/
         setControlsForTermination();
         if (lastException != null) {
             parentActivity.get().displayPostTaskAlert(R.string.msg_unable_to_process_tit,Utils.getExceptionMessage(lastException));
@@ -114,10 +142,6 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         parentActivity.get().setProgressBar(0);
         parentActivity.get().setPlaybackInProgress(false);
         parentActivity.get().changeTapePicture(false);
-
-        int lastIp = 0;
-        if (sg!=null) lastIp=sg.getLastIp();
-
         parentActivity.get().setResumePoint(lastIp);
     }
 
@@ -127,6 +151,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     }
 
     protected void onPreExecute() {
+        if (parentActivity.get()==null) return;
         parentActivity.get().setPlayBackViewsEnabled(true);
     }
 

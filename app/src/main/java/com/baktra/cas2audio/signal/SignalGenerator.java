@@ -136,7 +136,7 @@ public class SignalGenerator implements SampleConsumer {
         }
 
         /*Resume IP*/
-        cResumeIp= asConfig.resumeIp;
+        cResumeIp = asConfig.resumeIp;
     }
 
 
@@ -154,10 +154,9 @@ public class SignalGenerator implements SampleConsumer {
         dummySignalWriter.prepare();
 
         /*Determine writer*/
-        if (cResumeIp==-1) {
+        if (cResumeIp == -1) {
             currentSignalWriter = audioSignalWriter;
-        }
-        else {
+        } else {
             currentSignalWriter = dummySignalWriter;
         }
 
@@ -170,8 +169,7 @@ public class SignalGenerator implements SampleConsumer {
             LOW_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_LOW, SignalGenerator.FLAG_POLARITY_01, cSignalInRightChannelOnly, 0);
             HIGH_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_HIGH, SignalGenerator.FLAG_POLARITY_01, cSignalInRightChannelOnly, 0);
             SILENCE_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_SILENCE, SignalGenerator.FLAG_POLARITY_01, cSignalInRightChannelOnly, 0);
-        }
-        else {
+        } else {
             LOW_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_HIGH, SignalGenerator.FLAG_POLARITY_10, cSignalInRightChannelOnly, 0);
             HIGH_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_LOW, SignalGenerator.FLAG_POLARITY_10, cSignalInRightChannelOnly, 0);
             SILENCE_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_SILENCE, SignalGenerator.FLAG_POLARITY_10, cSignalInRightChannelOnly, 0);
@@ -187,253 +185,261 @@ public class SignalGenerator implements SampleConsumer {
 
         /*Initial signal*/
         for (int k = 0; k < cInitialSilence; k++) {
-                currentSignalWriter.writeInitialSignal(SILENCE_SHORT);
-            }
+            currentSignalWriter.writeInitialSignal(SILENCE_SHORT);
+        }
 
 
-            ip = 0;
+        ip = 0;
         /*Loop counter*/
         int op = INSTR_NOP;
 
-            while (op != SignalGenerator.INSTR_END && !parentTask.isCancelled()) {
+        while (op != SignalGenerator.INSTR_END && !parentTask.isCancelled()) {
 
-                /*Did we reach the resume point ?*/
-                if (ip==cResumeIp) {
-                    cResumeIp=-1;
-                    currentSignalWriter=audioSignalWriter;
+            /*Did we reach the resume point ?*/
+            if (ip == cResumeIp) {
+                cResumeIp = -1;
+                currentSignalWriter = audioSignalWriter;
+            }
+
+            /*Show progress*/
+            parentTask.setProgress(getStatusPercent(), ip < cResumeIp ? -1 : ip);
+
+            /*Determine what is the current operation and execute it*/
+            op = mem[ip];
+
+            int cx;
+            switch (op) {
+
+                /*Narrow pulse*/
+                case SignalGenerator.INSTR_NARROW: {
+                    generateNarrow();
+                    ip++;
+                    break;
+                }
+                /*Wide pulse*/
+                case SignalGenerator.INSTR_WIDE: {
+                    generateWide();
+                    ip++;
+                    break;
+                }
+                /*Pilot tone pulse*/
+                case SignalGenerator.INSTR_PILOT: {
+                    generatePilotTone(1);
+                    ip++;
+                    break;
+                }
+                /*Sync pulse*/
+                case SignalGenerator.INSTR_SYNC: {
+                    generateSync();
+                    ip++;
+                    break;
+                }
+                /*Data*/
+                case SignalGenerator.INSTR_DATA: {
+                    ip++;
+                    cx = mem[ip];
+                    ip++;
+
+                    for (int i = 0; i < cx && !parentTask.isCancelled(); i++) {
+                        generateByte(mem[ip]);
+                        if ((ip % 512) == 0) {
+                            parentTask.setProgress(getStatusPercent(), -1);
+                        }
+                        ip++;
+                    }
+                    break;
+
+                }
+                /*Pilot tone*/
+                case SignalGenerator.INSTR_PILOTTONE: {
+                    ip++;
+                    cx = mem[ip];
+                    generatePilotTone(cx);
+                    ip++;
+                    break;
                 }
 
-                /*Show progress*/
-                parentTask.setProgress(getStatusPercent(),ip<cResumeIp?-1:ip);
+                /*End*/
+                case SignalGenerator.INSTR_END: {
+                    break;
+                }
 
-                /*Determine what is the current operation and execute it*/
-                op = mem[ip];
 
-                int cx;
-                switch (op) {
+                /*Silence in tenths of seconds, or pause when negative */
+                case SignalGenerator.INSTR_SILENCE: {
+                    ip++;
+                    int silence = mem[ip];
 
-                    /*Narrow pulse*/
-                    case SignalGenerator.INSTR_NARROW: {
-                        generateNarrow();
-                        ip++;
-                        break;
-                    }
-                    /*Wide pulse*/
-                    case SignalGenerator.INSTR_WIDE: {
-                        generateWide();
-                        ip++;
-                        break;
-                    }
-                    /*Pilot tone pulse*/
-                    case SignalGenerator.INSTR_PILOT: {
-                        generatePilotTone(1);
-                        ip++;
-                        break;
-                    }
-                    /*Sync pulse*/
-                    case SignalGenerator.INSTR_SYNC: {
-                        generateSync();
-                        ip++;
-                        break;
-                    }
-                    /*Data*/
-                    case SignalGenerator.INSTR_DATA: {
-                        ip++;
-                        cx = mem[ip];
-                        ip++;
+                    if (silence < 0) {
+                        silence = -mem[ip];
 
-                        for (int i = 0; i < cx && !parentTask.isCancelled(); i++) {
-                            generateByte(mem[ip]);
-                            ip++;
+                    }
+                    generateSilence(silence);
+                    ip++;
+                    break;
+                }
+
+                case SignalGenerator.INSTR_PAUSE: {
+                    ip++;
+                    break;
+                }
+
+                /*Setup*/
+                case SignalGenerator.INSTR_SETUP: {
+                    handleSetup();
+                    ip += 9;
+                    break;
+                }
+
+                /*Block separator*/
+                case SignalGenerator.INSTR_BLOCKSEP: {
+                    generateBlockSep();
+                    ip++;
+                    break;
+                }
+
+                /*Stop pulse*/
+                case SignalGenerator.INSTR_STOP: {
+                    generateStop();
+                    ip++;
+                    break;
+                }
+
+                /*PWMS*/
+                case SignalGenerator.INSTR_PWMS: {
+                    ip++;
+                    pwmPolarity = mem[ip];
+                    ip++;
+                    pwmLoHiOrder = (mem[ip] != SignalGenerator.FLAG_ORDER_HL);
+                    ip++;
+                    pwmSampleRate = mem[ip];
+                    ip++;
+
+                    /*Create levels*/
+                    LOW_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_LOW, pwmPolarity, cSignalInRightChannelOnly, 0);
+                    HIGH_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_HIGH, pwmPolarity, cSignalInRightChannelOnly, 0);
+                    SILENCE_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_SILENCE, pwmPolarity, cSignalInRightChannelOnly, 0);
+                    break;
+                }
+
+                /*PWMC*/
+                case SignalGenerator.INSTR_PWMC: {
+                    ip++;
+                    int silence = getPWMMillis2Samples(mem[ip]);
+                    ip++;
+                    for (int i = 0; i < silence; i++) {
+                        currentSignalWriter.write(SILENCE_SAMPLE);
+                    }
+
+                    cx = mem[ip];
+                    /*Number of pairs*/
+                    ip++;
+                    for (int i = 0; i < cx; i++) {
+                        byte[] pulse = PulseCreator.createPulse(cChannels, cPulseVolume, getPWMLength(mem[ip]), cBits, cSigned, 0, pwmPolarity, cSignalInRightChannelOnly, cHarmonic);
+                        ip++;
+                        for (int j = 0; j < mem[ip]; j++) {
+                            currentSignalWriter.write(pulse);
                         }
-                        break;
-
+                        ip++;
                     }
-                    /*Pilot tone*/
-                    case SignalGenerator.INSTR_PILOTTONE: {
-                        ip++;
-                        cx = mem[ip];
-                        generatePilotTone(cx);
-                        ip++;
-                        break;
-                    }
+                    break;
+                }
 
-                    /*End*/
-                    case SignalGenerator.INSTR_END: {
-                        break;
-                    }
+                case SignalGenerator.INSTR_PWMD: {
+                    ip++;
+                    cx = mem[ip];
+                    /*Bytes of data*/
 
+                    /*Create pulses*/
+                    ip++;
+                    NARROW_PULSE = PulseCreator.createPulse(cChannels, cPulseVolume, getPWMLength(mem[ip]), cBits, cSigned, 0, pwmPolarity, cSignalInRightChannelOnly, cHarmonic);
+                    ip++;
+                    WIDE_PULSE = PulseCreator.createPulse(cChannels, cPulseVolume, getPWMLength(mem[ip]), cBits, cSigned, 0, pwmPolarity, cSignalInRightChannelOnly, cHarmonic);
+                    ip++;
+                    /*Set order*/
+                    loHiOrder = pwmLoHiOrder;
 
-                    /*Silence in tenths of seconds, or pause when negative */
-                    case SignalGenerator.INSTR_SILENCE: {
-                        ip++;
-                        int silence = mem[ip];
+                    /*Generate data itself*/
+                    for (int i = 0; i < cx && !parentTask.isCancelled(); i++) {
+                        generateByte(mem[ip]);
 
-                        if (silence < 0) {
-                            silence = -mem[ip];
-
-                        }
-                        generateSilence(silence);
-                        ip++;
-                        break;
-                    }
-
-                    case SignalGenerator.INSTR_PAUSE: {
-                        ip++;
-                        break;
-                    }
-
-                    /*Setup*/
-                    case SignalGenerator.INSTR_SETUP: {
-                        handleSetup();
-                        ip += 9;
-                        break;
-                    }
-
-                    /*Block separator*/
-                    case SignalGenerator.INSTR_BLOCKSEP: {
-                        generateBlockSep();
-                        ip++;
-                        break;
-                    }
-
-                    /*Stop pulse*/
-                    case SignalGenerator.INSTR_STOP: {
-                        generateStop();
-                        ip++;
-                        break;
-                    }
-
-                    /*PWMS*/
-                    case SignalGenerator.INSTR_PWMS: {
-                        ip++;
-                        pwmPolarity = mem[ip];
-                        ip++;
-                        pwmLoHiOrder = (mem[ip] != SignalGenerator.FLAG_ORDER_HL);
-                        ip++;
-                        pwmSampleRate = mem[ip];
-                        ip++;
-
-                        /*Create levels*/
-                        LOW_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_LOW, pwmPolarity, cSignalInRightChannelOnly, 0);
-                        HIGH_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_HIGH, pwmPolarity, cSignalInRightChannelOnly, 0);
-                        SILENCE_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_SILENCE, pwmPolarity, cSignalInRightChannelOnly, 0);
-                        break;
-                    }
-
-                    /*PWMC*/
-                    case SignalGenerator.INSTR_PWMC: {
-                        ip++;
-                        int silence = getPWMMillis2Samples(mem[ip]);
-                        ip++;
-                        for (int i = 0; i < silence; i++) {
-                            currentSignalWriter.write(SILENCE_SAMPLE);
+                        if ((ip % 512) == 0) {
+                            parentTask.setProgress(getStatusPercent(), -1);
                         }
 
-                        cx = mem[ip];
-                        /*Number of pairs*/
                         ip++;
-                        for (int i = 0; i < cx; i++) {
-                            byte[] pulse = PulseCreator.createPulse(cChannels, cPulseVolume, getPWMLength(mem[ip]), cBits, cSigned, 0, pwmPolarity, cSignalInRightChannelOnly, cHarmonic);
-                            ip++;
-                            for (int j = 0; j < mem[ip]; j++) {
-                                currentSignalWriter.write(pulse);
-                            }
-                            ip++;
+                    }
+
+                    break;
+                }
+
+                case SignalGenerator.INSTR_PWML: {
+                    ip++;
+                    /*Silence*/
+                    int silence = getPWMMillis2Samples(mem[ip]);
+                    ip++;
+                    for (int i = 0; i < silence; i++) {
+                        currentSignalWriter.write(SILENCE_SAMPLE);
+                    }
+                    /*Number of lengths*/
+                    cx = mem[ip];
+                    ip++;
+
+                    int sampleCount;
+                    boolean high;
+                    high = pwmPolarity == SignalGenerator.FLAG_ORDER_HL;
+
+                    /*States*/
+                    for (int i = 0; i < cx; i++) {
+                        sampleCount = getPWMLength(mem[ip]);
+                        ip++;
+                        for (int j = 0; j < sampleCount; j++) {
+                            currentSignalWriter.write(high == true ? HIGH_SAMPLE : LOW_SAMPLE);
                         }
-                        break;
+                        high = !high;
                     }
 
-                    case SignalGenerator.INSTR_PWMD: {
-                        ip++;
-                        cx = mem[ip];
-                        /*Bytes of data*/
+                    break;
+                }
+                case SignalGenerator.INSTR_BAUD: {
+                    generateBAUD();
+                    break;
+                }
+                case SignalGenerator.INSTR_STDDATA: {
+                    generateSTDDATA();
+                    break;
+                }
+                case SignalGenerator.INSTR_FSK: {
+                    generateFSK();
+                    break;
+                }
+                case SignalGenerator.INSTR_FUJI: {
+                    /*Skip opcode*/
+                    ip++;
+                    /*Get length*/
+                    cx = mem[ip];
+                    /*Skip data*/
+                    ip++;
+                    ip += cx;
+                    break;
+                }
 
-                        /*Create pulses*/
-                        ip++;
-                        NARROW_PULSE = PulseCreator.createPulse(cChannels, cPulseVolume, getPWMLength(mem[ip]), cBits, cSigned, 0, pwmPolarity, cSignalInRightChannelOnly, cHarmonic);
-                        ip++;
-                        WIDE_PULSE = PulseCreator.createPulse(cChannels, cPulseVolume, getPWMLength(mem[ip]), cBits, cSigned, 0, pwmPolarity, cSignalInRightChannelOnly, cHarmonic);
-                        ip++;
-                        /*Set order*/
-                        loHiOrder = pwmLoHiOrder;
+            }/*End of switch*/
 
-                        /*Generate data itself*/
-                        for (int i = 0; i < cx && !parentTask.isCancelled(); i++) {
-                            generateByte(mem[ip]);
-                            ip++;
-                        }
-
-                        break;
-                    }
-
-                    case SignalGenerator.INSTR_PWML: {
-                        ip++;
-                        /*Silence*/
-                        int silence = getPWMMillis2Samples(mem[ip]);
-                        ip++;
-                        for (int i = 0; i < silence; i++) {
-                            currentSignalWriter.write(SILENCE_SAMPLE);
-                        }
-                        /*Number of lengths*/
-                        cx = mem[ip];
-                        ip++;
-
-                        int sampleCount;
-                        boolean high;
-                        high = pwmPolarity == SignalGenerator.FLAG_ORDER_HL;
-
-                        /*States*/
-                        for (int i = 0; i < cx; i++) {
-                            sampleCount = getPWMLength(mem[ip]);
-                            ip++;
-                            for (int j = 0; j < sampleCount; j++) {
-                                currentSignalWriter.write(high == true ? HIGH_SAMPLE : LOW_SAMPLE);
-                            }
-                            high = !high;
-                        }
-
-                        break;
-                    }
-                    case SignalGenerator.INSTR_BAUD: {
-                        generateBAUD();
-                        break;
-                    }
-                    case SignalGenerator.INSTR_STDDATA: {
-                        generateSTDDATA();
-                        break;
-                    }
-                    case SignalGenerator.INSTR_FSK: {
-                        generateFSK();
-                        break;
-                    }
-                    case SignalGenerator.INSTR_FUJI: {
-                        /*Skip opcode*/
-                        ip++;
-                        /*Get length*/
-                        cx = mem[ip];
-                        /*Skip data*/
-                        ip++;
-                        ip += cx;
-                        break;
-                    }
-
-                }/*End of switch*/
-
-            }
+        }
 
 
-            /*Generator canceled*/
-            if (parentTask.isCancelled()) {
-                currentSignalWriter.prepareForClose();
-                currentSignalWriter.close();
-            }
-            /*Generator ended normally*/
-            else {
-                currentSignalWriter.prepareForTerminationSignal(SILENCE_SHORT);
-                currentSignalWriter.prepareForClose();
-                currentSignalWriter.close();
-            }
+        /*Generator canceled*/
+        if (parentTask.isCancelled()) {
+            currentSignalWriter.prepareForClose();
+            currentSignalWriter.close();
+        }
+        /*Generator ended normally*/
+        else {
+            currentSignalWriter.prepareForTerminationSignal(SILENCE_SHORT);
+            currentSignalWriter.prepareForClose();
+            currentSignalWriter.close();
+        }
 
         /*Everything OK*/
     }
@@ -513,11 +519,10 @@ public class SignalGenerator implements SampleConsumer {
         loHiOrder = mem[tmp + 6] != SignalGenerator.FLAG_ORDER_HL;
 
         if (cInvertPolarity) {
-            if (polarity==SignalGenerator.FLAG_POLARITY_01) {
-                polarity=SignalGenerator.FLAG_POLARITY_10;
-            }
-            else {
-                polarity=SignalGenerator.FLAG_POLARITY_01;
+            if (polarity == SignalGenerator.FLAG_POLARITY_01) {
+                polarity = SignalGenerator.FLAG_POLARITY_10;
+            } else {
+                polarity = SignalGenerator.FLAG_POLARITY_01;
             }
         }
 
