@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Disabled State -->
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <solid android:color="?attr/colorPrimaryFixedDim"/> <!-- Or a custom disabled color -->
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+
+    <!-- Enabled State (Default) -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="?attr/colorButtonNormal" /> <!-- Appears when enabled -->
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+</selector>
