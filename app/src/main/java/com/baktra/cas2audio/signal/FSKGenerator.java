@@ -1,5 +1,7 @@
 package com.baktra.cas2audio.signal;
 
+import com.baktra.cas2audio.CasTask;
+
 /**
  * FSK generator Supports standard FSK tape system Lookup table based.
  */
@@ -27,6 +29,8 @@ class FSKGenerator {
     /*Sine wave generation*/
     private int angle;
 
+    private CasTask parentTask;
+
     /**
      * Create new FSK generator
      *
@@ -38,10 +42,11 @@ class FSKGenerator {
      * @param amplitude Signal amplitude
      * @param rightOnly Signal in right channel only
      */
-    public FSKGenerator(int baudRate, boolean signed, int numChannels, int bitsPerSample, SampleConsumer c, int amplitude, boolean rightOnly,int sampleRate) {
+    public FSKGenerator(int baudRate, boolean signed, int numChannels, int bitsPerSample, SampleConsumer c, int amplitude, boolean rightOnly, int sampleRate, CasTask parentTask) {
 
         this.consumer = c;
         this.sampleRate=sampleRate;
+        this.parentTask=parentTask;
         
         MARK_DEGREES_PER_SAMPLE = (MARK_FREQUENCY * 3_600) / sampleRate;
         SPACE_DEGREES_PER_SAMPLE = (SPACE_FREQUENCY * 3_600) / sampleRate;
@@ -72,6 +77,12 @@ class FSKGenerator {
 
         /*Generate marks repeatedly*/
         while (counter < max) {
+
+            /*Opportunity for cancellation every 32K samples*/
+            if ((counter & 32767)==0) {
+                if (parentTask.isCancelled()) break;
+            }
+
             generateMarkOrSpace(MARK_DEGREES_PER_SAMPLE,-1);
             counter += samplesPerMarkOrSpace;
         }
@@ -91,7 +102,14 @@ class FSKGenerator {
 
         for (int i = 0; i < data.length; i++) {
 
+            /*Opportunity for cancellation every 64 bytes*/
+            if ((i & 63)==0) {
+                if (parentTask.isCancelled()) break;
+            }
+
             dataByte = data[i];
+
+
 
             /*Start bit*/
             generateMarkOrSpace(SPACE_DEGREES_PER_SAMPLE,i);
@@ -144,6 +162,11 @@ class FSKGenerator {
         boolean mark = false;
 
         for (int i = offset; i < maxIndex; i++) {
+
+            /*Opportunity for cancellation every 64 bytes*/
+            if ((i & 63)==0) {
+                if (parentTask.isCancelled()) break;
+            }
 
             durationInSamples = (durations[i] * sampleRate) / 10_000;
             if (mark == true) {

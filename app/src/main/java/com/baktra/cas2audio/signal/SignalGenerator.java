@@ -240,9 +240,11 @@ public class SignalGenerator implements SampleConsumer {
                     cx = mem[ip];
                     ip++;
 
-                    for (int i = 0; i < cx && !parentTask.isCancelled(); i++) {
+                    for (int i = 0; i < cx ; i++) {
                         generateByte(mem[ip]);
-                        if ((ip % 512) == 0) {
+                        /*Update progress and check for cancellation every 512 bytes*/
+                        if ((ip % 511) == 0) {
+                            if (parentTask.isCancelled()) break;
                             parentTask.setProgress(getStatusPercent(ip), -1);
                         }
                         ip++;
@@ -360,10 +362,12 @@ public class SignalGenerator implements SampleConsumer {
                     loHiOrder = pwmLoHiOrder;
 
                     /*Generate data itself*/
-                    for (int i = 0; i < cx && !parentTask.isCancelled(); i++) {
+                    for (int i = 0; i < cx; i++) {
                         generateByte(mem[ip]);
 
-                        if ((ip % 512) == 0) {
+                        /*Set progress and check cancellation every 512 bytes*/
+                        if ((ip & 511) == 0) {
+                            if (parentTask.isCancelled()) break;
                             parentTask.setProgress(getStatusPercent(ip), -1);
                         }
 
@@ -446,7 +450,13 @@ public class SignalGenerator implements SampleConsumer {
 
     private void generatePilotTone(int num) throws Exception {
 
-        for (int i = 0; i < num && !parentTask.isCancelled(); i++) {
+        for (int i = 0; i < num; i++) {
+
+            /*Opportunity for cancellation every 256 pulses*/
+            if ((i & 255)==0) {
+                if (parentTask.isCancelled()) break;
+            }
+
             currentSignalWriter.write(PILOTTONE_PULSE);
         }
 
@@ -557,7 +567,7 @@ public class SignalGenerator implements SampleConsumer {
 
     private void generateBAUD() {
         ip++;
-        fskGenerator = new FSKGenerator(mem[ip], cSigned, cChannels, cBits, this, cPulseVolume, cSignalInRightChannelOnly, cSampleRate);
+        fskGenerator = new FSKGenerator(mem[ip], cSigned, cChannels, cBits, this, cPulseVolume, cSignalInRightChannelOnly, cSampleRate,parentTask);
         ip++;
     }
 
@@ -612,7 +622,7 @@ public class SignalGenerator implements SampleConsumer {
         /*To be on the safe side*/
         if (fskGenerator == null) {
 
-            fskGenerator = new FSKGenerator(600, cSigned, cChannels, cBits, this, cPulseVolume, cSignalInRightChannelOnly, cSampleRate);
+            fskGenerator = new FSKGenerator(600, cSigned, cChannels, cBits, this, cPulseVolume, cSignalInRightChannelOnly, cSampleRate,parentTask);
 
         }
         fskGenerator.resetAngle();
