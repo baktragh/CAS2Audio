@@ -188,9 +188,8 @@ public class SignalGenerator implements SampleConsumer {
             currentSignalWriter.writeInitialSignal(SILENCE_SHORT);
         }
 
-
+        /*Prepare for instruction processing loop*/
         ip = 0;
-        /*Loop counter*/
         int op = INSTR_NOP;
 
         while (op != SignalGenerator.INSTR_END && !parentTask.isCancelled()) {
@@ -234,7 +233,7 @@ public class SignalGenerator implements SampleConsumer {
                     ip++;
                     break;
                 }
-                /*Data*/
+                /*Turbo data*/
                 case SignalGenerator.INSTR_DATA: {
                     ip++;
                     cx = mem[ip];
@@ -243,7 +242,7 @@ public class SignalGenerator implements SampleConsumer {
                     for (int i = 0; i < cx ; i++) {
                         generateByte(mem[ip]);
                         /*Update progress and check for cancellation every 512 bytes*/
-                        if ((ip % 511) == 0) {
+                        if ((ip & 511) == 0) {
                             if (parentTask.isCancelled()) break;
                             parentTask.setProgress(getStatusPercent(ip), -1);
                         }
@@ -336,10 +335,17 @@ public class SignalGenerator implements SampleConsumer {
                     cx = mem[ip];
                     /*Number of pairs*/
                     ip++;
+
+                    pwmc_loop:
                     for (int i = 0; i < cx; i++) {
                         byte[] pulse = PulseCreator.createPulse(cChannels, cPulseVolume, getPWMLength(mem[ip]), cBits, cSigned, 0, pwmPolarity, cSignalInRightChannelOnly, cHarmonic);
                         ip++;
                         for (int j = 0; j < mem[ip]; j++) {
+
+                            /*Opportunity to cancel every 256 pulses*/
+                            if ((j&255)==0) {
+                                if (parentTask.isCancelled()) break pwmc_loop;
+                            }
                             currentSignalWriter.write(pulse);
                         }
                         ip++;
@@ -394,7 +400,7 @@ public class SignalGenerator implements SampleConsumer {
                     high = pwmPolarity == SignalGenerator.FLAG_ORDER_HL;
 
                     /*States*/
-                    for (int i = 0; i < cx; i++) {
+                    for (int i = 0; i < cx && !parentTask.isCancelled(); i++) {
                         sampleCount = getPWMLength(mem[ip]);
                         ip++;
                         for (int j = 0; j < sampleCount; j++) {
@@ -585,10 +591,13 @@ public class SignalGenerator implements SampleConsumer {
         int[] data = new int[dataLen];
         System.arraycopy(mem, ip, data, 0, dataLen);
 
-
-
         int numPieces = irgLen / 2_000;
         int remainder = irgLen % 2_000;
+
+        /*Handle situation without preceding BAUD instruction, default to 600 bps*/
+        if (fskGenerator==null) {
+            fskGenerator = new FSKGenerator(600, cSigned, cChannels, cBits, this, cPulseVolume, cSignalInRightChannelOnly, cSampleRate, parentTask);
+        }
 
         /*Generate IRG in pieces of 2 seconds*/
         for (int i = 0; i < numPieces; i++) {
@@ -619,12 +628,11 @@ public class SignalGenerator implements SampleConsumer {
         int dataLen = mem[ip];
         ip++;
 
-        /*To be on the safe side*/
-        if (fskGenerator == null) {
-
-            fskGenerator = new FSKGenerator(600, cSigned, cChannels, cBits, this, cPulseVolume, cSignalInRightChannelOnly, cSampleRate,parentTask);
-
+        /*Handle situation without preceding BAUD instruction, default to 600 bps*/
+        if (fskGenerator==null) {
+            fskGenerator = new FSKGenerator(600, cSigned, cChannels, cBits, this, cPulseVolume, cSignalInRightChannelOnly, cSampleRate, parentTask);
         }
+        /*Generate the FSK signal*/
         fskGenerator.resetAngle();
         fskGenerator.generateIRG(irgLen);
         fskGenerator.generateFSK(mem, ip, dataLen);

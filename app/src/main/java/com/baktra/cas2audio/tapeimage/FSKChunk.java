@@ -118,7 +118,7 @@ public class FSKChunk implements TapeImageChunk {
      */
     @Override
     public String toString() {
-        return "fsk: [" + aux + " ms] (" + length + ")";
+        return "fsk: [" + aux + "] (" + length + ")";
     }
 
     /**
