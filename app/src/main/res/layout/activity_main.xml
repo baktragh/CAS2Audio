@@ -17,13 +17,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="0"
             android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/ivCassette"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:adjustViewBounds="true"
+                android:adjustViewBounds="false"
                 android:contentDescription="@string/cd_cassette"
                 android:cropToPadding="true"
                 android:paddingHorizontal="0dp"
@@ -45,8 +46,8 @@
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="4dp"
                 android:max="100"
-                android:minHeight="32dip"
-                android:padding="5dp"
+                android:minHeight="16dp"
+                android:padding="1dp"
                 android:progress="0"
                 android:scaleY="2" />
 
@@ -60,6 +61,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:orientation="horizontal">
 
                 <ImageButton
@@ -67,10 +69,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="2dp"
-                    android:layout_weight="1"
                     android:background="@drawable/button_background_selector"
                     android:contentDescription="@string/cd_play"
                     android:onClick="onPlay"
+                    android:paddingHorizontal="24dp"
                     android:paddingVertical="18dp"
                     android:src="@drawable/icon_play" />
 
@@ -79,10 +81,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="2dp"
-                    android:layout_weight="1"
+                    android:layout_weight="0"
                     android:background="@drawable/button_background_selector"
-                    android:contentDescription="@string/cd_stop"
+                    android:contentDescription="@string/cd_pause"
                     android:onClick="onStopPlaying"
+                    android:paddingHorizontal="24dp"
                     android:paddingVertical="18dp"
                     android:src="@drawable/icon_pause" />
 
@@ -91,10 +94,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="2dp"
-                    android:layout_weight="1"
+                    android:layout_weight="0"
                     android:background="@drawable/button_background_selector"
                     android:contentDescription="@string/cd_stop"
                     android:onClick="onStopPlaying"
+                    android:paddingHorizontal="24dp"
                     android:paddingVertical="18dp"
                     android:src="@drawable/icon_stop" />
 
@@ -103,6 +107,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:orientation="horizontal">
 
                 <ImageButton
@@ -110,11 +115,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="2dp"
-                    android:layout_weight="1"
+                    android:layout_weight="0"
                     android:background="@drawable/button_background_selector"
                     android:contentDescription="@string/cd_browse"
                     android:onClick="onBrowseTapeImage"
-                    android:paddingHorizontal="32dp"
+                    android:paddingHorizontal="24dp"
                     android:paddingVertical="18dp"
                     android:src="@drawable/icon_open" />
 
@@ -123,11 +128,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="2dp"
-                    android:layout_weight="1"
+                    android:layout_weight="0"
                     android:background="@drawable/button_background_selector"
                     android:contentDescription="@string/cd_recent"
                     android:onClick="onRecent"
-                    android:paddingHorizontal="32dp"
+                    android:paddingHorizontal="24dp"
                     android:paddingVertical="18dp"
                     android:src="@drawable/icon_history" />
 
@@ -136,15 +141,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="2dp"
-                    android:layout_weight="1"
+                    android:layout_weight="0"
                     android:background="@drawable/button_background_selector"
                     android:contentDescription="@string/cd_chunks"
                     android:onClick="onDisplayChunks"
-                    android:paddingHorizontal="32dp"
+                    android:paddingHorizontal="24dp"
                     android:paddingVertical="18dp"
                     android:src="@drawable/icon_list" />
 
             </LinearLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginVertical="2dp"
+                android:layout_weight="0" />
 
         </LinearLayout>
 

@@ -31,6 +31,7 @@
     <string name="cd_settings">Ustawienia</string>
     <string name="cd_cassette">Kaseta</string>
     <string name="cd_about">O aplikacji</string>
+    <string name="cd_pause">wstrzymaj</string>
 
     <string name="toast_about">CAS2Audio utworzone przez BAKTRA Software</string>
     <string name="clear_recents">Wyczyść ostatnie</string>
