@@ -45,12 +45,12 @@
             android:padding="8dp">
 
             <TextView
-                style="@android:style/Widget.TextView"
+                style="@android:style/Widget.Material.TextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/lbl_amplitude"
-                android:textColor="@android:color/primary_text_light"
+                android:textColor="?android:attr/textColorPrimary"
                 tools:text="@string/lbl_amplitude" />
 
             <SeekBar
