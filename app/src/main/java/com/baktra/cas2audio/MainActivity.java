@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         /*Set the title*/
-        setTitle("CAS2Audio 1.0.7");
+        setTitle("CAS2Audio 1.0.8");
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
