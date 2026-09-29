@@ -201,7 +201,8 @@ public class SignalGenerator implements SampleConsumer {
             }
 
             /*Show progress*/
-            parentTask.setProgress(getStatusPercent(ip), ip < cResumeIp ? -1 : ip);
+            updateProgress(getStatusPercent(ip), ip < cResumeIp ? -1 : ip,true);
+
 
             /*Determine what is the current operation and execute it*/
             op = mem[ip];
@@ -244,7 +245,7 @@ public class SignalGenerator implements SampleConsumer {
                         /*Update progress and check for cancellation every 512 bytes*/
                         if ((ip & 511) == 0) {
                             if (parentTask.isCancelled()) break;
-                            parentTask.setProgress(getStatusPercent(ip), -1);
+                            updateProgress(getStatusPercent(ip), -1,false);
                         }
                         ip++;
                     }
@@ -374,7 +375,7 @@ public class SignalGenerator implements SampleConsumer {
                         /*Set progress and check cancellation every 512 bytes*/
                         if ((ip & 511) == 0) {
                             if (parentTask.isCancelled()) break;
-                            parentTask.setProgress(getStatusPercent(ip), -1);
+                            updateProgress(getStatusPercent(ip), -1,false);
                         }
 
                         ip++;
@@ -643,8 +644,13 @@ public class SignalGenerator implements SampleConsumer {
     public void consumeSamples(byte[] b,int dataIndex) throws Exception {
         currentSignalWriter.write(b);
         if (dataIndex!=-1 && (dataIndex % 256) ==0) {
-            parentTask.setProgress(getStatusPercent(ip+dataIndex),-1);
+            updateProgress(getStatusPercent(ip+dataIndex),-1,false);
         }
+    }
+
+    private void updateProgress(int percentage,int tapeImagePosUpdateIp,boolean unconditional) {
+        if (ip<cResumeIp && !unconditional) return;
+        parentTask.setProgress(percentage,tapeImagePosUpdateIp);
     }
 
 
