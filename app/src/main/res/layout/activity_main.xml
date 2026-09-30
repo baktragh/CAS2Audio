@@ -17,6 +17,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginVertical="4dp"
             android:orientation="vertical">
 
             <ImageView
@@ -26,8 +28,6 @@
                 android:adjustViewBounds="false"
                 android:contentDescription="@string/cd_cassette"
                 android:cropToPadding="false"
-                android:paddingHorizontal="0dp"
-                android:paddingVertical="0dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/tape_inactive" />
 
@@ -35,6 +35,7 @@
                 android:id="@+id/tvTapeImageName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginVertical="2dp"
                 android:layout_weight="1"
                 android:textAlignment="center" />
 
@@ -43,12 +44,11 @@
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
                 android:layout_weight="1"
                 android:max="100"
                 android:minHeight="16dp"
-                android:padding="1dp"
                 android:progress="0"
                 android:scaleY="2" />
 
@@ -57,11 +57,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginVertical="4dp"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginVertical="2dp"
                 android:gravity="center"
                 android:orientation="horizontal">
 
@@ -164,6 +167,8 @@
             android:id="@+id/lvChunks"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginVertical="4dp"
             android:layout_weight="1"
             android:clickable="true"
             android:soundEffectsEnabled="false"
