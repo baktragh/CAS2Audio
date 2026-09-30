@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:keepScreenOn="true"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginVertical="4dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/ivCassette"
+                    android:layout_width="wrap_content"
+                    android:layout_height="120dp"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@string/cd_cassette"
+                    android:cropToPadding="true"
+                    android:scaleType="fitStart"
+                    android:src="@drawable/tape_inactive" />
+
+                <TextView
+                    android:id="@+id/tvTapeImageName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="4dp"
+                    android:textAlignment="viewStart" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="4dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/btnPlay"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="2dp"
+                        android:background="@drawable/button_background_selector"
+                        android:contentDescription="@string/cd_play"
+                        android:onClick="onPlay"
+                        android:paddingHorizontal="24dp"
+                        android:paddingVertical="18dp"
+                        android:src="@drawable/icon_play" />
+
+                    <ImageButton
+                        android:id="@+id/btnPause"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="2dp"
+                        android:layout_weight="0"
+                        android:background="@drawable/button_background_selector"
+                        android:contentDescription="@string/cd_pause"
+                        android:onClick="onStopPlaying"
+                        android:paddingHorizontal="24dp"
+                        android:paddingVertical="18dp"
+                        android:src="@drawable/icon_pause" />
+
+                    <ImageButton
+                        android:id="@+id/btnStop"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="2dp"
+                        android:layout_weight="0"
+                        android:background="@drawable/button_background_selector"
+                        android:contentDescription="@string/cd_stop"
+                        android:onClick="onStopPlaying"
+                        android:paddingHorizontal="24dp"
+                        android:paddingVertical="18dp"
+                        android:src="@drawable/icon_stop" />
+
+                    <ImageButton
+                        android:id="@+id/btnBrowse"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="2dp"
+                        android:layout_weight="0"
+                        android:background="@drawable/button_background_selector"
+                        android:contentDescription="@string/cd_browse"
+                        android:onClick="onBrowseTapeImage"
+                        android:paddingHorizontal="24dp"
+                        android:paddingVertical="18dp"
+                        android:src="@drawable/icon_open" />
+
+                    <ImageButton
+                        android:id="@+id/btnRecent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="2dp"
+                        android:layout_weight="0"
+                        android:background="@drawable/button_background_selector"
+                        android:contentDescription="@string/cd_recent"
+                        android:onClick="onRecent"
+                        android:paddingHorizontal="24dp"
+                        android:paddingVertical="18dp"
+                        android:src="@drawable/icon_history" />
+
+                    <ImageButton
+                        android:id="@+id/btnShowChunks"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="2dp"
+                        android:layout_weight="0"
+                        android:background="@drawable/button_background_selector"
+                        android:contentDescription="@string/cd_chunks"
+                        android:onClick="onDisplayChunks"
+                        android:paddingHorizontal="24dp"
+                        android:paddingVertical="18dp"
+                        android:src="@drawable/icon_list" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/pbProgress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="0"
+            android:max="100"
+            android:minHeight="16dp"
+            android:padding="1dp"
+            android:progress="0"
+            android:scaleY="2" />
+
+        <ListView
+            android:id="@+id/lvChunks"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="4dp"
+            android:layout_marginVertical="4dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:soundEffectsEnabled="false"
+            android:visibility="invisible" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

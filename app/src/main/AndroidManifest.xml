@@ -37,8 +37,8 @@
             android:name=".MainActivity"
             android:noHistory="false"
             android:exported="true"
-            android:screenOrientation="nosensor"
-            >
+            android:screenOrientation="nosensor">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
