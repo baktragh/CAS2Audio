@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
@@ -26,7 +27,9 @@ import com.baktra.cas2audio.tapeimage.TapeImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -73,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //System.out.println("MainActivity::onCreate()");
 
         /*Widgets to be disabled during playback*/
         playBackViewsDisabled.add(getBrowseButton());
@@ -111,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
 
         super.onResume();
+        //System.out.println("MainActivity::onResume()");
 
         /*If playback in progress, keep components as they were*/
         if (playbackInProgress) return;
@@ -144,22 +149,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void onStop() {
-        super.onStop();
+        //System.out.println("MainActivity::onStop()");
         storePreferences();
+        super.onStop();
 
     }
 
     protected void onPause() {
+        //System.out.println("MainActivity::onPause()");
         closeOptionsMenu();
         super.onPause();
     }
 
     protected void onDestroy() {
+        //System.out.println("MainActivity::onDestroy()");
         if (casTask != null) {
-            casTask.cancel(true);
+            casTask.cancel(false);
         }
         closeOptionsMenu();
         super.onDestroy();
+    }
+
+    public void onConfigurationChanged (Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
     public void onPlay(View v) {
@@ -259,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (casTask !=null ) {
-            casTask.cancel(true);
+            casTask.cancel(false);
         }
     }
 

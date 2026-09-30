@@ -26,10 +26,10 @@
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="false"
                 android:contentDescription="@string/cd_cassette"
-                android:cropToPadding="true"
+                android:cropToPadding="false"
                 android:paddingHorizontal="0dp"
                 android:paddingVertical="0dp"
-                android:scaleType="center"
+                android:scaleType="fitCenter"
                 android:src="@drawable/tape_inactive" />
 
             <TextView
@@ -56,6 +56,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="0"
             android:orientation="vertical">
 
             <LinearLayout
