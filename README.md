@@ -4,17 +4,20 @@ Play back tape images for 8-bit Atari computers on mobile devices with Android.
 
 ## Overview
 
-* CAS2Audio plays back Atari 8-bit tape images (.cas) files on small portable devices
+* CAS2Audio plays back Atari 8-bit tape images (.CAS files) on small portable devices
 (phones, tablets) running Android
-* CAS2Audio is a satellite project of TURGEN - <https://turgen.sourceforge.io/>
+* CAS2Audio is a satellite project of TURGEN - <https://turgen.sourceforge.io/>,
+a tool for creating Atari tapes
 
 ### Highlights
 
 * Simple, easy to use user interface with easy access to the recently selected tape images
-* Support for both standard records (FUJI, baud, data, fsk) and turbo records (pwms, pwmc, pwmd, pwml)
+* Support for both standard records (FUJI, baud, data, fsk) and turbo records (pwms, pwmc, pwmd,
+  pwml)
 * You can pause the playback and resume from any tape image chunk
 * The signal is generated on-the-fly (no temporary wave files are needed)
 * Displays animated cassette during playback
+* Since version 1.0.8, full support for landscape screen format
 
 ### Quick Start
 
@@ -23,7 +26,8 @@ You need an 8-bit Atari computer, data recorder, cassette adapter, and a smartph
 * Install CAS2Audio on your smartphone running Android
 * Download some tape images (.CAS files) to your smartphone
 * Connect your data recorder to the Atari computer
-* Insert a cassette adapter in the data recorder and connect the cassette adapter to the headphone jack of your smartphone
+* Insert a cassette adapter in the data recorder and connect the cassette adapter to the headphone
+  jack of your smartphone
 * Prepare the Atari computer to load data
 * Press PLAY on your data recorder
 * Open your tape image in the CAS2Audio and click the PLAY button
