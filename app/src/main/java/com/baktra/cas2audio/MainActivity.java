@@ -1,12 +1,14 @@
 package com.baktra.cas2audio;
 
+import static com.baktra.cas2audio.MainViewModel.STOP_REASON_PAUSE;
+import static com.baktra.cas2audio.MainViewModel.STOP_REASON_STOP;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
@@ -21,62 +23,49 @@ import android.view.View;
 import android.widget.*;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.baktra.cas2audio.tapeimage.TapeImage;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Time;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
-
-    private CasTask casTask;
-    private ConversionCrate currentConversionCrate;
-
-    private final String LN_SP;
-    Uri currentUri;
-    private boolean playbackInProgress;
-    private PowerManager powerManager;
-    File lastChooserDirectory;
-
-    private UserSettings userSettings;
 
     private final ArrayList<View> playBackViewsDisabled;
     private final ArrayList<MenuItem> playBackMenuItemsDisabled;
     private final ArrayList<View> playBackViewsEnabled;
     private final ArrayList<MenuItem> playBackMenuItemsEnabled;
 
-    private TapeImageRecents tapeImageRecents;
+    private final String LN_SP;
+    private MainViewModel viewModel;
 
-    public static final int STOP_REASON_STOP=0;
-    public static final int STOP_REASON_PAUSE=1;
-    private int stopReason;
+
 
     public MainActivity() {
         super();
         LN_SP = System.lineSeparator();
-        casTask = null;
-        currentUri = null;
-        playbackInProgress = false;
         playBackViewsDisabled = new ArrayList<>(8);
         playBackViewsEnabled = new ArrayList<>(8);
         playBackMenuItemsDisabled = new ArrayList<>(1);
         playBackMenuItemsEnabled = new ArrayList<>(1);
-
-        lastChooserDirectory = null;
-        tapeImageRecents = new TapeImageRecents();
-        userSettings = new UserSettings();
-
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //System.out.println("MainActivity::onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //System.out.println("MainActivity::onCreate()");
+
+
+        SharedPreferences sharedPrefs = getSharedPreferences("c2a_prefs", Context.MODE_PRIVATE);
+        MainViewModelFactory factory = new MainViewModelFactory(sharedPrefs);
+        viewModel = new ViewModelProvider(this,factory).get(MainViewModel.class);
+
+        setupModelObservers();
 
         /*Widgets to be disabled during playback*/
         playBackViewsDisabled.add(getBrowseButton());
@@ -88,19 +77,16 @@ public class MainActivity extends AppCompatActivity {
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
         playBackViewsEnabled.add(findViewById(R.id.btnPause));
 
-        /*Restore preferences from permanent storage*/
-        restorePreferences();
-
         /*Try to get a power manager*/
         try {
-            powerManager = (PowerManager) getApplicationContext().getSystemService(POWER_SERVICE);
+            viewModel.setPowerManager((PowerManager)getApplicationContext().getSystemService(POWER_SERVICE));
         } catch (Exception e) {
-            powerManager = null;
+            viewModel.setPowerManager(null);
             e.printStackTrace();
         }
 
         /*Set the title*/
-        setTitle("CAS2Audio 1.0.8");
+        setTitle("CAS2Audio 1.0.9");
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -113,44 +99,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     protected void onResume() {
-
-        super.onResume();
         //System.out.println("MainActivity::onResume()");
-
-        /*If playback in progress, keep components as they were*/
-        if (playbackInProgress) return;
-
-        /*If the current uri==null, then try to get input file from intent*/
-        if (currentUri == null) {
-
-            Intent intent = getIntent();
-            Uri u = intent.getData();
-
-            /*Valid path selected with intent*/
-            if (u != null) {
-                String filename = extractFileNameFromURI(u);
-                setCurrentFileName(filename);
-                setPlayBackViewsEnabled(false);
-                currentUri = u;
-            }
-            /*There was some intent, but no valid path selected.*/
-            else {
-                setCurrentFileName("");
-                setPlayBackViewsEnabled(false);
-                currentUri = null;
-            }
-
-        }
-        /*Activity was resumed, we are still open with valid tape image, and no playback is in progress*/
-        else {
-            updateUIForFile();
-        }
-
+        super.onResume();
     }
 
     protected void onStop() {
         //System.out.println("MainActivity::onStop()");
-        storePreferences();
         super.onStop();
 
     }
@@ -162,51 +116,91 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void onDestroy() {
-        //System.out.println("MainActivity::onDestroy()");
-        if (casTask != null) {
-            casTask.cancel(false);
-        }
         closeOptionsMenu();
         super.onDestroy();
     }
 
-    public void onConfigurationChanged (Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+
+    private void setupModelObservers() {
+
+        /*Chunk list visibility*/
+        viewModel.getChunkListVisibility().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer newVisibility) {
+                ListView lv = (ListView)findViewById(R.id.lvChunks);
+                lv.setVisibility(newVisibility);
+            }
+        });
+
+        /*Playback controls enable/disable*/
+        viewModel.getPlayBackState().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean newState) {
+
+                /*UI elements enabled or disabled*/
+                boolean b = newState.booleanValue();
+
+                for (View v : playBackViewsDisabled) {
+                    v.setEnabled(!b);
+                }
+                for (View v : playBackViewsEnabled) {
+                    v.setEnabled(b);
+                }
+
+                for (MenuItem mi: playBackMenuItemsDisabled) {
+                    mi.setEnabled(!b);
+                }
+                for (MenuItem mi: playBackMenuItemsEnabled) {
+                    mi.setEnabled(b);
+                }
+
+                /*Cassette image animation*/
+                ImageView iv = findViewById(R.id.ivCassette);
+
+                if (newState) {
+                    iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation));
+                    AnimationDrawable ad = (AnimationDrawable)iv.getDrawable();
+                    ad.start();
+                }
+                else {
+                    iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation));
+                    if (iv.getDrawable() instanceof AnimationDrawable) {
+                        AnimationDrawable ad = (AnimationDrawable) iv.getDrawable();
+                        ad.stop();
+                    }
+                    iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_inactive));
+                }
+
+                /*In any case, reset the progress bar*/
+                getProgressBar().setProgress(0);
+            }
+        });
+
+        /*Progress*/
+        viewModel.getProgressValue().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer newProgressValue) {
+                ProgressBar pb = (ProgressBar)findViewById(R.id.pbProgress);
+                pb.setProgress(newProgressValue);
+            }
+        });
+
     }
+
 
     public void onPlay(View v) {
 
-        getProgressBar().setProgress(0);
-
-        int[] instructions;
-        InputStream iStream;
-
         /*Check if anything was selected*/
-        if (currentUri == null || currentConversionCrate == null) {
+        if (viewModel.getCurrentUri() == null || viewModel.getCurrentConversionCrate() == null) {
             displaySimpleAlert(getString(R.string.msg_nothing_to_play_tit),getResources().getString(R.string.msg_nothing_to_play));
             return;
         }
 
         /*Create new background task*/
-        try {
-            casTask = new CasTask(
-                    currentConversionCrate.getInstructions(),
-                    this,
-                    !userSettings.isDoMono(),
-                    userSettings.isDoSquareWave(),
-                    getVolume(),
-                    currentConversionCrate.sampleRate,
-                    userSettings.isDoInvertPolarity(),
-                    getResumeIp()
-            );
-        } catch (Exception e) {
+        Exception e = viewModel.createCasTask();
+        if (e!=null) {
             displaySimpleAlert(getString(R.string.msg_unable_to_process_tit),Utils.getExceptionMessage(e));
         }
-
-        /*Execute the task*/
-        setPlaybackInProgress(true);
-        changeTapePicture(true);
-        casTask.execute();
     }
 
 
@@ -230,17 +224,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onDisplayChunks(View v) {
-        View lv = findViewById(R.id.lvChunks);
-
-        int visibility = lv.getVisibility();
-        if (visibility==View.VISIBLE) {
-            visibility=View.INVISIBLE;
-        }
-        else {
-            visibility=View.VISIBLE;
-        }
-
-        lv.setVisibility(visibility);
+        viewModel.flipChunkListVisibility();
     }
 
     public void onClickChunks(AdapterView<?> adapterView, View view, int i, long l) {
@@ -263,6 +247,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void onStopPlaying(View v) {
 
+        int stopReason;
+
         if (v==findViewById(R.id.btnPause)) {
             stopReason=STOP_REASON_PAUSE;
         }
@@ -270,13 +256,8 @@ public class MainActivity extends AppCompatActivity {
             stopReason=STOP_REASON_STOP;
         }
 
-        if (casTask !=null ) {
-            casTask.cancel(false);
-        }
-    }
+        viewModel.stopCasTask(stopReason);
 
-    public void onSettings(View v) {
-        doSettings();
 
     }
     public void onSettings(MenuItem item) {
@@ -285,14 +266,14 @@ public class MainActivity extends AppCompatActivity {
     public void doSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        intent.putExtra("user_settings", this.userSettings);
+        intent.putExtra("user_settings", viewModel.getUserSettings());
         startActivityForResult(intent, OPEN_SETTINGS);
     }
 
     public void onRecent(View v) {
         Intent intent = new Intent(this, RecentActivity.class);
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        intent.putExtra("recent_items", tapeImageRecents.createPersistenceString());
+        intent.putExtra("recent_items", viewModel.getTapeImageRecents().createPersistenceString());
         startActivityForResult(intent, OPEN_RECENT);
     }
 
@@ -307,8 +288,10 @@ public class MainActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        if (lastChooserDirectory!=null && lastChooserDirectory.exists() && lastChooserDirectory.isDirectory()) {
-            Uri pickerInitialUri = Uri.fromFile(lastChooserDirectory);
+        File lastDir = viewModel.getLastChooserDirectory();
+
+        if (lastDir!=null && lastDir.exists() && lastDir.isDirectory()) {
+            Uri pickerInitialUri = Uri.fromFile(lastDir);
             intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
         }
         startActivityForResult(intent, PICK_CAS_FILE);
@@ -327,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
         /*Handle the settings activity*/
         if (requestCode==OPEN_SETTINGS && resultCode==Activity.RESULT_OK) {
             if (data != null) {
-                this.userSettings = (UserSettings) data.getSerializableExtra("user_settings");
+                this.viewModel.setUserSettings((UserSettings) data.getSerializableExtra("user_settings"));
             }
             return;
         }
@@ -337,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
             if (data != null) {
                 String recentString = data.getStringExtra("recents");
                 if (recentString!=null) {
-                    this.tapeImageRecents.parsePersistenceString(recentString);
+                    this.viewModel.setTapeImageRecentsString(recentString);
                 }
             }
         }
@@ -365,12 +348,13 @@ public class MainActivity extends AppCompatActivity {
 
                     /*Perform the conversion*/
                     TapeImageProcessor tip = new TapeImageProcessor();
-                    currentConversionCrate = tip.convertItem(ti,userSettings.isDo48kHz()?48000:44100 , false);
-                    setChunkDisplay(currentConversionCrate.resumePoints);
+                    ConversionCrate cc = tip.convertItem(ti,viewModel.getUserSettings().isDo48kHz()?48000:44100 , false);
+                    viewModel.setCurrentConversionCrate(cc);
+
 
                 } catch (Exception e) {
                     candidateUri=null;
-                    currentConversionCrate=null;
+                    viewModel.setCurrentConversionCrate(null);
                     setChunkDisplay(new ArrayList<>());
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
@@ -403,8 +387,8 @@ public class MainActivity extends AppCompatActivity {
 
                     /*Update the user interface, and recents*/
                     if (candidateUri!=null) {
-                       currentUri=candidateUri;
-                       tapeImageRecents.addRecentItem(currentUri,extractFileNameFromURI(currentUri));
+                       viewModel.setCurrentUri(candidateUri);
+                       viewModel.getTapeImageRecents().addRecentItem(candidateUri,extractFileNameFromURI(candidateUri));
                        updateUIForFile();
                     }
                 }
@@ -419,14 +403,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     void updateUIForFile() {
-        String filename = extractFileNameFromURI(currentUri);
+        String filename = extractFileNameFromURI(viewModel.getCurrentUri());
         setCurrentFileName(filename);
-        setPlayBackViewsEnabled(false);
     }
 
-    private int getVolume() {
-        return userSettings.getAmplitude();
-    }
 
     private ProgressBar getProgressBar() {
         return findViewById(R.id.pbProgress);
@@ -441,44 +421,6 @@ public class MainActivity extends AppCompatActivity {
         tv.setText(filename);
     }
 
-    void setPlaybackInProgress(boolean b) {
-        playbackInProgress = b;
-    }
-
-    void changeTapePicture(boolean isActive) {
-
-        ImageView iv = findViewById(R.id.ivCassette);
-
-        if (isActive) {
-            iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation));
-            AnimationDrawable ad = (AnimationDrawable)iv.getDrawable();
-            ad.start();
-        }
-        else {
-            iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation));
-            if (iv.getDrawable() instanceof AnimationDrawable) {
-                AnimationDrawable ad = (AnimationDrawable) iv.getDrawable();
-                ad.stop();
-            }
-            iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_inactive));
-        }
-    }
-
-    void setPlayBackViewsEnabled(boolean b) {
-        for (View v : playBackViewsDisabled) {
-            v.setEnabled(!b);
-        }
-        for (View v : playBackViewsEnabled) {
-            v.setEnabled(b);
-        }
-
-        for (MenuItem mi: playBackMenuItemsDisabled) {
-            mi.setEnabled(!b);
-        }
-        for (MenuItem mi: playBackMenuItemsEnabled) {
-            mi.setEnabled(b);
-        }
-    }
 
     public void displayPostTaskAlert(int titleId, String msg) {
         displaySimpleAlert(getResources().getString(titleId),msg);
@@ -495,7 +437,7 @@ public class MainActivity extends AppCompatActivity {
         rpa.setResumePoint(ip,true);
     }
 
-    void setResumePoint(int ip) {
+    void observeResumePoint(int ip,int stopReason) {
         ListView lv = (ListView)findViewById(R.id.lvChunks);
         ResumePointAdapter rpa = (ResumePointAdapter)lv.getAdapter();
 
@@ -530,40 +472,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public PowerManager getPowerManager() {
-        return powerManager;
-    }
-
-    private void restorePreferences() {
-        SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
-        lastChooserDirectory = new File(sPref.getString("c2a_last_dir", ""));
-        try {
-            tapeImageRecents.parsePersistenceString(sPref.getString("c2a_recents", ""));
-        }
-        catch (Exception e) {
-            tapeImageRecents.clear();
-        }
-        userSettings = UserSettings.createFromPersistentStorage(sPref);
-        findViewById(R.id.lvChunks).setVisibility(sPref.getInt("c2a_chunks",View.INVISIBLE));
-    }
-
-    private void storePreferences() {
-
-        SharedPreferences sPref = this.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sPref.edit();
-
-        /*Current state of the UI*/
-        if (lastChooserDirectory != null) {
-            editor.putString("c2a_last_dir", lastChooserDirectory.getAbsolutePath());
-        }
-        String recentString = tapeImageRecents.createPersistenceString();
-        editor.putString("c2a_recents", recentString);
-        editor.putInt("c2a_chunks",findViewById(R.id.lvChunks).getVisibility());
-        editor.apply();
-
-        /*General settings*/
-        UserSettings.flushToPersistentStorage(userSettings, sPref);
-
+    private void observePreferences(SharedPreferences sPref) {
+        findViewById(R.id.lvChunks).setVisibility(sPref.getInt("c2a_chunks", View.INVISIBLE));
     }
 
     private void displaySimpleAlert(String title, String message) {

@@ -5,8 +5,6 @@ import android.os.PowerManager;
 
 import com.baktra.cas2audio.signal.SignalGenerator;
 
-import java.lang.ref.WeakReference;
-
 public class CasTask extends AsyncTask<Void,Integer,Void> {
 
     private final boolean stereo;
@@ -16,7 +14,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     private final boolean invertPolarity;
     private final int resumeIp;
     private Exception lastException;
-    private final WeakReference<MainActivity> parentActivity;
+    private final MainViewModel parentModel;
     private final int sampleRate;
     private PowerManager.WakeLock wakeLock;
 
@@ -24,11 +22,11 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
 
     public static final int WAKELOCK_TIMEOUT = 120 * 60 * 1000;
 
-    public CasTask(int[] instructions, MainActivity mainActivity, boolean stereo, boolean square, int volume, int sampleRate,boolean invertPolarity,int resumeIp) {
+    public CasTask(int[] instructions, MainViewModel mainView, boolean stereo, boolean square, int volume, int sampleRate,boolean invertPolarity,int resumeIp) {
         this.instructions=instructions;
         this.stereo=stereo;
         this.lastException = null;
-        this.parentActivity = new WeakReference<>(mainActivity);
+        this.parentModel = mainView;
         this.square = square;
         this.volume=volume;
         this.sampleRate=sampleRate;
@@ -42,7 +40,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     protected Void doInBackground(Void... voids) {
 
         try {
-            PowerManager pm = parentActivity.get().getPowerManager();
+            PowerManager pm = parentModel.getPowerManager();
             if (pm != null) {
                 wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CAS2Audio::TaskWakeLock");
                 wakeLock.acquire(WAKELOCK_TIMEOUT);
@@ -73,7 +71,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
                 sgc.resumeIp = resumeIp;
                 sg = new SignalGenerator(instructions,sgc,this);
                 sg.run();
-                setProgress(100,-1);
+                parentModel.setProgressValue(100);
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -89,34 +87,27 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     @Override
     protected void onProgressUpdate(Integer... progress) {
 
-        if (parentActivity.get()==null) return;
-
-            parentActivity.get().setProgressBar(progress[0]);
+            parentModel.setProgressValue(progress[0]);
             if (progress[1] != -1) {
-                parentActivity.get().setResumePointProgress(progress[1]);
+                parentModel.setResumePoint(progress[1]);
             }
+
 
     }
 
     protected void onPostExecute(Void v) {
 
-        /*If the parent activity is gone, just handle the exception, if any*/
-        if (parentActivity.get()==null) {
-            if (lastException != null) {
-                lastException.printStackTrace();
-            }
-            return;
-        }
-
         /*If the parent activity still exists, full termination*/
-        setControlsForTermination();
+        //parentModel.setControlsForTermination();
+
         if (lastException != null) {
-            parentActivity.get().displayPostTaskAlert(R.string.msg_unable_to_process_tit,Utils.getExceptionMessage(lastException));
+            //parentModel.get().displayPostTaskAlert(R.string.msg_unable_to_process_tit,Utils.getExceptionMessage(lastException));
             lastException.printStackTrace();
         }
-        parentActivity.get().setPlaybackInProgress(false);
-        parentActivity.get().changeTapePicture(false);
-        parentActivity.get().setResumePoint(0);
+
+        parentModel.handlePlaybackEndedNormal();
+
+        //parentModel.setResumePoint(0);
     }
 
     protected void onCancelled() {
@@ -125,34 +116,19 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         int lastIp = 0;
         if (sg!=null) lastIp=sg.getLastIp();
 
-        /*If the parent activity is gone, just handle the exception, if any*/
-        if (parentActivity.get()==null) {
-            if (lastException != null) {
-                lastException.printStackTrace();
-            }
-            return;
-        }
-
         /*If the parent activity still exists, full cancellation*/
-        setControlsForTermination();
+
         if (lastException != null) {
-            parentActivity.get().displayPostTaskAlert(R.string.msg_unable_to_process_tit,Utils.getExceptionMessage(lastException));
+            //parentModel.get().displayPostTaskAlert(R.string.msg_unable_to_process_tit,Utils.getExceptionMessage(lastException));
             lastException.printStackTrace();
         }
-        parentActivity.get().setProgressBar(0);
-        parentActivity.get().setPlaybackInProgress(false);
-        parentActivity.get().changeTapePicture(false);
-        parentActivity.get().setResumePoint(lastIp);
+        parentModel.handlePlaybackCancelled(lastIp);
+
     }
 
-    private void setControlsForTermination() {
-        parentActivity.get().setPlayBackViewsEnabled(false);
-        parentActivity.get().setProgressBar(0);
-    }
 
     protected void onPreExecute() {
-        if (parentActivity.get()==null) return;
-        parentActivity.get().setPlayBackViewsEnabled(true);
+
     }
 
     public void setProgress(int statusPercent,int ip) {
