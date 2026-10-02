@@ -28,12 +28,12 @@ public class ResumePointAdapter extends BaseAdapter {
     private int selectionBackground;
     private int normalBackground;
 
-    public ResumePointAdapter(Activity parentActivity,ListView parentView,ArrayList<ResumePoint> resumePoints,int resumePointIndex) {
-        this.currentContext=parentActivity;
-        this.parentView=parentView;
-        this.resumePoints=resumePoints;
-        this.currentResumePointIndex=resumePointIndex;
-        this.currentSelectedIndex=resumePointIndex;
+    public ResumePointAdapter(Activity parentActivity, ListView parentView, ArrayList<ResumePoint> resumePoints, int resumePointIndex) {
+        this.currentContext = parentActivity;
+        this.parentView = parentView;
+        this.resumePoints = resumePoints;
+        this.currentResumePointIndex = resumePointIndex;
+        this.currentSelectedIndex = resumePointIndex;
         retrieveColors();
     }
 
@@ -59,18 +59,16 @@ public class ResumePointAdapter extends BaseAdapter {
         TypedValue tvNormBackground = new TypedValue();
 
         /*Get selection background*/
-        if (t.resolveAttribute(android.R.attr.colorAccent,tvSelBackground,true)) {
-            selectionBackground=tvSelBackground.data;
-        }
-        else {
-            selectionBackground=Color.BLACK;
+        if (t.resolveAttribute(android.R.attr.colorAccent, tvSelBackground, true)) {
+            selectionBackground = tvSelBackground.data;
+        } else {
+            selectionBackground = Color.BLACK;
         }
         /*Get normal background*/
-        if (t.resolveAttribute(android.R.attr.colorBackground,tvNormBackground,true)) {
-            normalBackground=tvNormBackground.data;
-        }
-        else {
-            normalBackground=Color.TRANSPARENT;
+        if (t.resolveAttribute(android.R.attr.colorBackground, tvNormBackground, true)) {
+            normalBackground = tvNormBackground.data;
+        } else {
+            normalBackground = Color.TRANSPARENT;
         }
 
     }
@@ -79,30 +77,27 @@ public class ResumePointAdapter extends BaseAdapter {
     public View getView(int i, View view, ViewGroup viewGroup) {
 
         TextView tv;
-        if (view!=null) {
-            tv=(TextView)view;
-        }
-        else {
+        if (view != null) {
+            tv = (TextView) view;
+        } else {
             tv = new TextView(currentContext);
-            tv.setTextSize(TypedValue.COMPLEX_UNIT_PT,10);
-            tv.setPadding(0,2,0,2);
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_PT, 10);
+            tv.setPadding(0, 2, 0, 2);
         }
 
 
-        if (i==currentSelectedIndex) {
+        if (i == currentSelectedIndex) {
             tv.setBackgroundColor(selectionBackground);
-        }
-        else {
+        } else {
             tv.setBackgroundColor(normalBackground);
         }
 
         String resumePointText = resumePoints.get(i).toUIString();
 
-        if (i==currentResumePointIndex) {
+        if (i == currentResumePointIndex) {
             resumePointText += " <==";
             tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-        }
-        else {
+        } else {
             tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
         }
 
@@ -111,48 +106,36 @@ public class ResumePointAdapter extends BaseAdapter {
         return tv;
 
     }
+
     public void setSelectedIndex(int i) {
-        this.currentSelectedIndex=i;
+        this.currentSelectedIndex = i;
         notifyDataSetChanged();
     }
 
     public Object getSelectedItem() {
-        if (currentSelectedIndex>=0 && currentSelectedIndex<resumePoints.size()) {
+        if (currentSelectedIndex >= 0 && currentSelectedIndex < resumePoints.size()) {
             return resumePoints.get(currentSelectedIndex);
-        }
-        else {
+        } else {
             return null;
         }
     }
 
-    public void setResumePoint(int ip, boolean forProgress) {
+    public void setResumePoint(int ip) {
 
         /*Fallback value*/
-        currentResumePointIndex=0;
+        currentResumePointIndex = 0;
 
-        if (!forProgress) {
-            /*Find the closest resume point*/
-            for (int i = resumePoints.size() - 1; i >= 0; i--) {
-                ResumePoint p = resumePoints.get(i);
-                if (p.resumeIp < ip) {
-                    currentResumePointIndex = i;
-                    break;
-                }
-            }
-        }
-        else {
-            /*Find the closest resume point*/
-            for (int i = resumePoints.size() - 1; i >= 0; i--) {
-                ResumePoint p = resumePoints.get(i);
-                if (p.resumeIp <= ip) {
-                    currentResumePointIndex = i;
-                    break;
-                }
+        /*Find the closest resume point*/
+        for (int i = resumePoints.size() - 1; i >= 0; i--) {
+            ResumePoint p = resumePoints.get(i);
+            if (p.resumeIp <= ip) {
+                currentResumePointIndex = i;
+                break;
             }
         }
 
         /*Notify for the change*/
-        currentSelectedIndex=currentResumePointIndex;
+        currentSelectedIndex = currentResumePointIndex;
         notifyDataSetChanged();
 
         if (currentSelectedIndex < parentView.getFirstVisiblePosition() || currentSelectedIndex > parentView.getLastVisiblePosition()) {

@@ -71,7 +71,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
                 sgc.resumeIp = resumeIp;
                 sg = new SignalGenerator(instructions,sgc,this);
                 sg.run();
-                parentModel.setProgressValue(100);
+                setProgress(0,-1);
             }
             catch (Exception e) {
                 e.printStackTrace();

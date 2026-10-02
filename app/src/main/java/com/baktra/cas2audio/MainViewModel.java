@@ -21,27 +21,29 @@ public class MainViewModel extends ViewModel {
 
 
     private CasTask casTask;
-    private ConversionCrate currentConversionCrate;
-    Uri currentUri;
+    private MutableLiveData<TapeImageCrate> currentTapeImageCrate;
+
 
     private MutableLiveData<Integer> chunkListVisibility;
 
     private MutableLiveData<Boolean> playBackState;
     File lastChooserDirectory;
 
+    private MutableLiveData<Integer> resumeIp;
 
     public static final int STOP_REASON_STOP=0;
     public static final int STOP_REASON_PAUSE=1;
     private int stopReason;
 
     private MutableLiveData<Integer> progressValue;
-    private int resumeIp;
+
 
     public MainViewModel(SharedPreferences sPref) {
         casTask = null;
-        currentUri = null;
         playBackState = new MutableLiveData<>(Boolean.FALSE);
         progressValue = new MutableLiveData<>(new Integer(0));
+        currentTapeImageCrate = new MutableLiveData<>(TapeImageCrate.getEmpty());
+        resumeIp = new MutableLiveData<>(new Integer(0));
         lastChooserDirectory = null;
         tapeImageRecents = new TapeImageRecents();
         userSettings = new UserSettings();
@@ -58,25 +60,20 @@ public class MainViewModel extends ViewModel {
         }
     }
 
-    Uri getCurrentUri() {
-        return currentUri;
-    }
-    ConversionCrate getCurrentConversionCrate() {
-        return currentConversionCrate;
-    }
+
 
     Exception createCasTask() {
        casTask = null;
         try {
             casTask = new CasTask(
-                    currentConversionCrate.getInstructions(),
+                    currentTapeImageCrate.getValue().getConvCrate().getInstructions(),
                     this,
                     !userSettings.isDoMono(),
                     userSettings.isDoSquareWave(),
                     userSettings.getAmplitude(),
-                    currentConversionCrate.sampleRate,
+                    currentTapeImageCrate.getValue().getConvCrate().sampleRate,
                     userSettings.isDoInvertPolarity(),
-                    resumeIp
+                    resumeIp.getValue()
             );
             playBackState.setValue(new Boolean(true));
             casTask.execute();
@@ -101,7 +98,7 @@ public class MainViewModel extends ViewModel {
     }
 
     void setResumePoint(int value) {
-        this.resumeIp = value;
+        this.resumeIp.setValue(value);
     }
 
 
@@ -119,11 +116,19 @@ public class MainViewModel extends ViewModel {
     }
 
     void handlePlaybackEndedNormal() {
+
         playBackState.setValue(new Boolean(false));
+        resumeIp.setValue(0);
     }
 
-    void handlePlaybackCancelled(int resumeIp) {
+    void handlePlaybackCancelled(int resIp) {
         playBackState.setValue(new Boolean(false));
+        if (stopReason==STOP_REASON_PAUSE) {
+            resumeIp.setValue(resIp);
+        }
+        else {
+            resumeIp.setValue(0);
+        }
     }
 
     private void storePreferences() {
@@ -164,14 +169,9 @@ public class MainViewModel extends ViewModel {
         return lastChooserDirectory;
     }
 
-    void setCurrentConversionCrate(ConversionCrate cc) {
-        currentConversionCrate=cc;
+    void setCurrentTapeImageCrate(TapeImageCrate tic) {
+        currentTapeImageCrate.setValue(tic);
     }
-
-    void setCurrentUri(Uri u) {
-        currentUri=u;
-    }
-
 
     public PowerManager getPowerManager() {
         return powerManager;
@@ -199,6 +199,9 @@ public class MainViewModel extends ViewModel {
     public MutableLiveData<Integer> getProgressValue() {
         return progressValue;
     }
+
+    public MutableLiveData<TapeImageCrate> getCurrentTapeImageCrate() {return currentTapeImageCrate;}
+    public MutableLiveData<Integer> getResumeIp() {return resumeIp;}
 
 
     @Override

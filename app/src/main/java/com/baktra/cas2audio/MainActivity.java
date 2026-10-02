@@ -185,13 +185,39 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        /*Tape image opened/not opened*/
+        viewModel.getCurrentTapeImageCrate().observe(this, new Observer<TapeImageCrate>() {
+            @Override
+            public void onChanged(TapeImageCrate newCrate) {
+
+                /*If there is nothing*/
+                if (newCrate.isEmpty()) {
+                    TextView tv = findViewById(R.id.tvTapeImageName);
+                    tv.setText("");
+                    setChunkDisplay(new ArrayList<>());
+                }
+                else {
+                    TextView tv = findViewById(R.id.tvTapeImageName);
+                    tv.setText(extractFileNameFromURI(newCrate.getUri()));
+                    setChunkDisplay(newCrate.getConvCrate().resumePoints);
+                }
+
+            }
+        });
+
+        viewModel.getResumeIp().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer newResumeIp) {
+                setResumePointProgress(newResumeIp);
+            }
+        });
     }
 
 
     public void onPlay(View v) {
 
         /*Check if anything was selected*/
-        if (viewModel.getCurrentUri() == null || viewModel.getCurrentConversionCrate() == null) {
+        if (viewModel.getCurrentTapeImageCrate().getValue().isEmpty()) {
             displaySimpleAlert(getString(R.string.msg_nothing_to_play_tit),getResources().getString(R.string.msg_nothing_to_play));
             return;
         }
@@ -230,18 +256,10 @@ public class MainActivity extends AppCompatActivity {
     public void onClickChunks(AdapterView<?> adapterView, View view, int i, long l) {
         ListView lv = (ListView)adapterView;
         ResumePointAdapter rpa = (ResumePointAdapter) lv.getAdapter();
-        rpa.setSelectedIndex(i);
-    }
-
-    private int getResumeIp() {
-        ListView lv = (ListView)findViewById((R.id.lvChunks));
-        ResumePointAdapter rpa = (ResumePointAdapter)lv.getAdapter();
-        ResumePoint rp = (ResumePoint)rpa.getSelectedItem();
-        if (rp==null) {
-            return -1;
-        }
-        else {
-            return rp.resumeIp;
+        //rpa.setSelectedIndex(i);
+        ResumePoint p = (ResumePoint)rpa.getItem(i);
+        if (p!=null) {
+            viewModel.setResumePoint(p.resumeIp);
         }
     }
 
@@ -328,6 +346,10 @@ public class MainActivity extends AppCompatActivity {
         /*Handle .CAS file pickup*/
         if ((requestCode==PICK_CAS_FILE || requestCode==OPEN_RECENT) && resultCode==Activity.RESULT_OK) {
             if (data != null) {
+
+                TapeImageCrate tic = TapeImageCrate.getEmpty();
+                ConversionCrate cc = null;
+
                 Uri candidateUri = data.getData();
 
                 /*If no URI, just be done*/
@@ -348,13 +370,11 @@ public class MainActivity extends AppCompatActivity {
 
                     /*Perform the conversion*/
                     TapeImageProcessor tip = new TapeImageProcessor();
-                    ConversionCrate cc = tip.convertItem(ti,viewModel.getUserSettings().isDo48kHz()?48000:44100 , false);
-                    viewModel.setCurrentConversionCrate(cc);
-
+                    cc = tip.convertItem(ti,viewModel.getUserSettings().isDo48kHz()?48000:44100 , false);
 
                 } catch (Exception e) {
                     candidateUri=null;
-                    viewModel.setCurrentConversionCrate(null);
+
                     setChunkDisplay(new ArrayList<>());
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
@@ -387,10 +407,11 @@ public class MainActivity extends AppCompatActivity {
 
                     /*Update the user interface, and recents*/
                     if (candidateUri!=null) {
-                       viewModel.setCurrentUri(candidateUri);
+                       tic = TapeImageCrate.getFull(cc,candidateUri);
                        viewModel.getTapeImageRecents().addRecentItem(candidateUri,extractFileNameFromURI(candidateUri));
-                       updateUIForFile();
                     }
+
+                    viewModel.setCurrentTapeImageCrate(tic);
                 }
 
             }
@@ -401,13 +422,6 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
-    void updateUIForFile() {
-        String filename = extractFileNameFromURI(viewModel.getCurrentUri());
-        setCurrentFileName(filename);
-    }
-
-
     private ProgressBar getProgressBar() {
         return findViewById(R.id.pbProgress);
     }
@@ -415,12 +429,6 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton getBrowseButton() {
         return findViewById(R.id.btnBrowse);
     }
-
-    private void setCurrentFileName(String filename) {
-        TextView tv = findViewById(R.id.tvTapeImageName);
-        tv.setText(filename);
-    }
-
 
     public void displayPostTaskAlert(int titleId, String msg) {
         displaySimpleAlert(getResources().getString(titleId),msg);
@@ -434,19 +442,7 @@ public class MainActivity extends AppCompatActivity {
         if (ip==-1) return;
         ListView lv = (ListView)findViewById(R.id.lvChunks);
         ResumePointAdapter rpa = (ResumePointAdapter)lv.getAdapter();
-        rpa.setResumePoint(ip,true);
-    }
-
-    void observeResumePoint(int ip,int stopReason) {
-        ListView lv = (ListView)findViewById(R.id.lvChunks);
-        ResumePointAdapter rpa = (ResumePointAdapter)lv.getAdapter();
-
-        if (stopReason==STOP_REASON_PAUSE) {
-            rpa.setResumePoint(ip,false);
-        }
-        else {
-            rpa.setResumePoint(0,false);
-        }
+        rpa.setResumePoint(ip);
     }
 
     private String extractFileNameFromURI(Uri uri) {
@@ -470,10 +466,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return result;
 
-    }
-
-    private void observePreferences(SharedPreferences sPref) {
-        findViewById(R.id.lvChunks).setVisibility(sPref.getInt("c2a_chunks", View.INVISIBLE));
     }
 
     private void displaySimpleAlert(String title, String message) {
