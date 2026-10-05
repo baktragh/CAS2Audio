@@ -11,4 +11,9 @@
         android:onClick="onAbout">
     </item>
 
+    <item
+        android:title="Exit"
+        android:onClick="onExit">
+    </item>
+
 </menu>

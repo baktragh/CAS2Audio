@@ -1,19 +1,17 @@
 package com.baktra.cas2audio;
 
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.PowerManager;
-import android.view.View;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.io.File;
 
-public class MainViewModel extends ViewModel {
+public class MainViewModel extends ViewModel implements CasTaskObserver {
 
     private SharedPreferences sharedPreferences;
-    private PowerManager powerManager;
 
     private UserSettings userSettings;
 
@@ -24,7 +22,7 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<TapeImageCrate> currentTapeImageCrate;
 
 
-    private MutableLiveData<Integer> chunkListVisibility;
+    private MutableLiveData<Boolean> chunkListVisibility;
 
     private MutableLiveData<Boolean> playBackState;
     File lastChooserDirectory;
@@ -37,6 +35,12 @@ public class MainViewModel extends ViewModel {
 
     private MutableLiveData<Integer> progressValue;
 
+    public SingleLiveEvent<CasTaskAlertCrate> getCasAlert() {
+        return this.casAlert;
+    }
+
+    SingleLiveEvent<CasTaskAlertCrate> casAlert;
+
 
     public MainViewModel(SharedPreferences sPref) {
         casTask = null;
@@ -47,22 +51,15 @@ public class MainViewModel extends ViewModel {
         lastChooserDirectory = null;
         tapeImageRecents = new TapeImageRecents();
         userSettings = new UserSettings();
-        powerManager = null;
-        chunkListVisibility =new MutableLiveData<>(View.INVISIBLE);
+        chunkListVisibility =new MutableLiveData<>(Boolean.FALSE);
         sharedPreferences=sPref;
         restorePreferences();
-    }
-
-
-    void setPowerManager(PowerManager p) {
-        if (powerManager==null) {
-            powerManager=p;
-        }
+        casAlert = new SingleLiveEvent<>();
     }
 
 
 
-    Exception createCasTask() {
+    Exception createCasTask(PowerManager pm) {
        casTask = null;
         try {
             casTask = new CasTask(
@@ -73,7 +70,8 @@ public class MainViewModel extends ViewModel {
                     userSettings.getAmplitude(),
                     currentTapeImageCrate.getValue().getConvCrate().sampleRate,
                     userSettings.isDoInvertPolarity(),
-                    resumeIp.getValue()
+                    resumeIp.getValue(),
+                    pm
             );
             playBackState.setValue(new Boolean(true));
             casTask.execute();
@@ -93,35 +91,53 @@ public class MainViewModel extends ViewModel {
 
     }
 
-    void setProgressValue(int value) {
+    public void onProgressUpdate(int value) {
         this.progressValue.setValue(value);
     }
 
-    void setResumePoint(int value) {
-        this.resumeIp.setValue(value);
+    public void onResumePointUpdate(int value) {
+        setResumePoint(value);
+    }
+
+    public void setResumePoint(int resumePoint) {
+        this.resumeIp.setValue(resumePoint);
     }
 
 
     private void restorePreferences() {
 
-        lastChooserDirectory = new File(sharedPreferences.getString("c2a_last_dir", ""));
+        /*Restore user settings*/
+        userSettings = UserSettings.createFromPersistentStorage(sharedPreferences);
+
+        /*Restore recents*/
         try {
             tapeImageRecents.parsePersistenceString(sharedPreferences.getString("c2a_recents", ""));
         }
-        catch (Exception e) {
+        catch (Exception e1) {
             tapeImageRecents.clear();
         }
-        userSettings = UserSettings.createFromPersistentStorage(sharedPreferences);
+
+        /*Restore state of selected controls. If something fails, allow continuation*/
+        try {
+
+            lastChooserDirectory = new File(sharedPreferences.getString("c2a_last_dir", ""));
+            chunkListVisibility.setValue(sharedPreferences.getBoolean("c2a_chunks_v", false));
+        }
+        catch (Exception e1) {
+            e1.printStackTrace();
+        }
 
     }
 
-    void handlePlaybackEndedNormal() {
+
+    public void onSuccessfulPlayback() {
 
         playBackState.setValue(new Boolean(false));
         resumeIp.setValue(0);
+        casTask=null;
     }
 
-    void handlePlaybackCancelled(int resIp) {
+    public void onCancelledPlayback(int resIp) {
         playBackState.setValue(new Boolean(false));
         if (stopReason==STOP_REASON_PAUSE) {
             resumeIp.setValue(resIp);
@@ -129,6 +145,14 @@ public class MainViewModel extends ViewModel {
         else {
             resumeIp.setValue(0);
         }
+        casTask=null;
+    }
+
+    public void onFailedPlayback(Exception e) {
+        playBackState.setValue(new Boolean(false));
+        resumeIp.setValue(0);
+        casTask=null;
+        casAlert.setValue(new CasTaskAlertCrate(0,Utils.getExceptionMessage(e)));
     }
 
     private void storePreferences() {
@@ -141,7 +165,7 @@ public class MainViewModel extends ViewModel {
         }
         String recentString = tapeImageRecents.createPersistenceString();
         editor.putString("c2a_recents", recentString);
-        editor.putInt("c2a_chunks", chunkListVisibility.getValue());
+        editor.putBoolean("c2a_chunks_v", chunkListVisibility.getValue());
         editor.apply();
 
         /*General settings*/
@@ -173,41 +197,35 @@ public class MainViewModel extends ViewModel {
         currentTapeImageCrate.setValue(tic);
     }
 
-    public PowerManager getPowerManager() {
-        return powerManager;
-    }
-
     public void flipChunkListVisibility() {
 
-        if (chunkListVisibility.getValue()==View.VISIBLE) {
-            chunkListVisibility.setValue(View.INVISIBLE);
-        }
-        else {
-            chunkListVisibility.setValue(View.VISIBLE);
-        }
+        chunkListVisibility.setValue(!chunkListVisibility.getValue());
 
     }
 
-    public MutableLiveData<Integer> getChunkListVisibility() {
+    public LiveData<Boolean> getChunkListVisibility() {
         return chunkListVisibility;
     }
 
-    public MutableLiveData<Boolean> getPlayBackState() {
+    public LiveData<Boolean> getPlayBackState() {
         return playBackState;
     }
 
-    public MutableLiveData<Integer> getProgressValue() {
+    public LiveData<Integer> getProgressValue() {
         return progressValue;
     }
 
-    public MutableLiveData<TapeImageCrate> getCurrentTapeImageCrate() {return currentTapeImageCrate;}
-    public MutableLiveData<Integer> getResumeIp() {return resumeIp;}
+    public LiveData<TapeImageCrate> getCurrentTapeImageCrate() {return currentTapeImageCrate;}
+    public LiveData<Integer> getResumeIp() {return resumeIp;}
 
 
     @Override
     public void onCleared() {
         System.out.println("MainViewModel::onCleared()");
         storePreferences();
+        if (casTask!=null) {
+            casTask.cancel(false);
+        }
     }
 
 }

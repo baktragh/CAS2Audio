@@ -43,8 +43,6 @@ public class MainActivity extends AppCompatActivity {
     private final String LN_SP;
     private MainViewModel viewModel;
 
-
-
     public MainActivity() {
         super();
         LN_SP = System.lineSeparator();
@@ -76,14 +74,6 @@ public class MainActivity extends AppCompatActivity {
         /*Widgets to be enabled during playback*/
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
         playBackViewsEnabled.add(findViewById(R.id.btnPause));
-
-        /*Try to get a power manager*/
-        try {
-            viewModel.setPowerManager((PowerManager)getApplicationContext().getSystemService(POWER_SERVICE));
-        } catch (Exception e) {
-            viewModel.setPowerManager(null);
-            e.printStackTrace();
-        }
 
         /*Set the title*/
         setTitle("CAS2Audio 1.0.9");
@@ -124,11 +114,11 @@ public class MainActivity extends AppCompatActivity {
     private void setupModelObservers() {
 
         /*Chunk list visibility*/
-        viewModel.getChunkListVisibility().observe(this, new Observer<Integer>() {
+        viewModel.getChunkListVisibility().observe(this, new Observer<Boolean>() {
             @Override
-            public void onChanged(Integer newVisibility) {
+            public void onChanged(Boolean newVisibility) {
                 ListView lv = (ListView)findViewById(R.id.lvChunks);
-                lv.setVisibility(newVisibility);
+                lv.setVisibility(newVisibility?View.VISIBLE:View.INVISIBLE);
             }
         });
 
@@ -211,6 +201,15 @@ public class MainActivity extends AppCompatActivity {
                 setResumePointProgress(newResumeIp);
             }
         });
+
+        viewModel.getCasAlert().observe(this,new Observer<CasTaskAlertCrate>() {
+            @Override
+            public void onChanged(CasTaskAlertCrate newAlertCrate) {
+                if (newAlertCrate!=null) {
+                    displayPostTaskAlert(R.string.msg_unable_to_process_tit, newAlertCrate.getMessage());
+                }
+            }
+        });
     }
 
 
@@ -222,8 +221,16 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        PowerManager p;
+        try {
+            p=((PowerManager)getApplicationContext().getSystemService(POWER_SERVICE));
+        } catch (Exception e) {
+            p=null;
+            e.printStackTrace();
+        }
+
         /*Create new background task*/
-        Exception e = viewModel.createCasTask();
+        Exception e = viewModel.createCasTask(p);
         if (e!=null) {
             displaySimpleAlert(getString(R.string.msg_unable_to_process_tit),Utils.getExceptionMessage(e));
         }
@@ -484,6 +491,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void onAbout(MenuItem mi) {
         Toast.makeText(this,getString(R.string.toast_about),Toast.LENGTH_LONG).show();
+    }
+
+    public void onExit(MenuItem mi) {
+        finish();
     }
 
 
