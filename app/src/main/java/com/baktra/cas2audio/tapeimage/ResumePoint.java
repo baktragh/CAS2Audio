@@ -1,12 +1,17 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.tapeimage;
 
-import com.baktra.cas2audio.tapeimage.TapeImageChunk;
+import com.baktra.cas2audio.tapeimagefile.TapeImageChunk;
 
 public class ResumePoint {
 
-    int index;
-    int resumeIp;
-    TapeImageChunk chunk;
+    private int index;
+
+    public int getResumeIp() {
+        return this.resumeIp;
+    }
+
+    private int resumeIp;
+    private TapeImageChunk chunk;
 
     public ResumePoint(int index, int ip, TapeImageChunk chunk ) {
         this.index=index;
@@ -23,5 +28,7 @@ public class ResumePoint {
     }
 
 
-
+    public long getIndex() {
+        return index;
+    }
 }

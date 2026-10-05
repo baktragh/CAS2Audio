@@ -20,14 +20,14 @@
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
         <activity
-            android:name=".RecentActivity"
+            android:name=".recent.RecentActivity"
             android:exported="false"
             android:label="@string/tit_recent"
             android:parentActivityName=".MainActivity"
 
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".SettingsActivity"
+            android:name=".settings.SettingsActivity"
             android:exported="false"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity"

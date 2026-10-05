@@ -7,6 +7,10 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.baktra.cas2audio.recent.TapeImageRecents;
+import com.baktra.cas2audio.settings.UserSettings;
+import com.baktra.cas2audio.tapeimage.TapeImageCrate;
+
 import java.io.File;
 
 public class MainViewModel extends ViewModel implements CasTaskObserver {
@@ -68,7 +72,7 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
                     !userSettings.isDoMono(),
                     userSettings.isDoSquareWave(),
                     userSettings.getAmplitude(),
-                    currentTapeImageCrate.getValue().getConvCrate().sampleRate,
+                    currentTapeImageCrate.getValue().getConvCrate().getSampleRate(),
                     userSettings.isDoInvertPolarity(),
                     resumeIp.getValue(),
                     pm

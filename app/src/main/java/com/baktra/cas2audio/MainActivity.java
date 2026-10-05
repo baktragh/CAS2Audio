@@ -26,7 +26,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.baktra.cas2audio.tapeimage.TapeImage;
+import com.baktra.cas2audio.recent.RecentActivity;
+import com.baktra.cas2audio.settings.SettingsActivity;
+import com.baktra.cas2audio.settings.UserSettings;
+import com.baktra.cas2audio.tapeimage.ResumePoint;
+import com.baktra.cas2audio.tapeimage.TapeImageCrate;
+import com.baktra.cas2audio.tapeimage.TapeImageProcessor;
+import com.baktra.cas2audio.tapeimagefile.TapeImage;
 
 import java.io.File;
 import java.io.IOException;
@@ -189,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     TextView tv = findViewById(R.id.tvTapeImageName);
                     tv.setText(extractFileNameFromURI(newCrate.getUri()));
-                    setChunkDisplay(newCrate.getConvCrate().resumePoints);
+                    setChunkDisplay(newCrate.getConvCrate().getResumePoints());
                 }
 
             }
@@ -266,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
         //rpa.setSelectedIndex(i);
         ResumePoint p = (ResumePoint)rpa.getItem(i);
         if (p!=null) {
-            viewModel.setResumePoint(p.resumeIp);
+            viewModel.setResumePoint(p.getResumeIp());
         }
     }
 

@@ -3,7 +3,7 @@ package com.baktra.cas2audio;
 /**
  * Auto-growing storage for integers
  */
-class InstructionStream {
+public class InstructionStream {
 
     private int[] storage;
     private int pointer;

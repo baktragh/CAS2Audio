@@ -1,12 +1,14 @@
 package com.baktra.cas2audio;
 
+import com.baktra.cas2audio.tapeimage.ResumePoint;
+
 import java.util.ArrayList;
 
 public class ConversionCrate {
-    int sampleRate;
-    int[] instructions;
-    ArrayList<ResumePoint> resumePoints;
-    ConversionCrate() {
+    private int sampleRate;
+    private int[] instructions;
+    private ArrayList<ResumePoint> resumePoints;
+    public ConversionCrate() {
         resumePoints = new ArrayList<>();
     }
 
@@ -35,5 +37,17 @@ public class ConversionCrate {
 
     public int[] getInstructions() {
         return instructions;
+    }
+
+    public int getSampleRate() {
+        return this.sampleRate;
+    }
+
+    public ArrayList<ResumePoint> getResumePoints() {
+        return resumePoints;
+    }
+
+    public void setSampleRate(int sampleRate) {
+        this.sampleRate=sampleRate;
     }
 }

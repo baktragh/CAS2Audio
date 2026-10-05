@@ -11,7 +11,7 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
+import com.baktra.cas2audio.tapeimage.ResumePoint;
 
 import java.util.ArrayList;
 
@@ -49,7 +49,7 @@ public class ResumePointAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int i) {
-        return resumePoints.get(i).index;
+        return resumePoints.get(i).getIndex();
     }
 
     private final void retrieveColors() {
@@ -128,7 +128,7 @@ public class ResumePointAdapter extends BaseAdapter {
         /*Find the closest resume point*/
         for (int i = resumePoints.size() - 1; i >= 0; i--) {
             ResumePoint p = resumePoints.get(i);
-            if (p.resumeIp <= ip) {
+            if (p.getResumeIp() <= ip) {
                 currentResumePointIndex = i;
                 break;
             }

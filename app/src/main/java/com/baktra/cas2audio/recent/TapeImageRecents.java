@@ -1,20 +1,20 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.recent;
 
 import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-class TapeImageRecents {
+public class TapeImageRecents {
 
     private final ArrayList<RecentItem> recentItems;
     public static final int RECENT_CAPACITY =24;
 
-    TapeImageRecents() {
+    public TapeImageRecents() {
         recentItems = new ArrayList<>();
     }
 
-    String createPersistenceString() {
+    public String createPersistenceString() {
         StringBuilder sb = new StringBuilder();
 
         for (RecentItem ri : recentItems) {
@@ -31,7 +31,7 @@ class TapeImageRecents {
         return sb.toString();
     }
 
-    void addRecentItem(Uri uri, String filename) {
+    public void addRecentItem(Uri uri, String filename) {
         RecentItem candidateItem = new RecentItem(uri,filename);
 
         /*Check if already there*/
@@ -50,7 +50,7 @@ class TapeImageRecents {
         if (recentItems.size() > RECENT_CAPACITY) recentItems.remove(RECENT_CAPACITY -1);
     }
 
-    void parsePersistenceString(String s) {
+    public void parsePersistenceString(String s) {
         recentItems.clear();
         StringTokenizer tk = new StringTokenizer(s, ";");
 
@@ -64,7 +64,7 @@ class TapeImageRecents {
         }
     }
 
-    void clear() {
+    public void clear() {
         recentItems.clear();
     }
 

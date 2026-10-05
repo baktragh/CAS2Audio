@@ -1,4 +1,4 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.recent;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -12,6 +12,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.baktra.cas2audio.R;
 
 public class RecentActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 

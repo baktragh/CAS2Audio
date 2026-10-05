@@ -1,6 +1,8 @@
-package com.baktra.cas2audio;
+package com.baktra.cas2audio.tapeimage;
 
 import android.net.Uri;
+
+import com.baktra.cas2audio.ConversionCrate;
 
 public class TapeImageCrate {
 
@@ -15,12 +17,12 @@ public class TapeImageCrate {
         isEmpty=true;
     }
 
-    static TapeImageCrate getEmpty() {
+    public static TapeImageCrate getEmpty() {
         TapeImageCrate tic = new TapeImageCrate();
         return tic;
     }
 
-    static TapeImageCrate getFull(ConversionCrate cc,Uri uri) {
+    public static TapeImageCrate getFull(ConversionCrate cc,Uri uri) {
         TapeImageCrate tic = new TapeImageCrate();
         tic.convCrate=cc;
         tic.uri=uri;
