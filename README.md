@@ -18,6 +18,7 @@ a tool for creating Atari tapes
 * The signal is generated on-the-fly (no temporary wave files are needed)
 * Displays animated cassette during playback
 * Since version 1.0.8, full support for landscape screen format
+* Since version 1.0.9, full support for live screen rotation and color scheme changes
 
 ### Quick Start
 

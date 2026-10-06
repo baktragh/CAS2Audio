@@ -64,9 +64,6 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences sharedPrefs = getSharedPreferences("c2a_prefs", Context.MODE_PRIVATE);
         MainViewModelFactory factory = new MainViewModelFactory(sharedPrefs,getContentResolver());
-        viewModel = new ViewModelProvider(this,factory).get(MainViewModel.class);
-
-        setupModelObservers();
 
         /*Widgets to be disabled during playback*/
         playBackViewsDisabled.add(getBrowseButton());
@@ -78,6 +75,9 @@ public class MainActivity extends AppCompatActivity {
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
         playBackViewsEnabled.add(findViewById(R.id.btnPause));
 
+        viewModel = new ViewModelProvider(this,factory).get(MainViewModel.class);
+        setupModelObservers();
+
         /*Set the title*/
         setTitle("CAS2Audio 1.0.9");
     }
@@ -85,8 +85,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
-        playBackMenuItemsDisabled.add(menu.findItem(R.id.miSettings));
-
+        MenuItem mi = menu.findItem(R.id.miSettings);
+        playBackMenuItemsDisabled.add(mi);
+        mi.setEnabled(!(viewModel.getPlayBackState().getValue()));
         return true;
     }
 
