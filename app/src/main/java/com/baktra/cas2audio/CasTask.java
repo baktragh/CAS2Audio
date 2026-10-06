@@ -36,6 +36,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         this.resumeIp=resumeIp;
         this.sg=null;
         this.powerManager=pm;
+
     }
 
     @Override
@@ -98,8 +99,10 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     protected void onPostExecute(Void v) {
 
         if (lastException != null) {
-            taskObserver.onFailedPlayback(lastException);
             lastException.printStackTrace();
+            taskObserver.onFailedPlayback(lastException);
+            return;
+
         }
         taskObserver.onSuccessfulPlayback();
 
@@ -112,13 +115,13 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         if (sg!=null) lastIp=sg.getLastIp();
 
         if (lastException != null) {
-            taskObserver.onFailedPlayback(lastException);
             lastException.printStackTrace();
+            taskObserver.onFailedPlayback(lastException);
+            return;
+
         }
         taskObserver.onCancelledPlayback(lastIp);
     }
-
-
     protected void onPreExecute() {
 
     }

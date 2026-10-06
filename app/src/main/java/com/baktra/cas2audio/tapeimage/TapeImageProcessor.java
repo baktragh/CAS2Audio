@@ -19,26 +19,11 @@ public class TapeImageProcessor {
     }
 
     /*Convert tape image to the signal generator instructions*/
-    public ConversionCrate convertItem(TapeImage ti, int sampleRate, boolean shortenLeader) throws Exception {
+    public ConversionCrate convertItem(TapeImage ti, int sampleRate) throws Exception {
 
         ConversionCrate crate = new ConversionCrate();
         InstructionStream is = new InstructionStream();
         crate.setSampleRate(sampleRate);
-
-        if (shortenLeader == true) {
-            /*Find first data chunk*/
-            for (int i = 0; i < ti.getChunkCount(); i++) {
-                TapeImageChunk c = ti.getChunkAt(i);
-                if (c.getType().equals("data")) {
-                    DataChunk dc = (DataChunk) c;
-                    /*Shorten to 15 seconds*/
-                    if (dc.getAux() > 15000) {
-                        c.setAux(15000);
-                    }
-                    break;
-                }
-            }
-        }
 
         TapeImageChunk chunk;
         TapeImageChunk parent;

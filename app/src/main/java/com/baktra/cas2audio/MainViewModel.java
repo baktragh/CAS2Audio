@@ -1,6 +1,8 @@
 package com.baktra.cas2audio;
 
+import android.content.ContentResolver;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.PowerManager;
 
 import androidx.lifecycle.LiveData;
@@ -9,7 +11,9 @@ import androidx.lifecycle.ViewModel;
 
 import com.baktra.cas2audio.recent.TapeImageRecents;
 import com.baktra.cas2audio.settings.UserSettings;
+import com.baktra.cas2audio.tapeimage.ResumePoint;
 import com.baktra.cas2audio.tapeimage.TapeImageCrate;
+import com.baktra.cas2audio.tapeimage.TapeImageOpener;
 
 import java.io.File;
 
@@ -31,7 +35,7 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
     private MutableLiveData<Boolean> playBackState;
     File lastChooserDirectory;
 
-    private MutableLiveData<Integer> resumeIp;
+    private MutableLiveData<Integer> resumePointIp;
 
     public static final int STOP_REASON_STOP=0;
     public static final int STOP_REASON_PAUSE=1;
@@ -45,13 +49,15 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
 
     SingleLiveEvent<CasTaskAlertCrate> casAlert;
 
+    private TapeImageOpener tapeImageOpener;
 
-    public MainViewModel(SharedPreferences sPref) {
+
+    public MainViewModel(SharedPreferences sPref, ContentResolver contentResolver) {
         casTask = null;
         playBackState = new MutableLiveData<>(Boolean.FALSE);
         progressValue = new MutableLiveData<>(new Integer(0));
         currentTapeImageCrate = new MutableLiveData<>(TapeImageCrate.getEmpty());
-        resumeIp = new MutableLiveData<>(new Integer(0));
+        resumePointIp = new MutableLiveData<>(new Integer(0));
         lastChooserDirectory = null;
         tapeImageRecents = new TapeImageRecents();
         userSettings = new UserSettings();
@@ -59,6 +65,7 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
         sharedPreferences=sPref;
         restorePreferences();
         casAlert = new SingleLiveEvent<>();
+        tapeImageOpener = new TapeImageOpener(contentResolver);
     }
 
 
@@ -74,7 +81,7 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
                     userSettings.getAmplitude(),
                     currentTapeImageCrate.getValue().getConvCrate().getSampleRate(),
                     userSettings.isDoInvertPolarity(),
-                    resumeIp.getValue(),
+                    resumePointIp.getValue(),
                     pm
             );
             playBackState.setValue(new Boolean(true));
@@ -87,24 +94,33 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
     }
 
     void stopCasTask(int reason) {
-
+        stopReason=reason;
         if (casTask !=null ) {
             casTask.cancel(false);
         }
-        stopReason=reason;
+    }
 
+    TapeImageOpener.ReadResult readTapeImage(Uri uri) {
+        return this.tapeImageOpener.readTapeImage(uri,userSettings.isDo48kHz());
     }
 
     public void onProgressUpdate(int value) {
         this.progressValue.setValue(value);
     }
 
-    public void onResumePointUpdate(int value) {
-        setResumePoint(value);
+    public void onResumePointUpdate(int resumeIp) {
+        setResumePoint(resumeIp);
     }
 
-    public void setResumePoint(int resumePoint) {
-        this.resumeIp.setValue(resumePoint);
+    public void setResumePoint(int resumeIp) {
+
+        ResumePoint rp = ResumePoint.getClosestResumePoint(resumeIp,currentTapeImageCrate.getValue().getConvCrate().getResumePoints());
+        if (rp!=null) {
+            this.resumePointIp.setValue(rp.getResumeIp());
+        }
+        else {
+            this.resumePointIp.setValue(0);
+        }
     }
 
 
@@ -137,24 +153,24 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
     public void onSuccessfulPlayback() {
 
         playBackState.setValue(new Boolean(false));
-        resumeIp.setValue(0);
+        setResumePoint(0);
         casTask=null;
     }
 
     public void onCancelledPlayback(int resIp) {
         playBackState.setValue(new Boolean(false));
         if (stopReason==STOP_REASON_PAUSE) {
-            resumeIp.setValue(resIp);
+            setResumePoint(resIp);
         }
         else {
-            resumeIp.setValue(0);
+            setResumePoint(0);
         }
         casTask=null;
     }
 
     public void onFailedPlayback(Exception e) {
         playBackState.setValue(new Boolean(false));
-        resumeIp.setValue(0);
+        setResumePoint(0);
         casTask=null;
         casAlert.setValue(new CasTaskAlertCrate(0,Utils.getExceptionMessage(e)));
     }
@@ -220,12 +236,12 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
     }
 
     public LiveData<TapeImageCrate> getCurrentTapeImageCrate() {return currentTapeImageCrate;}
-    public LiveData<Integer> getResumeIp() {return resumeIp;}
+    public LiveData<Integer> getResumePointIp() {return resumePointIp;}
 
 
     @Override
     public void onCleared() {
-        System.out.println("MainViewModel::onCleared()");
+        //System.out.println("MainViewModel::onCleared()");
         storePreferences();
         if (casTask!=null) {
             casTask.cancel(false);

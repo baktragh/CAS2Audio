@@ -2,6 +2,8 @@ package com.baktra.cas2audio.tapeimage;
 
 import com.baktra.cas2audio.tapeimagefile.TapeImageChunk;
 
+import java.util.List;
+
 public class ResumePoint {
 
     private int index;
@@ -28,7 +30,30 @@ public class ResumePoint {
     }
 
 
-    public long getIndex() {
+    public int getIndex() {
         return index;
+    }
+
+    public static ResumePoint getClosestResumePoint(int ip, List<ResumePoint> resumePoints) {
+
+        /*Can be empty*/
+        if (resumePoints == null || resumePoints.isEmpty()) {
+            return null;
+        }
+
+        /*Begin with a fallback value*/
+        int currentResumePointIndex = 0;
+
+        /*Find the closest resume point*/
+        for (int i = resumePoints.size() - 1; i >= 0; i--) {
+            ResumePoint p = resumePoints.get(i);
+            if (p.getResumeIp() <= ip) {
+                currentResumePointIndex = i;
+                break;
+            }
+        }
+
+        /*Return the resume point found*/
+        return resumePoints.get(currentResumePointIndex);
     }
 }

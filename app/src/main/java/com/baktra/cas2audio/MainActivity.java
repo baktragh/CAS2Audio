@@ -31,12 +31,9 @@ import com.baktra.cas2audio.settings.SettingsActivity;
 import com.baktra.cas2audio.settings.UserSettings;
 import com.baktra.cas2audio.tapeimage.ResumePoint;
 import com.baktra.cas2audio.tapeimage.TapeImageCrate;
-import com.baktra.cas2audio.tapeimage.TapeImageProcessor;
-import com.baktra.cas2audio.tapeimagefile.TapeImage;
+import com.baktra.cas2audio.tapeimage.TapeImageOpener;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -66,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         SharedPreferences sharedPrefs = getSharedPreferences("c2a_prefs", Context.MODE_PRIVATE);
-        MainViewModelFactory factory = new MainViewModelFactory(sharedPrefs);
+        MainViewModelFactory factory = new MainViewModelFactory(sharedPrefs,getContentResolver());
         viewModel = new ViewModelProvider(this,factory).get(MainViewModel.class);
 
         setupModelObservers();
@@ -201,10 +198,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        viewModel.getResumeIp().observe(this, new Observer<Integer>() {
+        viewModel.getResumePointIp().observe(this, new Observer<Integer>() {
             @Override
             public void onChanged(Integer newResumeIp) {
-                setResumePointProgress(newResumeIp);
+                updateDisplayedResumePoint(newResumeIp);
             }
         });
 
@@ -339,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         /*Handle the settings activity*/
-        if (requestCode==OPEN_SETTINGS && resultCode==Activity.RESULT_OK) {
+        if (requestCode == OPEN_SETTINGS && resultCode == Activity.RESULT_OK) {
             if (data != null) {
                 this.viewModel.setUserSettings((UserSettings) data.getSerializableExtra("user_settings"));
             }
@@ -347,87 +344,54 @@ public class MainActivity extends AppCompatActivity {
         }
 
         /*Pre-handle the Recent activity*/
-        if (requestCode==OPEN_RECENT) {
+        if (requestCode == OPEN_RECENT) {
             if (data != null) {
                 String recentString = data.getStringExtra("recents");
-                if (recentString!=null) {
+                if (recentString != null) {
                     this.viewModel.setTapeImageRecentsString(recentString);
                 }
             }
         }
 
         /*Handle .CAS file pickup*/
-        if ((requestCode==PICK_CAS_FILE || requestCode==OPEN_RECENT) && resultCode==Activity.RESULT_OK) {
-            if (data != null) {
+        if ((requestCode == PICK_CAS_FILE || requestCode == OPEN_RECENT) && resultCode == Activity.RESULT_OK) {
 
-                TapeImageCrate tic = TapeImageCrate.getEmpty();
-                ConversionCrate cc = null;
-
-                Uri candidateUri = data.getData();
-
-                /*If no URI, just be done*/
-                if (candidateUri==null) return;
-
-                /*Check if valid tape image*/
-                /*Try to open the tape image - short, can be in the event thread*/
-                InputStream iStream=null;
-
-                try  {
-                    /*Get the persmission*/
-                    getContentResolver().takePersistableUriPermission(candidateUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                    /*Open for input stream*/
-                    iStream = getContentResolver().openInputStream(candidateUri);
-                    TapeImage ti = new TapeImage();
-                    ti.parse(iStream);
-
-                    /*Perform the conversion*/
-                    TapeImageProcessor tip = new TapeImageProcessor();
-                    cc = tip.convertItem(ti,viewModel.getUserSettings().isDo48kHz()?48000:44100 , false);
-
-                } catch (Exception e) {
-                    candidateUri=null;
-
-                    setChunkDisplay(new ArrayList<>());
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                        }
-                    });
-
-                    String primaryReasonString;
-
-                    if (e instanceof FileFormatException) {
-                        primaryReasonString = getString(R.string.msg_file_not_tape_image);
-                    }
-                    else {
-                        primaryReasonString = getString(R.string.msg_file_unable_open);
-                    }
-                    builder.setMessage(String.format("%s%n%s",primaryReasonString,Utils.getExceptionMessage(e)));
-                    builder.setTitle(getString(R.string.msg_file_unable_open_tit));
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                    e.printStackTrace();
-                }
-
-                finally {
-                    try {
-                        if (iStream != null) iStream.close();
-                    }
-                    catch(IOException ioe) {
-                        /*Nothing we can do*/
-                    }
-
-                    /*Update the user interface, and recents*/
-                    if (candidateUri!=null) {
-                       tic = TapeImageCrate.getFull(cc,candidateUri);
-                       viewModel.getTapeImageRecents().addRecentItem(candidateUri,extractFileNameFromURI(candidateUri));
-                    }
-
-                    viewModel.setCurrentTapeImageCrate(tic);
-                }
-
+            /*Nothing passed, the player is empty*/
+            if (data == null || data.getData() == null) {
+                viewModel.setCurrentTapeImageCrate(TapeImageCrate.getEmpty());
+                return;
             }
+
+            TapeImageOpener.ReadResult result = viewModel.readTapeImage(data.getData());
+
+            /*If successfull, add to recents*/
+            if (result.isSuccess()) {
+                viewModel.setCurrentTapeImageCrate(result.getTapeImageCrate());
+                viewModel.getTapeImageRecents().addRecentItem(data.getData(), extractFileNameFromURI(data.getData()));
+            }
+            /*Otherwise, respond to the error*/
+            else {
+                viewModel.setCurrentTapeImageCrate(TapeImageCrate.getEmpty());
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                    }
+                });
+
+                String primaryReasonString;
+                int failureReson = result.getFailureNature();
+
+                if (failureReson == TapeImageOpener.ReadResult.FAILURE_NOT_TAPEIMAGE) {
+                    primaryReasonString = getString(R.string.msg_file_not_tape_image);
+                } else {
+                    primaryReasonString = getString(R.string.msg_file_unable_open);
+                }
+                builder.setMessage(String.format("%s%n%s", primaryReasonString, Utils.getExceptionMessage(result.getException())));
+                builder.setTitle(getString(R.string.msg_file_unable_open_tit));
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+
 
         }
 
@@ -451,11 +415,11 @@ public class MainActivity extends AppCompatActivity {
         getProgressBar().setProgress(value);
     }
 
-    void setResumePointProgress(int ip) {
-        if (ip==-1) return;
+    void updateDisplayedResumePoint(int resumeIp) {
+        if (resumeIp==-1) return;
         ListView lv = (ListView)findViewById(R.id.lvChunks);
         ResumePointAdapter rpa = (ResumePointAdapter)lv.getAdapter();
-        rpa.setResumePoint(ip);
+        rpa.setResumePoint(resumeIp);
     }
 
     private String extractFileNameFromURI(Uri uri) {

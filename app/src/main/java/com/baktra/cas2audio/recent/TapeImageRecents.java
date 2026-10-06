@@ -47,7 +47,7 @@ public class TapeImageRecents {
 
         /*Move to front*/
         recentItems.add(0, candidateItem);
-        if (recentItems.size() > RECENT_CAPACITY) recentItems.remove(RECENT_CAPACITY -1);
+        if (recentItems.size() > RECENT_CAPACITY) recentItems.remove(RECENT_CAPACITY);
     }
 
     public void parsePersistenceString(String s) {

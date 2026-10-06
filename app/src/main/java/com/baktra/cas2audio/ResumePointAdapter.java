@@ -122,24 +122,16 @@ public class ResumePointAdapter extends BaseAdapter {
 
     public void setResumePoint(int ip) {
 
-        /*Fallback value*/
-        currentResumePointIndex = 0;
+        ResumePoint rp = ResumePoint.getClosestResumePoint(ip,resumePoints);
+        if (rp==null) return;
 
-        /*Find the closest resume point*/
-        for (int i = resumePoints.size() - 1; i >= 0; i--) {
-            ResumePoint p = resumePoints.get(i);
-            if (p.getResumeIp() <= ip) {
-                currentResumePointIndex = i;
-                break;
-            }
-        }
+        int currentResumePointIndex=rp.getIndex();
 
         /*Notify for the change*/
         currentSelectedIndex = currentResumePointIndex;
         notifyDataSetChanged();
 
         if (currentSelectedIndex < parentView.getFirstVisiblePosition() || currentSelectedIndex > parentView.getLastVisiblePosition()) {
-
             /*Programmatic selection, scroll to two items above, when possible*/
             int selectionIndex = currentSelectedIndex - 2;
             if (selectionIndex < 0) selectionIndex = 0;
