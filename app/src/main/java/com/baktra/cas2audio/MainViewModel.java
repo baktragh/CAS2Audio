@@ -215,6 +215,7 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
 
     void setCurrentTapeImageCrate(TapeImageCrate tic) {
         currentTapeImageCrate.setValue(tic);
+        setResumePoint(0);
     }
 
     public void flipChunkListVisibility() {
