@@ -61,29 +61,34 @@ public class UserSettings implements Serializable {
 
     public void setAmplitude(final int amplitude) {this.amplitude = amplitude;}
 
-    public static UserSettings createFromPersistentStorage(SharedPreferences sPref) {
+    public static UserSettings load(SharedPreferences sPref) {
         UserSettings s = new UserSettings();
 
-        s.do48kHz = sPref.getBoolean("c2a_48kHz", false);
-        s.doMono = sPref.getBoolean("c2a_mono", false);
-        s.doSquareWave = sPref.getBoolean("c2a_square", false);
-        s.doInvertPolarity = sPref.getBoolean("c2a_invert_pulses", false);
-        s.amplitude = sPref.getInt("c2a_amplitude",5);
+        try {
+            s.do48kHz = sPref.getBoolean("c2a_48kHz", false);
+            s.doMono = sPref.getBoolean("c2a_mono", false);
+            s.doSquareWave = sPref.getBoolean("c2a_square", false);
+            s.doInvertPolarity = sPref.getBoolean("c2a_invert_pulses", false);
+            s.amplitude = sPref.getInt("c2a_amplitude", 5);
 
-        /*Correct possibly wrong amplitude*/
-        if (s.amplitude<2 || s.amplitude >9) s.amplitude=5;
-        return s;
+            /*Correct possibly wrong amplitude*/
+            if (s.amplitude < 2 || s.amplitude > 9) s.amplitude = 5;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            return s;
+        }
     }
 
-    public static void flushToPersistentStorage(UserSettings s, SharedPreferences sPref) {
+    public static void save(UserSettings s, SharedPreferences.Editor editor) {
 
-        SharedPreferences.Editor editor = sPref.edit();
         editor.putBoolean("c2a_48kHz", s.do48kHz);
         editor.putBoolean("c2a_mono", s.doMono);
         editor.putBoolean("c2a_square", s.doSquareWave);
         editor.putBoolean("c2a_invert_pulses", s.doInvertPolarity);
         editor.putInt("c2a_amplitude",s.amplitude);
-        editor.apply();
     }
 
     public String toString() {

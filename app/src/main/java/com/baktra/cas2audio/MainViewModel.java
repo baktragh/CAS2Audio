@@ -1,8 +1,6 @@
 package com.baktra.cas2audio;
 
-import android.app.AlertDialog;
 import android.content.ContentResolver;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.PowerManager;
@@ -12,6 +10,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.baktra.cas2audio.recent.TapeImageRecents;
+import com.baktra.cas2audio.settings.SettingsRepository;
 import com.baktra.cas2audio.settings.UserSettings;
 import com.baktra.cas2audio.tapeimage.ResumePoint;
 import com.baktra.cas2audio.tapeimage.TapeImageCrate;
@@ -21,12 +20,8 @@ import java.io.File;
 
 public class MainViewModel extends ViewModel implements CasTaskObserver {
 
-    private SharedPreferences sharedPreferences;
 
-    private UserSettings userSettings;
-
-    private TapeImageRecents tapeImageRecents;
-
+    private SettingsRepository settingsRepository;
 
     private CasTask casTask;
     private MutableLiveData<TapeImageCrate> currentTapeImageCrate;
@@ -34,8 +29,9 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
 
     private MutableLiveData<Boolean> chunkListVisibility;
 
+
     private MutableLiveData<Boolean> playBackState;
-    File lastChooserDirectory;
+
 
     private MutableLiveData<Integer> resumePointIp;
 
@@ -61,30 +57,28 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
         progressValue = new MutableLiveData<>(new Integer(0));
         currentTapeImageCrate = new MutableLiveData<>(TapeImageCrate.getEmpty());
         resumePointIp = new MutableLiveData<>(new Integer(0));
-        lastChooserDirectory = null;
-        tapeImageRecents = new TapeImageRecents();
-        userSettings = new UserSettings();
         chunkListVisibility =new MutableLiveData<>(Boolean.FALSE);
-        sharedPreferences=sPref;
-        restorePreferences();
         casTaskAlert = new SingleLiveEvent<>();
         openAlert = new SingleLiveEvent<>();
         tapeImageOpener = new TapeImageOpener(contentResolver);
+        settingsRepository = new SettingsRepository(sPref);
+        loadPreferences();
     }
 
 
 
     Exception createCasTask(PowerManager pm) {
        casTask = null;
+       UserSettings us = settingsRepository.getUserSettings();
         try {
             casTask = new CasTask(
                     currentTapeImageCrate.getValue().getConvCrate().getInstructions(),
                     this,
-                    !userSettings.isDoMono(),
-                    userSettings.isDoSquareWave(),
-                    userSettings.getAmplitude(),
+                    !us.isDoMono(),
+                    us.isDoSquareWave(),
+                    us.getAmplitude(),
                     currentTapeImageCrate.getValue().getConvCrate().getSampleRate(),
-                    userSettings.isDoInvertPolarity(),
+                    us.isDoInvertPolarity(),
                     resumePointIp.getValue(),
                     pm
             );
@@ -105,7 +99,8 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
     }
 
     TapeImageOpener.ReadResult readTapeImage(Uri uri) {
-        return this.tapeImageOpener.readTapeImage(uri,userSettings.isDo48kHz());
+        UserSettings us = settingsRepository.getUserSettings();
+        return this.tapeImageOpener.readTapeImage(uri,us.isDo48kHz());
     }
 
     public void onProgressUpdate(int value) {
@@ -136,32 +131,28 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
     }
 
 
-
-
-    private void restorePreferences() {
+    private void loadPreferences() {
 
         /*Restore user settings*/
-        userSettings = UserSettings.createFromPersistentStorage(sharedPreferences);
+        settingsRepository.loadSettings();
+        /*Update the UI*/
+        chunkListVisibility.setValue(settingsRepository.getUiPersistence().isChunkListVisible());
 
-        /*Restore recents*/
-        try {
-            tapeImageRecents.parsePersistenceString(sharedPreferences.getString("c2a_recents", ""));
-        }
-        catch (Exception e1) {
-            tapeImageRecents.clear();
-        }
-
-        /*Restore state of selected controls. If something fails, allow continuation*/
-        try {
-
-            lastChooserDirectory = new File(sharedPreferences.getString("c2a_last_dir", ""));
-            chunkListVisibility.setValue(sharedPreferences.getBoolean("c2a_chunks_v", false));
-        }
-        catch (Exception e1) {
-            e1.printStackTrace();
-        }
+        System.out.println("Load prefs: "+settingsRepository.getUiPersistence().isChunkListVisible());
 
     }
+
+    private void savePreferences() {
+
+        /*Get state of the ui*/
+        settingsRepository.getUiPersistence().updateChunkListVisible(chunkListVisibility.getValue());
+        System.out.println("Save prefs: "+settingsRepository.getUiPersistence().isChunkListVisible());
+
+        /*Save settings*/
+        settingsRepository.saveSettings();
+    }
+
+
 
 
     public void onSuccessfulPlayback() {
@@ -189,42 +180,21 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
         casTaskAlert.setValue(new CasTaskAlertCrate(0,Utils.getExceptionMessage(e)));
     }
 
-    private void storePreferences() {
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        /*Current state of the UI*/
-        if (lastChooserDirectory != null) {
-            editor.putString("c2a_last_dir", lastChooserDirectory.getAbsolutePath());
-        }
-        String recentString = tapeImageRecents.createPersistenceString();
-        editor.putString("c2a_recents", recentString);
-        editor.putBoolean("c2a_chunks_v", chunkListVisibility.getValue());
-        editor.apply();
-
-        /*General settings*/
-        UserSettings.flushToPersistentStorage(userSettings, sharedPreferences);
-
-    }
 
     UserSettings getUserSettings() {
-        return userSettings;
+        return settingsRepository.getUserSettings();
     }
 
-    void setUserSettings(UserSettings us) {
-        userSettings=us;
+    void updateUserSettings(UserSettings us) {
+        settingsRepository.setUserSettings(us);
     }
 
     TapeImageRecents getTapeImageRecents() {
-        return tapeImageRecents;
+        return settingsRepository.getTapeImageRecents();
     }
 
     void setTapeImageRecentsString(String s) {
-        tapeImageRecents.parsePersistenceString(s);
-    }
-
-    File getLastChooserDirectory() {
-        return lastChooserDirectory;
+        settingsRepository.getTapeImageRecents().parsePersistenceString(s);
     }
 
     void setCurrentTapeImageCrate(TapeImageCrate tic) {
@@ -233,9 +203,7 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
     }
 
     public void flipChunkListVisibility() {
-
         chunkListVisibility.setValue(!chunkListVisibility.getValue());
-
     }
 
     public LiveData<Boolean> getChunkListVisibility() {
@@ -256,8 +224,7 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
 
     @Override
     public void onCleared() {
-        //System.out.println("MainViewModel::onCleared()");
-        storePreferences();
+        savePreferences();
         if (casTask!=null) {
             casTask.cancel(false);
         }
@@ -268,6 +235,7 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
         /*Open nothing*/
         if (tapeImageUri==null) {
             setCurrentTapeImageCrate(TapeImageCrate.getEmpty());
+            return;
         }
 
         /*Try to open the tape image*/
@@ -291,4 +259,7 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
     public LiveData<OpenAlertCrate> getOpenAlert() {
         return openAlert;
     }
+
+
+
 }

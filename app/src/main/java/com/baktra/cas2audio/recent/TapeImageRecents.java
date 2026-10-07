@@ -1,5 +1,6 @@
 package com.baktra.cas2audio.recent;
 
+import android.content.SharedPreferences;
 import android.net.Uri;
 
 import java.util.ArrayList;
@@ -29,6 +30,25 @@ public class TapeImageRecents {
         }
 
         return sb.toString();
+    }
+
+    public static void save(TapeImageRecents tir, SharedPreferences.Editor editor) {
+        editor.putString("c2a_recents",tir.createPersistenceString());
+    }
+
+    public static TapeImageRecents load(SharedPreferences prefs) {
+        TapeImageRecents tir = new TapeImageRecents();
+        try {
+
+            String recentString = prefs.getString("c2a_recents", "");
+            tir.parsePersistenceString(recentString);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            return tir;
+        }
     }
 
     public void addRecentItem(Uri uri, String filename) {

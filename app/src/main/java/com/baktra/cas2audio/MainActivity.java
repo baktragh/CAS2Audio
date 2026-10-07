@@ -343,12 +343,6 @@ public class MainActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        File lastDir = viewModel.getLastChooserDirectory();
-
-        if (lastDir!=null && lastDir.exists() && lastDir.isDirectory()) {
-            Uri pickerInitialUri = Uri.fromFile(lastDir);
-            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri);
-        }
         startActivityForResult(intent, PICK_CAS_FILE);
 
     }
@@ -365,7 +359,7 @@ public class MainActivity extends AppCompatActivity {
         /*Handle the settings activity*/
         if (requestCode == OPEN_SETTINGS && resultCode == Activity.RESULT_OK) {
             if (data != null) {
-                this.viewModel.setUserSettings((UserSettings) data.getSerializableExtra("user_settings"));
+                this.viewModel.updateUserSettings((UserSettings) data.getSerializableExtra("user_settings"));
             }
             return;
         }
@@ -397,7 +391,6 @@ public class MainActivity extends AppCompatActivity {
             if (effectiveUri!=null) {
                 fileName=extractFileNameFromURI(effectiveUri);
             }
-
             viewModel.openTapeImage(effectiveUri,fileName);
 
         }
