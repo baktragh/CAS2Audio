@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         setupModelObservers();
 
         /*Set the title*/
-        setTitle("CAS2Audio 1.0.9");
+        setTitle("CAS2Audio 1.1.0");
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -206,11 +206,37 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        viewModel.getCasAlert().observe(this,new Observer<CasTaskAlertCrate>() {
+        viewModel.getCasTaskAlert().observe(this,new Observer<CasTaskAlertCrate>() {
             @Override
             public void onChanged(CasTaskAlertCrate newAlertCrate) {
                 if (newAlertCrate!=null) {
                     displayPostTaskAlert(R.string.msg_unable_to_process_tit, newAlertCrate.getMessage());
+                }
+            }
+        });
+
+        viewModel.getOpenAlert().observe(this, new Observer<OpenAlertCrate>() {
+            public void onChanged(OpenAlertCrate newAlertCrate) {
+                if (newAlertCrate!=null) {
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                        }
+                    });
+
+                    String primaryReasonString;
+                    int failureReson = newAlertCrate.getReason();
+
+                    if (failureReson == TapeImageOpener.ReadResult.FAILURE_NOT_TAPEIMAGE) {
+                        primaryReasonString = getString(R.string.msg_file_not_tape_image);
+                    } else {
+                        primaryReasonString = getString(R.string.msg_file_unable_open);
+                    }
+                    builder.setMessage(String.format("%s%n%s", primaryReasonString, newAlertCrate.getDetails()));
+                    builder.setTitle(getString(R.string.msg_file_unable_open_tit));
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
                 }
             }
         });
@@ -357,42 +383,22 @@ public class MainActivity extends AppCompatActivity {
         /*Handle .CAS file pickup*/
         if ((requestCode == PICK_CAS_FILE || requestCode == OPEN_RECENT) && resultCode == Activity.RESULT_OK) {
 
+            Uri effectiveUri;
+
             /*Nothing passed, the player is empty*/
             if (data == null || data.getData() == null) {
-                viewModel.setCurrentTapeImageCrate(TapeImageCrate.getEmpty());
+                effectiveUri = null;
                 return;
+            } else {
+                effectiveUri = data.getData();
             }
 
-            TapeImageOpener.ReadResult result = viewModel.readTapeImage(data.getData());
-
-            /*If successfull, add to recents*/
-            if (result.isSuccess()) {
-                viewModel.setCurrentTapeImageCrate(result.getTapeImageCrate());
-                viewModel.getTapeImageRecents().addRecentItem(data.getData(), extractFileNameFromURI(data.getData()));
-            }
-            /*Otherwise, respond to the error*/
-            else {
-                viewModel.setCurrentTapeImageCrate(TapeImageCrate.getEmpty());
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                    }
-                });
-
-                String primaryReasonString;
-                int failureReson = result.getFailureNature();
-
-                if (failureReson == TapeImageOpener.ReadResult.FAILURE_NOT_TAPEIMAGE) {
-                    primaryReasonString = getString(R.string.msg_file_not_tape_image);
-                } else {
-                    primaryReasonString = getString(R.string.msg_file_unable_open);
-                }
-                builder.setMessage(String.format("%s%n%s", primaryReasonString, Utils.getExceptionMessage(result.getException())));
-                builder.setTitle(getString(R.string.msg_file_unable_open_tit));
-                AlertDialog dialog = builder.create();
-                dialog.show();
+            String fileName=null;
+            if (effectiveUri!=null) {
+                fileName=extractFileNameFromURI(effectiveUri);
             }
 
+            viewModel.openTapeImage(effectiveUri,fileName);
 
         }
 

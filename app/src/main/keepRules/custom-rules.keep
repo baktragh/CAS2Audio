@@ -1,0 +1,3 @@
+# Keep the names of all classes inside a package
+-keepnames class com.baktra.cas2audio.** { *; }
+

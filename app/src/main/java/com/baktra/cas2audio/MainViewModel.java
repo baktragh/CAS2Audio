@@ -1,6 +1,8 @@
 package com.baktra.cas2audio;
 
+import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.PowerManager;
@@ -43,11 +45,12 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
 
     private MutableLiveData<Integer> progressValue;
 
-    public SingleLiveEvent<CasTaskAlertCrate> getCasAlert() {
-        return this.casAlert;
+    public SingleLiveEvent<CasTaskAlertCrate> getCasTaskAlert() {
+        return this.casTaskAlert;
     }
 
-    SingleLiveEvent<CasTaskAlertCrate> casAlert;
+    SingleLiveEvent<CasTaskAlertCrate> casTaskAlert;
+    SingleLiveEvent<OpenAlertCrate> openAlert;
 
     private TapeImageOpener tapeImageOpener;
 
@@ -64,7 +67,8 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
         chunkListVisibility =new MutableLiveData<>(Boolean.FALSE);
         sharedPreferences=sPref;
         restorePreferences();
-        casAlert = new SingleLiveEvent<>();
+        casTaskAlert = new SingleLiveEvent<>();
+        openAlert = new SingleLiveEvent<>();
         tapeImageOpener = new TapeImageOpener(contentResolver);
     }
 
@@ -114,14 +118,24 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
 
     public void setResumePoint(int resumeIp) {
 
+        /*Always set to zero for an empty tape image or explicit zero resume point*/
+        if (resumeIp==0 || currentTapeImageCrate.getValue().isEmpty()) {
+            this.resumePointIp.setValue(0);
+            return;
+        }
+
+        /*Try getting the closest resume point*/
         ResumePoint rp = ResumePoint.getClosestResumePoint(resumeIp,currentTapeImageCrate.getValue().getConvCrate().getResumePoints());
         if (rp!=null) {
             this.resumePointIp.setValue(rp.getResumeIp());
         }
+        /*If not available, fall back to 0*/
         else {
             this.resumePointIp.setValue(0);
         }
     }
+
+
 
 
     private void restorePreferences() {
@@ -172,7 +186,7 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
         playBackState.setValue(new Boolean(false));
         setResumePoint(0);
         casTask=null;
-        casAlert.setValue(new CasTaskAlertCrate(0,Utils.getExceptionMessage(e)));
+        casTaskAlert.setValue(new CasTaskAlertCrate(0,Utils.getExceptionMessage(e)));
     }
 
     private void storePreferences() {
@@ -249,4 +263,32 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
         }
     }
 
+    public void openTapeImage(Uri tapeImageUri,String fileName) {
+
+        /*Open nothing*/
+        if (tapeImageUri==null) {
+            setCurrentTapeImageCrate(TapeImageCrate.getEmpty());
+        }
+
+        /*Try to open the tape image*/
+        TapeImageOpener.ReadResult result = readTapeImage(tapeImageUri);
+
+        /*If successfull, add to recents*/
+        if (result.isSuccess()) {
+            setCurrentTapeImageCrate(result.getTapeImageCrate());
+            getTapeImageRecents().addRecentItem(tapeImageUri, fileName);
+        }
+        /*Otherwise, set up for just "empty" tape image*/
+        else {
+            /*The player has an empt tape image*/
+            setCurrentTapeImageCrate(TapeImageCrate.getEmpty());
+
+            /*Tell the user by scheduling an alert*/
+            openAlert.setValue(new OpenAlertCrate(result.getFailureNature(), Utils.getExceptionMessage(result.getException())));
+        }
+    }
+
+    public LiveData<OpenAlertCrate> getOpenAlert() {
+        return openAlert;
+    }
 }

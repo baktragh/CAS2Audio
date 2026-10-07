@@ -6,7 +6,7 @@ class Utils {
 
     public static String getExceptionMessage(Exception ex) {
         StringBuilder sb = new StringBuilder(128);
-        sb.append(ex.getClass().getName());
+        sb.append(ex.getClass().getSimpleName());
         String m = ex.getMessage();
         if (m != null) {
             sb.append(':');
