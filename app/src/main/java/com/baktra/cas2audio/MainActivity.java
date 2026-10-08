@@ -1,20 +1,16 @@
 package com.baktra.cas2audio;
 
-import static com.baktra.cas2audio.MainViewModel.STOP_REASON_PAUSE;
-import static com.baktra.cas2audio.MainViewModel.STOP_REASON_STOP;
+import static com.baktra.cas2audio.CasPlaybackHandler.STOP_REASON_PAUSE;
+import static com.baktra.cas2audio.CasPlaybackHandler.STOP_REASON_STOP;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.PowerManager;
-import android.provider.DocumentsContract;
 import android.provider.OpenableColumns;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -61,10 +57,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        SharedPreferences sharedPrefs = getSharedPreferences("c2a_prefs", Context.MODE_PRIVATE);
         Cas2AudioApp c2aApp = (Cas2AudioApp)getApplication();
-        MainViewModelFactory factory = new MainViewModelFactory(c2aApp);
+        MainViewModelFactory factory = new MainViewModelFactory(c2aApp.getSettingsRepository(),c2aApp.getTapeImageOpener(),c2aApp.getCasPlaybackHandler());
 
         /*Widgets to be disabled during playback*/
         playBackViewsDisabled.add(getBrowseButton());
@@ -253,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         /*Create new background task*/
-        Exception e = viewModel.createCasTask();
+        Exception e = viewModel.startPlayback();
         if (e!=null) {
             displaySimpleAlert(getString(R.string.msg_unable_to_process_tit),Utils.getExceptionMessage(e));
         }
@@ -304,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
             stopReason=STOP_REASON_STOP;
         }
 
-        viewModel.stopCasTask(stopReason);
+        viewModel.stopPlayback(stopReason);
 
 
     }

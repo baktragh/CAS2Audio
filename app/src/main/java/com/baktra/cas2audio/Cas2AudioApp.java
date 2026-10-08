@@ -7,11 +7,14 @@ import android.os.PowerManager;
 import com.baktra.cas2audio.settings.SettingsRepository;
 import com.baktra.cas2audio.tapeimage.TapeImageOpener;
 
+import java.util.Optional;
+
 public class Cas2AudioApp extends Application {
 
     private SettingsRepository settingsRepository;
     private PowerManager powerManager;
     private TapeImageOpener tapeImageOpener;
+    private CasPlaybackHandler casPlaybackHandler;
 
     public void onCreate() {
 
@@ -19,19 +22,18 @@ public class Cas2AudioApp extends Application {
         settingsRepository = new SettingsRepository(getSharedPreferences("c2a_prefs", Context.MODE_PRIVATE));
         tapeImageOpener = new TapeImageOpener(getContentResolver());
 
+        Optional<PowerManager> pm =Optional.empty();
         try {
-            powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            PowerManager p = (PowerManager) getSystemService(POWER_SERVICE);
+            pm=Optional.of(p);
         }
         catch(Exception e) {
-            powerManager=null;
+           pm=Optional.empty();
         }
+        casPlaybackHandler = new CasPlaybackHandler(pm);
 
     }
 
-
-    public PowerManager getPowerManager() {
-        return powerManager;
-    }
 
     public SettingsRepository getSettingsRepository() {
         return this.settingsRepository;
@@ -39,5 +41,9 @@ public class Cas2AudioApp extends Application {
 
     public TapeImageOpener getTapeImageOpener() {
         return this.tapeImageOpener;
+    }
+
+    public CasPlaybackHandler getCasPlaybackHandler() {
+        return casPlaybackHandler;
     }
 }

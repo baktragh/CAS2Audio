@@ -5,6 +5,8 @@ import android.os.PowerManager;
 
 import com.baktra.cas2audio.signal.SignalGenerator;
 
+import java.util.Optional;
+
 public class CasTask extends AsyncTask<Void,Integer,Void> {
 
     private final boolean stereo;
@@ -13,26 +15,26 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     private final int[] instructions;
     private final boolean invertPolarity;
     private final int resumeIp;
-    private final PowerManager powerManager;
+    private final Optional<PowerManager> powerManager;
     private Exception lastException;
-    private final CasTaskObserver taskObserver;
+    private final CasPlaybackHandler handler;
     private final int sampleRate;
-    private PowerManager.WakeLock wakeLock;
+    private Optional<PowerManager.WakeLock> wakeLock;
 
     SignalGenerator sg;
 
     public static final int WAKELOCK_TIMEOUT = 120 * 60 * 1000;
 
-    public CasTask(int[] instructions, CasTaskObserver observer, boolean stereo, boolean square, int volume, int sampleRate,boolean invertPolarity,int resumeIp,PowerManager pm) {
+    public CasTask(int[] instructions, CasPlaybackHandler handler, boolean stereo, boolean square, int volume, int sampleRate, boolean invertPolarity, int resumeIp, Optional<PowerManager> pm) {
         this.instructions=instructions;
         this.stereo=stereo;
         this.lastException = null;
-        this.taskObserver = observer;
+        this.handler = handler;
         this.square = square;
         this.volume=volume;
         this.sampleRate=sampleRate;
         this.invertPolarity=invertPolarity;
-        this.wakeLock = null;
+        this.wakeLock = Optional.empty();
         this.resumeIp=resumeIp;
         this.sg=null;
         this.powerManager=pm;
@@ -44,14 +46,14 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
 
         try {
 
-            if (powerManager != null) {
-                wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CAS2Audio::TaskWakeLock");
-                wakeLock.acquire(WAKELOCK_TIMEOUT);
+            if (powerManager.isPresent()) {
+                wakeLock = Optional.of(powerManager.get().newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CAS2Audio::TaskWakeLock"));
+                wakeLock.get().acquire(WAKELOCK_TIMEOUT);
             } else {
-                wakeLock = null;
+                wakeLock = Optional.empty();
             }
         } catch (Exception e) {
-            wakeLock = null;
+            wakeLock = Optional.empty();
             e.printStackTrace();
         }
 
@@ -79,7 +81,7 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
                 e.printStackTrace();
                 lastException=e;
             } finally {
-                if (wakeLock != null) wakeLock.release();
+                if (wakeLock.isPresent()) wakeLock.get().release();
             }
 
 
@@ -88,23 +90,18 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
 
     @Override
     protected void onProgressUpdate(Integer... progress) {
-
-            taskObserver.onProgressUpdate(progress[0]);
-            if (progress[1] != -1) {
-                taskObserver.onResumePointUpdate(progress[1]);
-            }
-
+           handler.publishProgress(progress[0],progress[1]);
     }
 
     protected void onPostExecute(Void v) {
 
         if (lastException != null) {
             lastException.printStackTrace();
-            taskObserver.onFailedPlayback(lastException);
+            handler.processFailure(lastException);
             return;
 
         }
-        taskObserver.onSuccessfulPlayback();
+        handler.processSuccess();
 
     }
 
@@ -116,11 +113,10 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
 
         if (lastException != null) {
             lastException.printStackTrace();
-            taskObserver.onFailedPlayback(lastException);
+            handler.processFailure(lastException);
             return;
-
         }
-        taskObserver.onCancelledPlayback(lastIp);
+        handler.processCancellation(lastIp);
     }
     protected void onPreExecute() {
 

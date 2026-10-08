@@ -1,12 +1,11 @@
 package com.baktra.cas2audio;
 
-import android.app.Application;
-import android.content.ContentResolver;
-import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.PowerManager;
+import static com.baktra.cas2audio.CasPlaybackHandler.STOP_REASON_PAUSE;
+import static com.baktra.cas2audio.CasPlaybackHandler.STOP_REASON_STOP;
+import static com.baktra.cas2audio.CasPlaybackHandler.STOP_REASON_TERMINATE;
 
-import androidx.lifecycle.AndroidViewModel;
+import android.net.Uri;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -18,44 +17,25 @@ import com.baktra.cas2audio.tapeimage.ResumePoint;
 import com.baktra.cas2audio.tapeimage.TapeImageCrate;
 import com.baktra.cas2audio.tapeimage.TapeImageOpener;
 
-import java.io.File;
+public class MainViewModel extends ViewModel implements CasPlaybackObserver {
 
-public class MainViewModel extends AndroidViewModel implements CasTaskObserver {
-
-
-    private CasTask casTask;
+    /*User interface state*/
     private MutableLiveData<TapeImageCrate> currentTapeImageCrate;
-
-
-    private Cas2AudioApp appContext;
-
     private MutableLiveData<Boolean> chunkListVisibility;
-
-
     private MutableLiveData<Boolean> playBackState;
-
-
     private MutableLiveData<Integer> resumePointIp;
-
-    public static final int STOP_REASON_STOP=0;
-    public static final int STOP_REASON_PAUSE=1;
-    private int stopReason;
-
     private MutableLiveData<Integer> progressValue;
-
-    public SingleLiveEvent<CasTaskAlertCrate> getCasTaskAlert() {
-        return this.casTaskAlert;
-    }
-
     SingleLiveEvent<CasTaskAlertCrate> casTaskAlert;
     SingleLiveEvent<OpenAlertCrate> openAlert;
 
 
+    /*Repositories and services*/
+    private SettingsRepository settingsRepository;
+    private TapeImageOpener tapeImageOpener;
+    private final CasPlaybackHandler casPlaybackHandler;
 
 
-    public MainViewModel(Cas2AudioApp app) {
-        super(app);
-        casTask = null;
+    public MainViewModel(SettingsRepository settingsRepo,TapeImageOpener tiOpener,CasPlaybackHandler cpHandler) {
         playBackState = new MutableLiveData<>(Boolean.FALSE);
         progressValue = new MutableLiveData<>(new Integer(0));
         currentTapeImageCrate = new MutableLiveData<>(TapeImageCrate.getEmpty());
@@ -63,41 +43,44 @@ public class MainViewModel extends AndroidViewModel implements CasTaskObserver {
         chunkListVisibility =new MutableLiveData<>(Boolean.FALSE);
         casTaskAlert = new SingleLiveEvent<>();
         openAlert = new SingleLiveEvent<>();
+        settingsRepository=settingsRepo;
+        tapeImageOpener=tiOpener;
+        casPlaybackHandler = cpHandler;
+
+        System.out.println("MainViewModel:"+settingsRepository);
+
         loadPreferences();
-        appContext=(Cas2AudioApp) app;
     }
 
 
 
-    Exception createCasTask() {
-       casTask = null;
-       UserSettings us = getSettingsRepository().getUserSettings();
-        try {
-            casTask = new CasTask(
+    Exception startPlayback() {
+       try {
+
+           UserSettings us = getUserSettings();
+            getCasPlaybackHandler().prepare(
                     currentTapeImageCrate.getValue().getConvCrate().getInstructions(),
                     this,
                     !us.isDoMono(),
                     us.isDoSquareWave(),
                     us.getAmplitude(),
-                    currentTapeImageCrate.getValue().getConvCrate().getSampleRate(),
+                    us.isDo48kHz()?48000:44100,
                     us.isDoInvertPolarity(),
-                    resumePointIp.getValue(),
-                    ((Cas2AudioApp)getApplication()).getPowerManager()
-            );
-            playBackState.setValue(new Boolean(true));
-            casTask.execute();
-            return null;
-        } catch (Exception e) {
-            casTask=null;
-            return e;
-        }
+                    resumePointIp.getValue()
+                    );
+       }
+       catch (Exception e) {
+           return e;
+       }
+
+       playBackState.setValue(new Boolean(true));
+       getCasPlaybackHandler().play();
+       return null;
+
     }
 
-    void stopCasTask(int reason) {
-        stopReason=reason;
-        if (casTask !=null ) {
-            casTask.cancel(false);
-        }
+    public void stopPlayback(int reason) {
+        getCasPlaybackHandler().stop(reason);
     }
 
     TapeImageOpener.ReadResult readTapeImage(Uri uri) {
@@ -154,13 +137,11 @@ public class MainViewModel extends AndroidViewModel implements CasTaskObserver {
 
 
     public void onSuccessfulPlayback() {
-
         playBackState.setValue(new Boolean(false));
         setResumePoint(0);
-        casTask=null;
     }
 
-    public void onCancelledPlayback(int resIp) {
+    public void onCancelledPlayback(int resIp,int stopReason) {
         playBackState.setValue(new Boolean(false));
         if (stopReason==STOP_REASON_PAUSE) {
             setResumePoint(resIp);
@@ -168,16 +149,14 @@ public class MainViewModel extends AndroidViewModel implements CasTaskObserver {
         else {
             setResumePoint(0);
         }
-        casTask=null;
+
     }
 
     public void onFailedPlayback(Exception e) {
         playBackState.setValue(new Boolean(false));
         setResumePoint(0);
-        casTask=null;
         casTaskAlert.setValue(new CasTaskAlertCrate(0,Utils.getExceptionMessage(e)));
     }
-
 
     UserSettings getUserSettings() {
         return getSettingsRepository().getUserSettings();
@@ -223,9 +202,7 @@ public class MainViewModel extends AndroidViewModel implements CasTaskObserver {
     @Override
     public void onCleared() {
         savePreferences();
-        if (casTask!=null) {
-            casTask.cancel(false);
-        }
+        getCasPlaybackHandler().stop(STOP_REASON_TERMINATE);
     }
 
     public void openTapeImage(Uri tapeImageUri,String fileName) {
@@ -257,13 +234,19 @@ public class MainViewModel extends AndroidViewModel implements CasTaskObserver {
     public LiveData<OpenAlertCrate> getOpenAlert() {
         return openAlert;
     }
+    public SingleLiveEvent<CasTaskAlertCrate> getCasTaskAlert() {
+        return this.casTaskAlert;
+    }
 
     private SettingsRepository getSettingsRepository() {
-        return appContext.getSettingsRepository();
+        return settingsRepository;
     }
 
     private TapeImageOpener getTapeImageOpener() {
-        return appContext.getTapeImageOpener();
+        return tapeImageOpener;
     }
 
+    public CasPlaybackHandler getCasPlaybackHandler() {
+        return this.casPlaybackHandler;
+    }
 }
