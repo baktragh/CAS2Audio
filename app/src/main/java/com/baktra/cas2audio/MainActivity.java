@@ -63,7 +63,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         SharedPreferences sharedPrefs = getSharedPreferences("c2a_prefs", Context.MODE_PRIVATE);
-        MainViewModelFactory factory = new MainViewModelFactory(sharedPrefs,getContentResolver());
+        Cas2AudioApp c2aApp = (Cas2AudioApp)getApplication();
+        MainViewModelFactory factory = new MainViewModelFactory(c2aApp);
 
         /*Widgets to be disabled during playback*/
         playBackViewsDisabled.add(getBrowseButton());
@@ -251,16 +252,8 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        PowerManager p;
-        try {
-            p=((PowerManager)getApplicationContext().getSystemService(POWER_SERVICE));
-        } catch (Exception e) {
-            p=null;
-            e.printStackTrace();
-        }
-
         /*Create new background task*/
-        Exception e = viewModel.createCasTask(p);
+        Exception e = viewModel.createCasTask();
         if (e!=null) {
             displaySimpleAlert(getString(R.string.msg_unable_to_process_tit),Utils.getExceptionMessage(e));
         }

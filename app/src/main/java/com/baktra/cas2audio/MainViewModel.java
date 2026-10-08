@@ -1,10 +1,12 @@
 package com.baktra.cas2audio;
 
+import android.app.Application;
 import android.content.ContentResolver;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.PowerManager;
 
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -18,14 +20,14 @@ import com.baktra.cas2audio.tapeimage.TapeImageOpener;
 
 import java.io.File;
 
-public class MainViewModel extends ViewModel implements CasTaskObserver {
+public class MainViewModel extends AndroidViewModel implements CasTaskObserver {
 
-
-    private SettingsRepository settingsRepository;
 
     private CasTask casTask;
     private MutableLiveData<TapeImageCrate> currentTapeImageCrate;
 
+
+    private Cas2AudioApp appContext;
 
     private MutableLiveData<Boolean> chunkListVisibility;
 
@@ -48,10 +50,11 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
     SingleLiveEvent<CasTaskAlertCrate> casTaskAlert;
     SingleLiveEvent<OpenAlertCrate> openAlert;
 
-    private TapeImageOpener tapeImageOpener;
 
 
-    public MainViewModel(SharedPreferences sPref, ContentResolver contentResolver) {
+
+    public MainViewModel(Cas2AudioApp app) {
+        super(app);
         casTask = null;
         playBackState = new MutableLiveData<>(Boolean.FALSE);
         progressValue = new MutableLiveData<>(new Integer(0));
@@ -60,16 +63,15 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
         chunkListVisibility =new MutableLiveData<>(Boolean.FALSE);
         casTaskAlert = new SingleLiveEvent<>();
         openAlert = new SingleLiveEvent<>();
-        tapeImageOpener = new TapeImageOpener(contentResolver);
-        settingsRepository = new SettingsRepository(sPref);
         loadPreferences();
+        appContext=(Cas2AudioApp) app;
     }
 
 
 
-    Exception createCasTask(PowerManager pm) {
+    Exception createCasTask() {
        casTask = null;
-       UserSettings us = settingsRepository.getUserSettings();
+       UserSettings us = getSettingsRepository().getUserSettings();
         try {
             casTask = new CasTask(
                     currentTapeImageCrate.getValue().getConvCrate().getInstructions(),
@@ -80,7 +82,7 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
                     currentTapeImageCrate.getValue().getConvCrate().getSampleRate(),
                     us.isDoInvertPolarity(),
                     resumePointIp.getValue(),
-                    pm
+                    ((Cas2AudioApp)getApplication()).getPowerManager()
             );
             playBackState.setValue(new Boolean(true));
             casTask.execute();
@@ -99,8 +101,8 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
     }
 
     TapeImageOpener.ReadResult readTapeImage(Uri uri) {
-        UserSettings us = settingsRepository.getUserSettings();
-        return this.tapeImageOpener.readTapeImage(uri,us.isDo48kHz());
+        UserSettings us = getSettingsRepository().getUserSettings();
+        return getTapeImageOpener().readTapeImage(uri,us.isDo48kHz());
     }
 
     public void onProgressUpdate(int value) {
@@ -134,22 +136,18 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
     private void loadPreferences() {
 
         /*Restore user settings*/
-        settingsRepository.loadSettings();
+        getSettingsRepository().loadSettings();
         /*Update the UI*/
-        chunkListVisibility.setValue(settingsRepository.getUiPersistence().isChunkListVisible());
-
-        System.out.println("Load prefs: "+settingsRepository.getUiPersistence().isChunkListVisible());
-
+        chunkListVisibility.setValue(getSettingsRepository().getUiPersistence().isChunkListVisible());
     }
 
     private void savePreferences() {
 
         /*Get state of the ui*/
-        settingsRepository.getUiPersistence().updateChunkListVisible(chunkListVisibility.getValue());
-        System.out.println("Save prefs: "+settingsRepository.getUiPersistence().isChunkListVisible());
+        getSettingsRepository().getUiPersistence().updateChunkListVisible(chunkListVisibility.getValue());
 
         /*Save settings*/
-        settingsRepository.saveSettings();
+        getSettingsRepository().saveSettings();
     }
 
 
@@ -182,19 +180,19 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
 
 
     UserSettings getUserSettings() {
-        return settingsRepository.getUserSettings();
+        return getSettingsRepository().getUserSettings();
     }
 
     void updateUserSettings(UserSettings us) {
-        settingsRepository.setUserSettings(us);
+        getSettingsRepository().setUserSettings(us);
     }
 
     TapeImageRecents getTapeImageRecents() {
-        return settingsRepository.getTapeImageRecents();
+        return getSettingsRepository().getTapeImageRecents();
     }
 
     void setTapeImageRecentsString(String s) {
-        settingsRepository.getTapeImageRecents().parsePersistenceString(s);
+        getSettingsRepository().getTapeImageRecents().parsePersistenceString(s);
     }
 
     void setCurrentTapeImageCrate(TapeImageCrate tic) {
@@ -260,6 +258,12 @@ public class MainViewModel extends ViewModel implements CasTaskObserver {
         return openAlert;
     }
 
+    private SettingsRepository getSettingsRepository() {
+        return appContext.getSettingsRepository();
+    }
 
+    private TapeImageOpener getTapeImageOpener() {
+        return appContext.getTapeImageOpener();
+    }
 
 }

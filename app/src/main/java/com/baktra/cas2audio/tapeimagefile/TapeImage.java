@@ -167,6 +167,12 @@ public final class TapeImage {
                 lastBaudOrTrChunk = unknownChunk;
 
             }
+
+            /*Handle the situation where no chunks are available*/
+            if (chunkList.isEmpty()) {
+                throw new FileFormatException("FUJI chunk not found in tape image");
+            }
+
         } finally {
 
             /*
