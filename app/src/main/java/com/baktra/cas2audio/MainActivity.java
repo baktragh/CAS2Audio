@@ -1,5 +1,6 @@
 package com.baktra.cas2audio;
 
+import static androidx.core.content.IntentCompat.*;
 import static com.baktra.cas2audio.CasPlaybackHandler.STOP_REASON_PAUSE;
 import static com.baktra.cas2audio.CasPlaybackHandler.STOP_REASON_STOP;
 
@@ -27,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.content.IntentCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -380,7 +382,8 @@ public class MainActivity extends AppCompatActivity {
 
         /*Handle the settings activity*/
         if (o.getResultCode() != Activity.RESULT_OK || o.getData()==null) return;
-        this.viewModel.updateUserSettings((UserSettings) o.getData().getSerializableExtra("user_settings"));
+        UserSettings us = IntentCompat.getSerializableExtra(o.getData(),"user_settings",UserSettings.class);
+        this.viewModel.updateUserSettings(us);
     }
 
     private void initializeLaunchers() {

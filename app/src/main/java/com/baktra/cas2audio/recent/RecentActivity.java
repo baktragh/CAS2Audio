@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.IntentCompat;
 
 import com.baktra.cas2audio.R;
 
@@ -29,7 +30,8 @@ public class RecentActivity extends AppCompatActivity implements AdapterView.OnI
     protected void onResume() {
         super.onResume();
         localRecents = new TapeImageRecents();
-        localRecents.parsePersistenceString((String) getIntent().getSerializableExtra("recent_items"));
+        String persistenceString = IntentCompat.getSerializableExtra(getIntent(),"recent_items",String.class);
+        localRecents.parsePersistenceString(persistenceString);
         setUI();
     }
 

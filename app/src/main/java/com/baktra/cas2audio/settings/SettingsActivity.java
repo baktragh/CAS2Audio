@@ -8,6 +8,7 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.IntentCompat;
 
 import com.baktra.cas2audio.R;
 
@@ -23,7 +24,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     protected void onResume() {
         super.onResume();
-        userSettings = (UserSettings) getIntent().getSerializableExtra("user_settings");
+        userSettings = (UserSettings) IntentCompat.getSerializableExtra(getIntent(),"user_settings",UserSettings.class);
         setUI();
 
     }
