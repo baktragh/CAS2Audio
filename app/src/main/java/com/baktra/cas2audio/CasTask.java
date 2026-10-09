@@ -6,8 +6,9 @@ import android.os.PowerManager;
 import com.baktra.cas2audio.signal.SignalGenerator;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
-public class CasTask extends AsyncTask<Void,Integer,Void> {
+public class CasTask implements Callable<Void> {
 
     private final boolean stereo;
     private final boolean square;
@@ -21,7 +22,12 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
     private final int sampleRate;
     private Optional<PowerManager.WakeLock> wakeLock;
 
+    private volatile boolean cancelRequest;
+
     SignalGenerator sg;
+
+    public static final int RESULT_OK = 0;
+    public static final int RESULT_ERROR = -1;
 
     public static final int WAKELOCK_TIMEOUT = 120 * 60 * 1000;
 
@@ -38,12 +44,14 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
         this.resumeIp=resumeIp;
         this.sg=null;
         this.powerManager=pm;
+        this.cancelRequest=false;
 
     }
 
-    @Override
-    protected Void doInBackground(Void... voids) {
 
+    public Void call() {
+
+        /*Setup wake lock. If it fails, processing continues*/
         try {
 
             if (powerManager.isPresent()) {
@@ -57,72 +65,65 @@ public class CasTask extends AsyncTask<Void,Integer,Void> {
             e.printStackTrace();
         }
 
-            try {
-                SignalGenerator.SignalGeneratorConfig sgc = new SignalGenerator.SignalGeneratorConfig();
-                sgc.amplitude=volume*10;
-                sgc.bitsPerSample=16;
-                sgc.doNotModulateStandard=false;
-                sgc.initialSilence=1;
-                sgc.numChannels=(stereo?2:1);
-                sgc.postProcessingString="";
-                sgc.rightChannelOnly = (stereo);
-                sgc.sampleRate=sampleRate;
-                sgc.bufferSize=sgc.sampleRate;
-                sgc.signedSamples=true;
-                sgc.terminalSilence=1;
-                sgc.waveForm=square?0:-1;
-                sgc.invertPolarity=invertPolarity;
-                sgc.resumeIp = resumeIp;
-                sg = new SignalGenerator(instructions,sgc,this);
-                sg.run();
-                setProgress(0,-1);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                lastException=e;
-            } finally {
-                if (wakeLock.isPresent()) wakeLock.get().release();
-            }
+        try {
+            SignalGenerator.SignalGeneratorConfig sgc = new SignalGenerator.SignalGeneratorConfig();
+            sgc.amplitude = volume * 10;
+            sgc.bitsPerSample = 16;
+            sgc.doNotModulateStandard = false;
+            sgc.initialSilence = 1;
+            sgc.numChannels = (stereo ? 2 : 1);
+            sgc.postProcessingString = "";
+            sgc.rightChannelOnly = (stereo);
+            sgc.sampleRate = sampleRate;
+            sgc.bufferSize = sgc.sampleRate;
+            sgc.signedSamples = true;
+            sgc.terminalSilence = 1;
+            sgc.waveForm = square ? 0 : -1;
+            sgc.invertPolarity = invertPolarity;
+            sgc.resumeIp = resumeIp;
+            sg = new SignalGenerator(instructions, sgc, this);
+            sg.run();
+            setProgress(0, -1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            lastException = e;
+        } finally {
+            if (wakeLock.isPresent()) wakeLock.get().release();
+        }
 
+        /*Handle the termination by calling methods of the handler.
+         The methods are called within this background thread. It is responsibility
+         of the handler to publish the results to the UI using the main thread.
+         */
+
+        if (lastException != null) {
+            handler.processFailure(lastException);
+        }
+        else if (isCancelled()) {
+            int lastIp = 0;
+            if (sg!=null) lastIp=sg.getLastIp();
+            handler.processCancellation(lastIp);
+        }
+        else {
+            handler.processSuccess();
+        }
 
         return null;
-    }
 
-    @Override
-    protected void onProgressUpdate(Integer... progress) {
-           handler.publishProgress(progress[0],progress[1]);
-    }
 
-    protected void onPostExecute(Void v) {
-
-        if (lastException != null) {
-            lastException.printStackTrace();
-            handler.processFailure(lastException);
-            return;
-
-        }
-        handler.processSuccess();
 
     }
 
-    protected void onCancelled() {
-
-        /*Calculate possible resume point*/
-        int lastIp = 0;
-        if (sg!=null) lastIp=sg.getLastIp();
-
-        if (lastException != null) {
-            lastException.printStackTrace();
-            handler.processFailure(lastException);
-            return;
-        }
-        handler.processCancellation(lastIp);
-    }
-    protected void onPreExecute() {
-
-    }
-
+    /*The handler must ensure that publishing to the UI is done on the main thread*/
     public void setProgress(int statusPercent,int ip) {
-        publishProgress(statusPercent,ip);
+        handler.publishProgress(statusPercent,ip);
+    }
+
+    public void cancel() {
+        cancelRequest=true;
+    }
+
+    public boolean isCancelled() {
+        return cancelRequest;
     }
 }

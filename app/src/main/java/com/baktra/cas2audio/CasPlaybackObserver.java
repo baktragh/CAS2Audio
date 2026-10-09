@@ -8,6 +8,6 @@ public interface CasPlaybackObserver {
     public void onProgressUpdate(int value);
     public void onResumePointUpdate(int resumeIp);
 
-    public void onFailedPlayback(Exception e);
+    public void onFailedPlayback(Throwable e);
 
 }

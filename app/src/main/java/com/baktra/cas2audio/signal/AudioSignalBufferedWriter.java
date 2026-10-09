@@ -113,20 +113,20 @@ public class AudioSignalBufferedWriter implements SignalWriter {
         track.play();
     }
 
-    private AudioTrack getOldStyleAudioTrack() {
-
-        AudioTrack oldTrack = new AudioTrack(
-                AudioManager.STREAM_MUSIC,
-                sampleRate,
-                numChannels == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO,
-                bitsPerSample == 8 ? AudioFormat.ENCODING_PCM_8BIT : AudioFormat.ENCODING_PCM_16BIT,
-                bufferSize,
-                AudioTrack.MODE_STREAM
-        );
-
-        return oldTrack;
-
-    }
+//    private AudioTrack getOldStyleAudioTrack() {
+//
+//        AudioTrack oldTrack = new AudioTrack(
+//                AudioManager.STREAM_MUSIC,
+//                sampleRate,
+//                numChannels == 1 ? AudioFormat.CHANNEL_OUT_MONO : AudioFormat.CHANNEL_OUT_STEREO,
+//                bitsPerSample == 8 ? AudioFormat.ENCODING_PCM_8BIT : AudioFormat.ENCODING_PCM_16BIT,
+//                bufferSize,
+//                AudioTrack.MODE_STREAM
+//        );
+//
+//        return oldTrack;
+//
+//    }
 
     private AudioTrack getNewStyleAudioTrack() {
 

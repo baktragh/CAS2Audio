@@ -4,7 +4,7 @@ package com.baktra.cas2audio;
 class Utils {
 
 
-    public static String getExceptionMessage(Exception ex) {
+    public static String getExceptionMessage(Throwable ex) {
         StringBuilder sb = new StringBuilder(128);
         sb.append(ex.getClass().getSimpleName());
         String m = ex.getMessage();
@@ -16,7 +16,7 @@ class Utils {
         return sb.toString();
     }
 
-    public static String getTitledExceptionMessage(String title, Exception ex) {
+    public static String getTitledExceptionMessage(String title, Throwable ex) {
         String sb = "<HTML><B>" +
                 title +
                 "</B><BR>" +

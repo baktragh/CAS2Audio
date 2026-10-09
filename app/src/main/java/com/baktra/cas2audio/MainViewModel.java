@@ -37,9 +37,9 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
 
     public MainViewModel(SettingsRepository settingsRepo,TapeImageOpener tiOpener,CasPlaybackHandler cpHandler) {
         playBackState = new MutableLiveData<>(Boolean.FALSE);
-        progressValue = new MutableLiveData<>(new Integer(0));
+        progressValue = new MutableLiveData<>(0);
         currentTapeImageCrate = new MutableLiveData<>(TapeImageCrate.getEmpty());
-        resumePointIp = new MutableLiveData<>(new Integer(0));
+        resumePointIp = new MutableLiveData<>(0);
         chunkListVisibility =new MutableLiveData<>(Boolean.FALSE);
         casTaskAlert = new SingleLiveEvent<>();
         openAlert = new SingleLiveEvent<>();
@@ -73,7 +73,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
            return e;
        }
 
-       playBackState.setValue(new Boolean(true));
+       playBackState.setValue(true);
        getCasPlaybackHandler().play();
        return null;
 
@@ -137,12 +137,12 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
 
 
     public void onSuccessfulPlayback() {
-        playBackState.setValue(new Boolean(false));
+        playBackState.setValue(false);
         setResumePoint(0);
     }
 
     public void onCancelledPlayback(int resIp,int stopReason) {
-        playBackState.setValue(new Boolean(false));
+        playBackState.setValue(false);
         if (stopReason==STOP_REASON_PAUSE) {
             setResumePoint(resIp);
         }
@@ -152,8 +152,8 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
 
     }
 
-    public void onFailedPlayback(Exception e) {
-        playBackState.setValue(new Boolean(false));
+    public void onFailedPlayback(Throwable e) {
+        playBackState.setValue(false);
         setResumePoint(0);
         casTaskAlert.setValue(new CasTaskAlertCrate(0,Utils.getExceptionMessage(e)));
     }

@@ -147,17 +147,17 @@ public class MainActivity extends AppCompatActivity {
                 ImageView iv = findViewById(R.id.ivCassette);
 
                 if (newState) {
-                    iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation));
+                    iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation,null));
                     AnimationDrawable ad = (AnimationDrawable)iv.getDrawable();
                     ad.start();
                 }
                 else {
-                    iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation));
+                    iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation,null));
                     if (iv.getDrawable() instanceof AnimationDrawable) {
                         AnimationDrawable ad = (AnimationDrawable) iv.getDrawable();
                         ad.stop();
                     }
-                    iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_inactive));
+                    iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_inactive,null));
                 }
 
                 /*In any case, reset the progress bar*/
