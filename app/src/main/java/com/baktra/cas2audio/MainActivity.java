@@ -18,7 +18,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -41,6 +49,10 @@ public class MainActivity extends AppCompatActivity {
 
     private final String LN_SP;
     private MainViewModel viewModel;
+
+    private ActivityResultLauncher<Intent> launchBrowse;
+    private ActivityResultLauncher<Intent> launchSettings;
+    private ActivityResultLauncher<Intent> launchRecents;
 
     public MainActivity() {
         super();
@@ -75,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
 
         /*Set the title*/
         setTitle("CAS2Audio 1.1.0");
+
+        /*Initialize launchers*/
+        initializeLaunchers();
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -309,14 +324,14 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SettingsActivity.class);
         intent.setAction(Intent.ACTION_GET_CONTENT);
         intent.putExtra("user_settings", viewModel.getUserSettings());
-        startActivityForResult(intent, OPEN_SETTINGS);
+        launchSettings.launch(intent);
     }
 
     public void onRecent(View v) {
         Intent intent = new Intent(this, RecentActivity.class);
         intent.setAction(Intent.ACTION_GET_CONTENT);
         intent.putExtra("recent_items", viewModel.getTapeImageRecents().createPersistenceString());
-        startActivityForResult(intent, OPEN_RECENT);
+        launchRecents.launch(intent);
     }
 
     /*Browse for a tape image*/
@@ -330,58 +345,75 @@ public class MainActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        startActivityForResult(intent, PICK_CAS_FILE);
+        launchBrowse.launch(intent);
 
     }
-    private static final int PICK_CAS_FILE = 102;
-    private static final int OPEN_SETTINGS =103;
-    private static final int OPEN_RECENT = 104;
 
 
-    protected void onActivityResult(int requestCode,
-                                    int resultCode,
-                                    Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+
+    private void processBrowseResult(ActivityResult o) {
+        if (o.getResultCode()!=Activity.RESULT_OK || o.getData()==null || o.getData().getData()==null) return;
+        openTapeImageUri(o.getData().getData());
+
+    }
+    private void processRecentsResult(ActivityResult o) {
+
+        if (o.getResultCode()!=Activity.RESULT_OK || o.getData()==null) return;
+
+            String recentString = o.getData().getStringExtra("recents");
+            if (recentString != null) {
+                this.viewModel.setTapeImageRecentsString(recentString);
+            }
+
+            if (o.getData().getData()!=null) {
+                openTapeImageUri(o.getData().getData());
+            }
+    }
+
+    private void openTapeImageUri(Uri uri) {
+        String fileName=null;
+        fileName=extractFileNameFromURI(uri);
+        viewModel.openTapeImage(uri,fileName);
+    }
+
+    private void processSettingsResult(ActivityResult o) {
 
         /*Handle the settings activity*/
-        if (requestCode == OPEN_SETTINGS && resultCode == Activity.RESULT_OK) {
-            if (data != null) {
-                this.viewModel.updateUserSettings((UserSettings) data.getSerializableExtra("user_settings"));
-            }
-            return;
-        }
+        if (o.getResultCode() != Activity.RESULT_OK || o.getData()==null) return;
+        this.viewModel.updateUserSettings((UserSettings) o.getData().getSerializableExtra("user_settings"));
+    }
 
-        /*Pre-handle the Recent activity*/
-        if (requestCode == OPEN_RECENT) {
-            if (data != null) {
-                String recentString = data.getStringExtra("recents");
-                if (recentString != null) {
-                    this.viewModel.setTapeImageRecentsString(recentString);
+    private void initializeLaunchers() {
+
+        launchBrowse = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult o) {
+                        processBrowseResult(o);
+                    }
                 }
-            }
-        }
+        );
 
-        /*Handle .CAS file pickup*/
-        if ((requestCode == PICK_CAS_FILE || requestCode == OPEN_RECENT) && resultCode == Activity.RESULT_OK) {
 
-            Uri effectiveUri;
-
-            /*Nothing passed, the player is empty*/
-            if (data == null || data.getData() == null) {
-                effectiveUri = null;
-                return;
-            } else {
-                effectiveUri = data.getData();
-            }
-
-            String fileName=null;
-            if (effectiveUri!=null) {
-                fileName=extractFileNameFromURI(effectiveUri);
-            }
-            viewModel.openTapeImage(effectiveUri,fileName);
-
-        }
-
+        launchRecents = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult o) {
+                        processRecentsResult(o);
+                    }
+                }
+        );
+        launchSettings = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult o) {
+                        processSettingsResult(o);
+                    }
+                }
+        );
     }
 
 
@@ -398,9 +430,6 @@ public class MainActivity extends AppCompatActivity {
         displaySimpleAlert(getResources().getString(titleId),msg);
     }
 
-    void setProgressBar(int value) {
-        getProgressBar().setProgress(value);
-    }
 
     void updateDisplayedResumePoint(int resumeIp) {
         if (resumeIp==-1) return;
