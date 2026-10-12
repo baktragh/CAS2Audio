@@ -21,8 +21,6 @@ public class CasPlaybackHandler {
     public static final int STOP_REASON_PAUSE=1;
     public static final int STOP_REASON_TERMINATE=2;
 
-    private int stopReason;
-
     private CasPlaybackObserver observer;
 
     public CasPlaybackHandler(Optional<PowerManager> pm) {
@@ -66,15 +64,14 @@ public class CasPlaybackHandler {
 
     public void stop(int stopReason) {
 
-        /*Keep reason*/
-        this.stopReason=stopReason;
+
 
         /*Not task, do nothing*/
         if (casTask.isEmpty() || taskFuture.isEmpty()) return;
         CasTask ct = casTask.get();
 
         /*Request cancellation*/
-        ct.cancel();
+        ct.cancel(stopReason);
     }
 
     public void processSuccess() {
@@ -82,9 +79,9 @@ public class CasPlaybackHandler {
         publishPlaybackSuccess();
     }
 
-    public void processCancellation(int resumeIp) {
+    public void processCancellation(int resumeIp,int stopReason) {
         clearTask();
-        publishPlaybackCancellation(resumeIp);
+        publishPlaybackCancellation(resumeIp,stopReason);
     }
 
     public void processFailure(Throwable e) {
@@ -134,7 +131,7 @@ public class CasPlaybackHandler {
 
     }
 
-    public void publishPlaybackCancellation(int resumeIp) {
+    public void publishPlaybackCancellation(int resumeIp,int stopReason) {
         Looper mainLooper = Looper.getMainLooper();
         Handler mainHandler = new Handler(mainLooper);
 

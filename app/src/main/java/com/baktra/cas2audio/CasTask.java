@@ -30,6 +30,7 @@ public class CasTask implements Callable<Void> {
     public static final int RESULT_ERROR = -1;
 
     public static final int WAKELOCK_TIMEOUT = 120 * 60 * 1000;
+    private int stopReason;
 
     public CasTask(int[] instructions, CasPlaybackHandler handler, boolean stereo, boolean square, int volume, int sampleRate, boolean invertPolarity, int resumeIp, Optional<PowerManager> pm) {
         this.instructions=instructions;
@@ -102,7 +103,7 @@ public class CasTask implements Callable<Void> {
         else if (isCancelled()) {
             int lastIp = 0;
             if (sg!=null) lastIp=sg.getLastIp();
-            handler.processCancellation(lastIp);
+            handler.processCancellation(lastIp,stopReason);
         }
         else {
             handler.processSuccess();
@@ -119,8 +120,11 @@ public class CasTask implements Callable<Void> {
         handler.publishProgress(statusPercent,ip);
     }
 
-    public void cancel() {
-        cancelRequest=true;
+    public void cancel(int stopReason) {
+        if (!cancelRequest) {
+            cancelRequest=true;
+            this.stopReason=stopReason;
+        }
     }
 
     public boolean isCancelled() {
