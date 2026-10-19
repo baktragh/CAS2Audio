@@ -1,0 +1,15 @@
+package com.baktra.cas2audio.goldies;
+
+import java.util.List;
+import java.util.Map;
+
+public interface GoldiesRepoObserver {
+
+    public void onSuccessfullRefresh();
+
+    public void onFailedRefresh();
+
+    public void onDisplay(Map<TapeSystem,List<String>> map);
+
+
+}

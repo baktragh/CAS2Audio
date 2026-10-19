@@ -297,7 +297,6 @@ public class MainActivity extends AppCompatActivity {
     public void onClickChunks(AdapterView<?> adapterView, View view, int i, long l) {
         ListView lv = (ListView)adapterView;
         ResumePointAdapter rpa = (ResumePointAdapter) lv.getAdapter();
-        //rpa.setSelectedIndex(i);
         ResumePoint p = (ResumePoint)rpa.getItem(i);
         if (p!=null) {
             viewModel.setResumePoint(p.getResumeIp());
@@ -350,8 +349,6 @@ public class MainActivity extends AppCompatActivity {
         launchBrowse.launch(intent);
 
     }
-
-
 
     private void processBrowseResult(ActivityResult o) {
         if (o.getResultCode()!=Activity.RESULT_OK || o.getData()==null || o.getData().getData()==null) return;

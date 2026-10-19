@@ -25,8 +25,8 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
     private MutableLiveData<Boolean> playBackState;
     private MutableLiveData<Integer> resumePointIp;
     private MutableLiveData<Integer> progressValue;
-    SingleLiveEvent<CasTaskAlertCrate> casTaskAlert;
-    SingleLiveEvent<OpenAlertCrate> openAlert;
+    private SingleLiveEvent<CasTaskAlertCrate> casTaskAlert;
+    private SingleLiveEvent<OpenAlertCrate> openAlert;
 
 
     /*Repositories and services*/
@@ -46,13 +46,8 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
         settingsRepository=settingsRepo;
         tapeImageOpener=tiOpener;
         casPlaybackHandler = cpHandler;
-
-        System.out.println("MainViewModel:"+settingsRepository);
-
         loadPreferences();
     }
-
-
 
     Exception startPlayback() {
        try {
