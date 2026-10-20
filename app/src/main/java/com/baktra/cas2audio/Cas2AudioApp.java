@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.os.PowerManager;
 
+import com.baktra.cas2audio.goldies.GoldiesRepository;
 import com.baktra.cas2audio.settings.SettingsRepository;
 import com.baktra.cas2audio.tapeimage.TapeImageOpener;
 
@@ -16,11 +17,14 @@ public class Cas2AudioApp extends Application {
     private TapeImageOpener tapeImageOpener;
     private CasPlaybackHandler casPlaybackHandler;
 
+    private GoldiesRepository goldiesRepo;
+
     public void onCreate() {
 
         super.onCreate();
         settingsRepository = new SettingsRepository(getSharedPreferences("c2a_prefs", Context.MODE_PRIVATE));
         tapeImageOpener = new TapeImageOpener(getContentResolver());
+        goldiesRepo = new GoldiesRepository(getFilesDir());
 
         Optional<PowerManager> pm =Optional.empty();
         try {

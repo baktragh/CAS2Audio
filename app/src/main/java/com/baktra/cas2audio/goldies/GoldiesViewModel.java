@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class GoldiesViewModel extends ViewModel implements GoldiesRepoObserver {
+public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObserver {
 
     private static class UIState {
         boolean isRefreshEnabled;
@@ -42,6 +42,10 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepoObserver {
 
     @Override
     public void onFailedRefresh() {
+
+    }
+
+    public void onFailedRead() {
 
     }
 

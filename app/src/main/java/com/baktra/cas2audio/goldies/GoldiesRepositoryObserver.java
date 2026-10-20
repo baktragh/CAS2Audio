@@ -3,7 +3,7 @@ package com.baktra.cas2audio.goldies;
 import java.util.List;
 import java.util.Map;
 
-public interface GoldiesRepoObserver {
+public interface GoldiesRepositoryObserver {
 
     public void onSuccessfullRefresh();
 
@@ -12,4 +12,5 @@ public interface GoldiesRepoObserver {
     public void onDisplay(Map<TapeSystem,List<String>> map);
 
 
+    public void onFailedRead();
 }
