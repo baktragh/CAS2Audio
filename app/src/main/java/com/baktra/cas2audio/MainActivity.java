@@ -32,6 +32,7 @@ import androidx.core.content.IntentCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.baktra.cas2audio.goldies.GoldiesActivity;
 import com.baktra.cas2audio.recent.RecentActivity;
 import com.baktra.cas2audio.settings.SettingsActivity;
 import com.baktra.cas2audio.settings.UserSettings;
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> launchBrowse;
     private ActivityResultLauncher<Intent> launchSettings;
     private ActivityResultLauncher<Intent> launchRecents;
+
+    private ActivityResultLauncher<Intent> launchGoldies;
 
     public MainActivity() {
         super();
@@ -335,6 +338,12 @@ public class MainActivity extends AppCompatActivity {
         launchRecents.launch(intent);
     }
 
+    public void onGoldies(MenuItem i) {
+        Intent intent = new Intent(this, GoldiesActivity.class);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        launchGoldies.launch(intent);
+    }
+
     /*Browse for a tape image*/
     public void onBrowseTapeImage(android.view.View view) {
 
@@ -383,6 +392,15 @@ public class MainActivity extends AppCompatActivity {
         this.viewModel.updateUserSettings(us);
     }
 
+    private void processGoldiesResult(ActivityResult o) {
+
+        /*Handle the Goldies Activity*/
+        if (o.getResultCode() != Activity.RESULT_OK || o.getData()==null) return;
+
+        /*TODO: Open the selected tape image*/
+
+    }
+
     private void initializeLaunchers() {
 
         launchBrowse = registerForActivityResult(
@@ -414,6 +432,18 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        launchGoldies = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult o) {
+                        processGoldiesResult(o);
+                    }
+                }
+        );
+
+
     }
 
 

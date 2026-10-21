@@ -9,7 +9,7 @@ public interface GoldiesRepositoryObserver {
 
     public void onFailedRefresh();
 
-    public void onDisplay(Map<TapeSystem,List<String>> map);
+    public void onDisplay(Map<TapeSystem,List<String>> map,List<TapeSystem> tapeSystems);
 
 
     public void onFailedRead();

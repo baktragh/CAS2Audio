@@ -26,7 +26,8 @@ public class Cas2AudioApp extends Application {
         tapeImageOpener = new TapeImageOpener(getContentResolver());
         goldiesRepo = new GoldiesRepository(getFilesDir());
 
-        Optional<PowerManager> pm =Optional.empty();
+
+        Optional<PowerManager> pm;
         try {
             PowerManager p = (PowerManager) getSystemService(POWER_SERVICE);
             pm=Optional.of(p);
@@ -49,5 +50,9 @@ public class Cas2AudioApp extends Application {
 
     public CasPlaybackHandler getCasPlaybackHandler() {
         return casPlaybackHandler;
+    }
+
+    public GoldiesRepository getGoldiesRepository() {
+        return this.goldiesRepo;
     }
 }

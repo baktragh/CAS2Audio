@@ -10,7 +10,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -24,12 +23,15 @@ public class GoldiesRepository {
 
     private File localDirectory;
 
-    private Map<String, List<String>> zipMap;
+    private Map<TapeSystem, List<String>> repoMap;
     private Map<String,TapeSystem> dir2SystemMap;
+    private List<TapeSystem> tapeSystems;
 
     public GoldiesRepository(File localDirectory) {
         this.localDirectory=localDirectory;
-        zipMap = new HashMap<>();
+        repoMap = new HashMap<>();
+        dir2SystemMap = new HashMap<>();
+        tapeSystems = new ArrayList<>();
         this.zipDirty=true;
     }
 
@@ -39,49 +41,34 @@ public class GoldiesRepository {
         if (zipDirty==true) {
             int result = processZip();
             if (result==ZIP_OK) {
-                zipDirty=false;
+                //zipDirty=false;
             }
             else {
                 observer.onFailedRead();
+                return;
             }
         }
 
-        /*Prepare the map for the observer*/
-
-        /*Create a new map*/
-        Map<TapeSystem,List<String>> repoMap = new HashMap<>();
-        Set<Map.Entry<String,TapeSystem>> entries = dir2SystemMap.entrySet();
-
-        /*Put all tape systems in the new map, with empty list of entry names*/
-        for (Map.Entry<String,TapeSystem> oneEntry:entries) {
-            repoMap.put(oneEntry.getValue(),new ArrayList<>());
-        }
-
-        Set<Map.Entry<String,List<String>>> zipMapEntries = zipMap.entrySet();
-
-        /*For each directory in the zip, add to the map entry with matching tape system*/
-        for (Map.Entry<String,List<String>> oneEntry: zipMapEntries) {
-            /*Get the tape system*/
-            TapeSystem t = dir2SystemMap.get(oneEntry.getKey());
-            repoMap.get(t).addAll(oneEntry.getValue());
-        }
-
-        observer.onDisplay(repoMap);
-
+        observer.onDisplay(repoMap,tapeSystems);
     }
 
 
 
     private int processZip() {
 
-        zipMap.clear();
+        repoMap.clear();
+        dir2SystemMap.clear();
+        tapeSystems.clear();
 
         try {
             File f = new File(localDirectory,"goldies.zip");
+            //File f = new File("/sdcard/Download/goldies.zip");
             if (!f.exists() || !f.isFile()) return ZIP_NOT_PRESENT;
 
             /*Instantiate the zip file*/
             ZipFile zipFile = new ZipFile(f);
+
+            processMapEntry(zipFile);
 
             /*Get all entries*/
             Enumeration<ZipEntry> allEntries = (Enumeration<ZipEntry>) zipFile.entries();
@@ -97,37 +84,46 @@ public class GoldiesRepository {
                 File entryNameFile = new File(oneEntry.getName());
                 File entryParentFile = entryNameFile.getParentFile();
 
-                /*If new directory, place it there*/
-                if (zipMap.get(entryParentFile.getName())==null) {
-                    zipMap.put(entryParentFile.getName(),new ArrayList<>());
+                /*Skip files in the root directory*/
+                if (entryParentFile==null) continue;
+
+                System.out.println(entryNameFile);
+                System.out.println(entryParentFile);
+                System.out.println("--");
+
+                /*Get the tape system*/
+                TapeSystem tsForEntry=dir2SystemMap.get(entryParentFile.toString());
+                if (tsForEntry==null) continue;
+
+                /*If new tape system*/
+                if (repoMap.get(tsForEntry)==null) {
+                    repoMap.put(tsForEntry,new ArrayList<>());
                 }
-                /*Place the entry there*/
-                zipMap.get(entryParentFile.getName()).add(entryNameFile.getName());
+
+                /*Place the entry name there*/
+                repoMap.get(tsForEntry).add(entryNameFile.getName());
             }
 
-            /*Get the mapping from directory name to system*/
-            ZipEntry mapFileEntry = zipFile.getEntry("map.txt");
-            InputStream isMap = zipFile.getInputStream(mapFileEntry);
-            InputStreamReader isrMap = new InputStreamReader(isMap);
-            BufferedReader brMap = new BufferedReader(isrMap);
 
-            processMap(brMap);
-
-            brMap.close();
-            isrMap.close();
-            isMap.close();
         }
         catch (IOException ioe) {
+            ioe.printStackTrace();
             return ZIP_CORRUPTED;
         }
 
         return ZIP_OK;
     }
 
-    private void processMap(BufferedReader br) throws IOException {
+    private void processMapEntry(ZipFile zipFile) throws IOException {
+
+        /*Get the mapping from directory name to system*/
+        ZipEntry mapFileEntry = zipFile.getEntry("map.txt");
+        InputStream isMap = zipFile.getInputStream(mapFileEntry);
+        InputStreamReader isrMap = new InputStreamReader(isMap);
+        BufferedReader brMap = new BufferedReader(isrMap);
 
         String line;
-        while ((line=br.readLine())!=null) {
+        while ((line=brMap.readLine())!=null) {
             line=line.trim();
             StringTokenizer tk = new StringTokenizer(line,",");
 
@@ -135,8 +131,16 @@ public class GoldiesRepository {
             String country = tk.nextToken();
             String prefixCode = tk.nextToken();
 
-            dir2SystemMap.put(prefixCode,new TapeSystem(name,country,prefixCode));
+            TapeSystem ts = new TapeSystem(name,country,prefixCode);
+
+            dir2SystemMap.put(prefixCode,ts);
+            tapeSystems.add(ts);
         }
+
+        brMap.close();
+        isrMap.close();
+        isMap.close();
+
 
     }
 }

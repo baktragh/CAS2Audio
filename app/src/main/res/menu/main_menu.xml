@@ -12,8 +12,15 @@
     </item>
 
     <item
+        android:title="@string/goldies"
+        android:onClick="onGoldies">
+    </item>
+
+    <item
         android:title="@string/exit"
         android:onClick="onExit">
     </item>
+
+
 
 </menu>

@@ -6,12 +6,13 @@ android {
 
     defaultConfig {
         applicationId="com.baktra.cas2audio"
-        minSdk=31
+        minSdk 31
         compileSdk = 34
         /*targetSdkVersion(30)*/
         versionName= '1.1.0'
         testInstrumentationRunner="androidx.test.runner.AndroidJUnitRunner"
         versionCode = 110
+        targetSdk 31
     }
 
 
@@ -25,7 +26,9 @@ android {
         compose=true
     }
     compileSdk {
-        version = release(34)
+        version = release(36) {
+            minorApiLevel = 1
+        }
     }
     buildTypes {
         release {
@@ -40,6 +43,7 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
+    implementation 'androidx.activity:activity-ktx:1.13.0'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'

@@ -7,42 +7,47 @@
         android:maxSdkVersion="99" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <attribution android:tag="cas2audio_audio_output"
-        android:label= "@string/lbl_c2a_audio_output">
-    </attribution>
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+
+    <attribution
+        android:label="@string/lbl_c2a_audio_output"
+        android:tag="cas2audio_audio_output"></attribution>
 
     <application
+        android:name=".Cas2AudioApp"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:name=".Cas2AudioApp"
-     >
-
+        android:theme="@style/AppTheme">
         <activity
             android:name=".recent.RecentActivity"
             android:exported="false"
             android:label="@string/tit_recent"
             android:parentActivityName=".MainActivity"
-
             android:theme="@style/AppTheme" />
         <activity
             android:name=".settings.SettingsActivity"
             android:exported="false"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".MainActivity"
-
             android:theme="@style/AppTheme" />
         <activity
             android:name=".MainActivity"
-            android:noHistory="false"
-            android:exported="true">
+            android:exported="true"
+            android:noHistory="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".goldies.GoldiesActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity"/>
     </application>
 
 </manifest>
