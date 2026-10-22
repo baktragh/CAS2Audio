@@ -44,7 +44,7 @@ public class GoldiesRepository {
                 //zipDirty=false;
             }
             else {
-                observer.onFailedRead();
+                observer.onFailedRead(result);
                 return;
             }
         }

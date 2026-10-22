@@ -2,7 +2,10 @@ package com.baktra.cas2audio.settings;
 
 import android.content.SharedPreferences;
 
+import com.baktra.cas2audio.goldies.GoldiesPersistence;
 import com.baktra.cas2audio.recent.TapeImageRecents;
+
+import java.util.Properties;
 
 public class SettingsRepository {
 
@@ -34,6 +37,17 @@ public class SettingsRepository {
         uiPersistence = UIPersistence.load(sharedPrefs);
         tiRecents = TapeImageRecents.load(sharedPrefs);
     }
+
+    public GoldiesPersistence loadGoldiesPersistence() {
+        return GoldiesPersistence.load(sharedPrefs);
+    }
+
+    public void saveGoldiesPersistence(GoldiesPersistence gp) {
+        GoldiesPersistence.save(gp,sharedPrefs.edit());
+    }
+
+
+
 
     public UserSettings getUserSettings() {
         return this.userSettings;

@@ -12,5 +12,5 @@ public interface GoldiesRepositoryObserver {
     public void onDisplay(Map<TapeSystem,List<String>> map,List<TapeSystem> tapeSystems);
 
 
-    public void onFailedRead();
+    public void onFailedRead(int reason);
 }

@@ -100,9 +100,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
-        MenuItem mi = menu.findItem(R.id.miSettings);
-        playBackMenuItemsDisabled.add(mi);
-        mi.setEnabled(!(viewModel.getPlayBackState().getValue()));
+        MenuItem mi1 = menu.findItem(R.id.miSettings);
+        MenuItem mi2 = menu.findItem(R.id.miGoldies);
+        playBackMenuItemsDisabled.add(mi1);
+        playBackMenuItemsDisabled.add(mi2);
+
+        mi1.setEnabled(!(viewModel.getPlayBackState().getValue()));
+        mi2.setEnabled(!(viewModel.getPlayBackState().getValue()));
         return true;
     }
 

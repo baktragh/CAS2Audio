@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <item
+        android:title="@string/goldies"
+        android:id="@+id/miGoldies"
+        android:onClick="onGoldies">
+    </item>
+
     <item
         android:id="@+id/miSettings"
         android:onClick="onSettings"
@@ -11,10 +19,6 @@
         android:onClick="onAbout">
     </item>
 
-    <item
-        android:title="@string/goldies"
-        android:onClick="onGoldies">
-    </item>
 
     <item
         android:title="@string/exit"

@@ -40,4 +40,8 @@ public final class TapeSystem {
                 Objects.equals(country, that.country) &&
                 Objects.equals(prefixCode, that.prefixCode);
     }
+
+    public String toString() {
+        return name;
+    }
 }
