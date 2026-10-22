@@ -20,7 +20,7 @@
 
             <Spinner
                 android:id="@+id/spSystems"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="4dp"
                 android:layout_weight="1"
@@ -31,10 +31,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="false"
+                android:contentDescription="@string/refresh_goldies"
                 android:cropToPadding="false"
                 android:minWidth="48dp"
                 android:minHeight="48dp"
-                android:src="@android:drawable/ic_menu_rotate" />
+                android:src="@drawable/icon_refresh" />
         </LinearLayout>
 
         <ListView

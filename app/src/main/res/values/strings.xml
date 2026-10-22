@@ -36,6 +36,7 @@
     <string name="lbl_c2a_audio_output">CAS2Audio Audio Output</string>
     <string name="exit">Exit</string>
     <string name="goldies">Goldies</string>
+    <string name="refresh_goldies">Update goldies</string>
 
 
 </resources>

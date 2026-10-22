@@ -39,6 +39,7 @@
 
     <string name="exit">Zakończ</string>
     <string name="goldies">Goldies</string>
+    <string name="refresh_goldies">Aktualizacja Goldies</string>
 
 
 </resources>
