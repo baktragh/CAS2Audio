@@ -37,6 +37,8 @@
     <string name="exit">Exit</string>
     <string name="goldies">Goldies</string>
     <string name="refresh_goldies">Update goldies</string>
+    <string name="goldies_zip_absent_or_corrupt">Goldies archive not present or corrupted. Select refresh to re-download.</string>
+    <string name="goldies_zip_download_failed">Goldies archive download has failed</string>
 
 
 </resources>

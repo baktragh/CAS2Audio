@@ -4,9 +4,10 @@ import android.app.Application;
 import android.content.Context;
 import android.os.PowerManager;
 
-import com.baktra.cas2audio.goldies.GoldiesRepository;
-import com.baktra.cas2audio.settings.SettingsRepository;
-import com.baktra.cas2audio.tapeimage.TapeImageOpener;
+import com.baktra.cas2audio.features.goldies.GoldiesRepository;
+import com.baktra.cas2audio.features.player.domain.CasPlaybackHandler;
+import com.baktra.cas2audio.features.settings.repository.SettingsRepository;
+import com.baktra.cas2audio.features.player.domain.tapeimage.TapeImageOpener;
 
 import java.util.Optional;
 
@@ -22,10 +23,10 @@ public class Cas2AudioApp extends Application {
     public void onCreate() {
 
         super.onCreate();
+
         settingsRepository = new SettingsRepository(getSharedPreferences("c2a_prefs", Context.MODE_PRIVATE));
         tapeImageOpener = new TapeImageOpener(getContentResolver());
-        goldiesRepo = new GoldiesRepository(getFilesDir());
-
+        goldiesRepo = new GoldiesRepository(getFilesDir(),getSharedPreferences("c2a_prefs",Context.MODE_PRIVATE));
 
         Optional<PowerManager> pm;
         try {

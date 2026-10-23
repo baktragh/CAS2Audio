@@ -40,6 +40,7 @@
     <string name="exit">Zakończ</string>
     <string name="goldies">Goldies</string>
     <string name="refresh_goldies">Aktualizacja Goldies</string>
-
+    <string name="goldies_zip_absent_or_corrupt">Archiwum Goldies jest niedostępne lub uszkodzone. Wybierz Aktualizuj, aby pobrać nowe.</string>
+    <string name="goldies_zip_download_failed">Nie udało się pobrać archiwum Goldies</string>
 
 </resources>

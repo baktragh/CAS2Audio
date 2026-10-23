@@ -1,0 +1,13 @@
+package com.baktra.cas2audio.features.player.domain;
+
+public interface CasPlaybackObserver {
+
+    public void onSuccessfulPlayback();
+    public void onCancelledPlayback(int resumeIp,int stopReason);
+
+    public void onProgressUpdate(int value);
+    public void onResumePointUpdate(int resumeIp);
+
+    public void onFailedPlayback(Throwable e);
+
+}

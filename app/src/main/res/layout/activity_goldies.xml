@@ -35,6 +35,7 @@
                 android:cropToPadding="false"
                 android:minWidth="48dp"
                 android:minHeight="48dp"
+                android:onClick="onRefresh"
                 android:src="@drawable/icon_refresh" />
         </LinearLayout>
 

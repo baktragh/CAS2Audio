@@ -6,6 +6,7 @@
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="99" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-permission
         android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
@@ -23,19 +24,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".recent.RecentActivity"
+            android:name=".features.recent.presentation.RecentActivity"
             android:exported="false"
             android:label="@string/tit_recent"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".features.player.presentation.MainActivity"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".settings.SettingsActivity"
+            android:name=".features.settings.SettingsActivity"
             android:exported="false"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".features.player.presentation.MainActivity"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".MainActivity"
+            android:name=".features.player.presentation.MainActivity"
             android:exported="true"
             android:noHistory="false">
             <intent-filter>
@@ -45,9 +46,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".goldies.GoldiesActivity"
+            android:name=".features.goldies.GoldiesActivity"
             android:exported="false"
-            android:parentActivityName=".MainActivity"/>
+            android:parentActivityName=".features.player.presentation.MainActivity"/>
     </application>
 
 </manifest>

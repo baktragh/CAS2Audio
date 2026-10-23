@@ -1,0 +1,95 @@
+package com.baktra.cas2audio.features.recent.domain;
+
+import android.content.SharedPreferences;
+import android.net.Uri;
+
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
+public class TapeImageRecents {
+
+    private final ArrayList<RecentItem> recentItems;
+    public static final int RECENT_CAPACITY =24;
+
+    public TapeImageRecents() {
+        recentItems = new ArrayList<>();
+    }
+
+    public String createPersistenceString() {
+        StringBuilder sb = new StringBuilder();
+
+        for (RecentItem ri : recentItems) {
+            String p1 = ri.getUri().toString();
+            String p2 = ri.getFilename();
+            sb.append("{");
+            sb.append(p1);
+            sb.append(',');
+            sb.append(p2);
+            sb.append("}");
+            sb.append(";");
+        }
+
+        return sb.toString();
+    }
+
+    public static void save(TapeImageRecents tir, SharedPreferences.Editor editor) {
+        editor.putString("c2a_recents",tir.createPersistenceString());
+    }
+
+    public static TapeImageRecents load(SharedPreferences prefs) {
+        TapeImageRecents tir = new TapeImageRecents();
+        try {
+
+            String recentString = prefs.getString("c2a_recents", "");
+            tir.parsePersistenceString(recentString);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            return tir;
+        }
+    }
+
+    public void addRecentItem(Uri uri, String filename) {
+        RecentItem candidateItem = new RecentItem(uri,filename);
+
+        /*Check if already there*/
+        boolean found = false;
+        for (RecentItem item : recentItems) {
+            if (item.getUri().toString().equals(candidateItem.getUri().toString())) {
+                found = true;
+                break;
+            }
+        }
+        /*If already there, just return*/
+        if (found) return;
+
+        /*Move to front*/
+        recentItems.add(0, candidateItem);
+        if (recentItems.size() > RECENT_CAPACITY) recentItems.remove(RECENT_CAPACITY);
+    }
+
+    public void parsePersistenceString(String s) {
+        recentItems.clear();
+        StringTokenizer tk = new StringTokenizer(s, ";");
+
+        while (tk.hasMoreTokens()) {
+            String pair = tk.nextToken();
+            if (pair.length() == 0) break;
+            StringTokenizer tk2 = new StringTokenizer(pair,",");
+            String p1 = tk2.nextToken().replace("{", "").replace("}", "");
+            String p2 = tk2.nextToken().replace("{", "").replace("}", "");
+            recentItems.add(new RecentItem(Uri.parse(p1),p2));
+        }
+    }
+
+    public void clear() {
+        recentItems.clear();
+    }
+
+    public RecentItem[] getAsArray() {
+        RecentItem[] retVal = new RecentItem[recentItems.size()];
+        return recentItems.toArray(retVal);
+    }
+}
