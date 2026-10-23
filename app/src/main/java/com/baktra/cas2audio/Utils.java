@@ -1,7 +1,7 @@
 package com.baktra.cas2audio;
 
 
-class Utils {
+public class Utils {
 
 
     public static String getExceptionMessage(Throwable ex) {
@@ -27,5 +27,20 @@ class Utils {
     }
 
     private Utils() {
+    }
+
+    public static byte[] convertIntsToBytes(int[] intArray) {
+        if (intArray == null) {
+            return new byte[0];
+        }
+
+        byte[] byteArray = new byte[intArray.length];
+        for (int i = 0; i < intArray.length; i++) {
+            // Explicit cast handles negative numbers (-128 to -1)
+            // and safely truncates/wraps single-byte integer ranges.
+            byteArray[i] = (byte) intArray[i];
+        }
+
+        return byteArray;
     }
 }

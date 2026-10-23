@@ -1,6 +1,5 @@
 package com.baktra.cas2audio;
 
-import static androidx.core.content.IntentCompat.*;
 import static com.baktra.cas2audio.CasPlaybackHandler.STOP_REASON_PAUSE;
 import static com.baktra.cas2audio.CasPlaybackHandler.STOP_REASON_STOP;
 
@@ -22,12 +21,8 @@ import android.widget.*;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.content.IntentCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -211,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     TextView tv = findViewById(R.id.tvTapeImageName);
-                    tv.setText(extractFileNameFromURI(newCrate.getUri()));
+                    tv.setText(newCrate.getFileName());
                     setChunkDisplay(newCrate.getConvCrate().getResumePoints());
                 }
 
@@ -385,7 +380,7 @@ public class MainActivity extends AppCompatActivity {
     private void openTapeImageUri(Uri uri) {
         String fileName=null;
         fileName=extractFileNameFromURI(uri);
-        viewModel.openTapeImage(uri,fileName);
+        viewModel.openTapeImageFromURI(uri,fileName);
     }
 
     private void processSettingsResult(ActivityResult o) {
@@ -401,7 +396,8 @@ public class MainActivity extends AppCompatActivity {
         /*Handle the Goldies Activity*/
         if (o.getResultCode() != Activity.RESULT_OK || o.getData()==null) return;
 
-        /*TODO: Open the selected tape image*/
+        Intent intentData = o.getData();
+        viewModel.openTapeImageFromArray(intentData.getIntArrayExtra("tape_image_data"),intentData.getStringExtra("tape_image_name"));
 
     }
 

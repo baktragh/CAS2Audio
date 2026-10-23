@@ -150,6 +150,12 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
         return this.uiState;
     }
 
+
+    public int[] getTapeImageData(TapeSystem system, String fileName) {
+        return goldiesRepo.getTapeImageData(system,fileName);
+    }
+
+
     public void onCleared() {
         TapeSystem lastSystem = uiState.getValue().getCurrentTapeSystem();
         if (lastSystem!=null) {

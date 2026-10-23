@@ -1,7 +1,6 @@
 package com.baktra.cas2audio;
 
 import static com.baktra.cas2audio.CasPlaybackHandler.STOP_REASON_PAUSE;
-import static com.baktra.cas2audio.CasPlaybackHandler.STOP_REASON_STOP;
 import static com.baktra.cas2audio.CasPlaybackHandler.STOP_REASON_TERMINATE;
 
 import android.net.Uri;
@@ -78,9 +77,9 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
         getCasPlaybackHandler().stop(reason);
     }
 
-    TapeImageOpener.ReadResult readTapeImage(Uri uri) {
+    TapeImageOpener.ReadResult readTapeImage(Uri uri,int[] tapeImageBytes,String fileName) {
         UserSettings us = getSettingsRepository().getUserSettings();
-        return getTapeImageOpener().readTapeImage(uri,us.isDo48kHz());
+        return getTapeImageOpener().readTapeImage(uri,tapeImageBytes,us.isDo48kHz(),fileName);
     }
 
     public void onProgressUpdate(int value) {
@@ -200,7 +199,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
         getCasPlaybackHandler().stop(STOP_REASON_TERMINATE);
     }
 
-    public void openTapeImage(Uri tapeImageUri,String fileName) {
+    public void openTapeImageFromURI(Uri tapeImageUri, String fileName) {
 
         /*Open nothing*/
         if (tapeImageUri==null) {
@@ -209,22 +208,38 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
         }
 
         /*Try to open the tape image*/
-        TapeImageOpener.ReadResult result = readTapeImage(tapeImageUri);
+        TapeImageOpener.ReadResult result = readTapeImage(tapeImageUri,null,fileName);
+        processOpenedImage(result,false,tapeImageUri,fileName);
 
+    }
+
+    public void openTapeImageFromArray(int[] tapeImageBytes,String fileName) {
+        if (tapeImageBytes==null) {
+            setCurrentTapeImageCrate(TapeImageCrate.getEmpty());
+            return;
+        }
+
+        TapeImageOpener.ReadResult result = readTapeImage(null,tapeImageBytes,fileName);
+        processOpenedImage(result,false,null,fileName);
+    }
+
+    private void processOpenedImage(TapeImageOpener.ReadResult result, boolean addToRecents,Uri tapeImageUri,String fileName) {
         /*If successfull, add to recents*/
         if (result.isSuccess()) {
             setCurrentTapeImageCrate(result.getTapeImageCrate());
-            getTapeImageRecents().addRecentItem(tapeImageUri, fileName);
+            if (addToRecents && tapeImageUri!=null) {
+                getTapeImageRecents().addRecentItem(tapeImageUri, fileName);
+            }
         }
         /*Otherwise, set up for just "empty" tape image*/
         else {
             /*The player has an empt tape image*/
             setCurrentTapeImageCrate(TapeImageCrate.getEmpty());
-
             /*Tell the user by scheduling an alert*/
             openAlert.setValue(new OpenAlertCrate(result.getFailureNature(), Utils.getExceptionMessage(result.getException())));
         }
     }
+
 
     public LiveData<OpenAlertCrate> getOpenAlert() {
         return openAlert;

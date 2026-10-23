@@ -6,8 +6,10 @@ import android.net.Uri;
 
 import com.baktra.cas2audio.ConversionCrate;
 import com.baktra.cas2audio.FileFormatException;
+import com.baktra.cas2audio.Utils;
 import com.baktra.cas2audio.tapeimagefile.TapeImage;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 public class TapeImageOpener {
@@ -54,21 +56,32 @@ public class TapeImageOpener {
         this.resolver=resolver;
     }
 
-    public ReadResult readTapeImage(Uri uri,boolean do48Khz) {
+    public ReadResult readTapeImage(Uri uri,int[] tapeImageBytes,boolean do48Khz,String fileName) {
         try  {
-            /*Get the persmission*/
-            resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            /*Open for input stream*/
-            InputStream iStream = resolver.openInputStream(uri);
+
             TapeImage ti = new TapeImage();
-            ti.parse(iStream);
+
+            /*Read from URI*/
+            if (uri!=null) {
+                /*Get the permission*/
+                resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                /*Open for input stream*/
+                InputStream iStream = resolver.openInputStream(uri);
+                ti.parse(iStream);
+            }
+            /*Read from array*/
+            else {
+                ByteArrayInputStream bais = new ByteArrayInputStream(Utils.convertIntsToBytes(tapeImageBytes));
+                ti.parse(bais);
+            }
 
             /*Perform the conversion*/
             TapeImageProcessor tip = new TapeImageProcessor();
             ConversionCrate cc = tip.convertItem(ti,do48Khz?48000:44100);
 
-            TapeImageCrate tic = TapeImageCrate.getFull(cc,uri);
+            TapeImageCrate tic = TapeImageCrate.getFull(cc,fileName);
 
             return new ReadResult(true,ReadResult.FAILURE_NONE,null,tic);
 
@@ -87,6 +100,8 @@ public class TapeImageOpener {
         }
 
     }
+
+
 
 
 }

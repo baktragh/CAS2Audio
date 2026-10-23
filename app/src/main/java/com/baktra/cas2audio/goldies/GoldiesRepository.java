@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -41,7 +42,7 @@ public class GoldiesRepository {
         if (zipDirty==true) {
             int result = processZip();
             if (result==ZIP_OK) {
-                //zipDirty=false;
+                zipDirty=false;
             }
             else {
                 observer.onFailedRead(result);
@@ -62,7 +63,6 @@ public class GoldiesRepository {
 
         try {
             File f = new File(localDirectory,"goldies.zip");
-            //File f = new File("/sdcard/Download/goldies.zip");
             if (!f.exists() || !f.isFile()) return ZIP_NOT_PRESENT;
 
             /*Instantiate the zip file*/
@@ -104,6 +104,8 @@ public class GoldiesRepository {
                 repoMap.get(tsForEntry).add(entryNameFile.getName());
             }
 
+            zipFile.close();
+
 
         }
         catch (IOException ioe) {
@@ -125,6 +127,9 @@ public class GoldiesRepository {
         String line;
         while ((line=brMap.readLine())!=null) {
             line=line.trim();
+
+            if (line.isEmpty()) continue;
+
             StringTokenizer tk = new StringTokenizer(line,",");
 
             String name = tk.nextToken();
@@ -140,6 +145,46 @@ public class GoldiesRepository {
         brMap.close();
         isrMap.close();
         isMap.close();
+
+
+    }
+
+    public int[] getTapeImageData(TapeSystem system,String fileName) {
+
+        /*Instantiate the zip file*/
+        try {
+            File f = new File(localDirectory, "goldies.zip");
+            ZipFile zipFile = new ZipFile(f);
+            if (!f.exists() || !f.isFile()) return null;
+
+            System.out.println(system.getPrefixCode()+" "+fileName);
+
+            ZipEntry entry = zipFile.getEntry(system.getPrefixCode()+"/"+fileName);
+            InputStream is = zipFile.getInputStream(entry);
+
+            ArrayList<Integer> fileBytes = new ArrayList<>();
+            int oneByte;
+            while ((oneByte=is.read())!=-1) {
+                fileBytes.add(oneByte);
+            }
+
+            is.close();
+
+            /*Convert to array of ints*/
+            int[] arr = new int[fileBytes.size()];
+            int index=0;
+            for (Integer oneInt:fileBytes) {
+                arr[index]=oneInt;
+                index++;
+            }
+            /*Return the array*/
+            return arr;
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
 
 
     }

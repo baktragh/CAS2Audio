@@ -19,7 +19,7 @@ import com.baktra.cas2audio.R;
 
 import java.util.List;
 
-public class GoldiesActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class GoldiesActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,AdapterView.OnItemClickListener {
 
     private GoldiesViewModel viewModel;
 
@@ -45,7 +45,7 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                setResult(RESULT_OK, createResultIntent());
+                setResult(RESULT_OK, createResultIntent(null,null));
                 finish();
                 return true;
             default:
@@ -108,6 +108,7 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
                 }
                 spSystems.setEnabled(true);
                 spSystems.setOnItemSelectedListener(GoldiesActivity.this);
+                lv.setOnItemClickListener(GoldiesActivity.this);
             }
         });
     }
@@ -131,19 +132,43 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
 
     }
 
-
-    private Intent createResultIntent() {
+    private Intent createResultIntent(TapeSystem system,String tapeImageName) {
         Intent i = new Intent();
-        i.setData(null);
+
+        int[] tapeImageData = viewModel.getTapeImageData(system,tapeImageName);
+
+        i.putExtra("tape_image_data",tapeImageData);
+        i.putExtra("tape_image_name",tapeImageName);
         return i;
     }
 
-
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+        System.out.println("onItemSelected()");
+
         if (parent==findViewById(R.id.spSystems)) {
             viewModel.updateCurrentTapeSystem((TapeSystem)parent.getSelectedItem());
         }
+
+
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+        System.out.println("onItemClick()");
+
+         if (parent==findViewById(R.id.lvGoldies)) {
+
+            ListView lv = (ListView)findViewById(R.id.lvGoldies);
+            Spinner sp = (Spinner)findViewById(R.id.spSystems);
+
+            Intent i = createResultIntent((TapeSystem)sp.getSelectedItem(),(String)lv.getItemAtPosition(position));
+            setResult(RESULT_OK,i);
+            finish();
+        }
+
     }
 
     @Override
