@@ -40,5 +40,7 @@
     <string name="refresh_goldies">Aktualizovat Goldies</string>
     <string name="goldies_zip_absent_or_corrupt">Archiv s Goldies není přítomen nebo je poškozen. Vyberte Aktualizovat pro nové stažení.</string>
     <string name="goldies_zip_download_failed">Archiv s Goldies se nepodařilo stáhnout</string>
+    <string name="goldies_downloading">Stahuje se...</string>
+    <string name="btn_dismiss">Zavřít</string>
 
 </resources>

@@ -37,12 +37,43 @@
                 android:minHeight="48dp"
                 android:onClick="onRefresh"
                 android:src="@drawable/icon_refresh" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/holo_red_dark"
+            android:orientation="vertical"
+            android:padding="4dp">
+
+            <TextView
+                android:id="@+id/tvMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="Message"
+                android:textColor="@android:color/white"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/btnDismiss"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="0"
+                android:onClick="onMessageDismiss"
+                android:text="@string/btn_dismiss" />
         </LinearLayout>
 
         <ListView
             android:id="@+id/lvGoldies"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="4dp" />
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="4dp">
+
+        </ListView>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

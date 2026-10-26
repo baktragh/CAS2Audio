@@ -16,7 +16,8 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
         EMPTY,
         ZIP_NOT_PRESENT_OR_CORRUPT,
         ZIP_DOWNLOAD_FAILED,
-        LIST_POPULATED
+        LIST_POPULATED,
+        ZIP_DOWNLOADING
     }
     protected static class UIState {
 
@@ -161,6 +162,8 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
     }
 
     public void initiateRefresh() {
+        UIState newState = new UIState(MainState.ZIP_DOWNLOADING,null,null,null,null);
+        uiState.setValue(newState);
         goldiesRepo.refresh(this);
     }
 

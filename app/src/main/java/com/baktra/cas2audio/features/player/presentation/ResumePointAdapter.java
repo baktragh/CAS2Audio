@@ -125,7 +125,7 @@ public class ResumePointAdapter extends BaseAdapter {
         ResumePoint rp = ResumePoint.getClosestResumePoint(ip,resumePoints);
         if (rp==null) return;
 
-        int currentResumePointIndex=rp.getIndex();
+        currentResumePointIndex=rp.getIndex();
 
         /*Notify for the change*/
         currentSelectedIndex = currentResumePointIndex;

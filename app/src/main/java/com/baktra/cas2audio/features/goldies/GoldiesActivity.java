@@ -6,12 +6,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewTreeLifecycleOwner;
 
 import com.baktra.cas2audio.Cas2AudioApp;
 import com.baktra.cas2audio.R;
@@ -62,8 +67,12 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
                 ListView lv = (ListView) findViewById(R.id.lvGoldies);
                 Spinner spSystems = (Spinner) findViewById(R.id.spSystems);
 
-                /*For an empty state, display just everything empty*/
+                ImageButton btnRefresh = (ImageButton)findViewById(R.id.btnRefresh);
+
+                /*For an empty state, display just everything empty.
+                * The user can select the refresh button to download the archive*/
                 if (newState.getMainState() == GoldiesViewModel.MainState.EMPTY) {
+
                     String[] itemsArr = new String[0];
                     TapeSystem[] systemsArr = new TapeSystem[0];
 
@@ -72,53 +81,155 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
 
                     lv.setEnabled(false);
                     spSystems.setEnabled(false);
+                    btnRefresh.setEnabled(true);
+
+                    setMessageBarVisible(false,false,null);
 
                     return;
                 }
-                /*For an error state, just display one item holding the error message*/
-                else if (newState.getMainState() == GoldiesViewModel.MainState.ZIP_DOWNLOAD_FAILED || newState.getMainState() == GoldiesViewModel.MainState.ZIP_NOT_PRESENT_OR_CORRUPT) {
-                    String[] itemsArr = new String[2];
-                    TapeSystem[] systemsArr = new TapeSystem[0];
 
-                    if (newState.getMainState()== GoldiesViewModel.MainState.ZIP_DOWNLOAD_FAILED) {
-                        itemsArr[0] = getString(R.string.goldies_zip_download_failed);
-                        itemsArr[1] = Utils.getExceptionMessage(newState.getFailureException());
-                    }
-                    else {
-                        itemsArr[0] = getString(R.string.goldies_zip_absent_or_corrupt);
-                        itemsArr[1] = Utils.getExceptionMessage(newState.getFailureException());
-                    }
+                /*Downloading ZIP. Transitional state to display something when the file is being
+                  downloaded. The user controls are not active, because there is not much to do
+                  during the download anyway.
+                 */
+                else if (newState.getMainState() == GoldiesViewModel.MainState.ZIP_DOWNLOADING) {
+
+                    String[] itemsArr = new String[0];
+                    TapeSystem[] systemsArr = new TapeSystem[0];
 
                     lv.setAdapter(new ArrayAdapter<String>(GoldiesActivity.this, R.layout.goldies_item, itemsArr));
                     spSystems.setAdapter(new ArrayAdapter<TapeSystem>(GoldiesActivity.this, R.layout.goldies_item, systemsArr));
 
                     lv.setEnabled(false);
                     spSystems.setEnabled(false);
+                    btnRefresh.setActivated(false);
+
+                    setMessageBarVisible(true,false,getString(R.string.goldies_downloading));
 
                     return;
                 }
 
-                /*Redisplay the Goldies, if any*/
-                String[] itemsArr = new String[0];
-                itemsArr = newState.getCurrentItems().toArray(itemsArr);
-                lv.setAdapter(new ArrayAdapter<String>(GoldiesActivity.this, R.layout.goldies_item, itemsArr));
-                lv.setEnabled(true);
+                /*If the download failed, display a message with a "Dismiss" button. Clicking the dismiss
+                * button will acknowledge the message and force re-read of the existing archive*/
+                else if (newState.getMainState() == GoldiesViewModel.MainState.ZIP_DOWNLOAD_FAILED) {
 
-                /*Redisplay the Systems, but only when the list has changed*/
-                if (!isSystemListSame(spSystems,newState.getTapeSystems())) {
+                    String[] itemsArr = new String[0];
                     TapeSystem[] systemsArr = new TapeSystem[0];
-                    systemsArr = newState.getTapeSystems().toArray(systemsArr);
 
-                    ArrayAdapter<TapeSystem> systemAdapter = new ArrayAdapter<TapeSystem>(GoldiesActivity.this, R.layout.goldies_item, systemsArr);
-                    spSystems.setAdapter(systemAdapter);
-                    int selPosition = systemAdapter.getPosition(newState.getCurrentTapeSystem());
-                    spSystems.setSelection(selPosition);
+                    String msg = getString(R.string.goldies_zip_download_failed) +
+                            "\n" +
+                            Utils.getExceptionMessage(newState.getFailureException());
+
+                    lv.setAdapter(new ArrayAdapter<String>(GoldiesActivity.this, R.layout.goldies_item, itemsArr));
+                    spSystems.setAdapter(new ArrayAdapter<TapeSystem>(GoldiesActivity.this, R.layout.goldies_item, systemsArr));
+
+                    lv.setEnabled(false);
+                    spSystems.setEnabled(false);
+                    btnRefresh.setEnabled(false);
+                    setMessageBarVisible(true,true,msg);
+
+                    return;
                 }
-                spSystems.setEnabled(true);
-                spSystems.setOnItemSelectedListener(GoldiesActivity.this);
-                lv.setOnItemClickListener(GoldiesActivity.this);
+
+                /*If the ZIP file is not present, or corrupted, just display an error message. The
+                * refresh button is enabled, so that the ZIP can be re-downloaded*/
+                else if (newState.getMainState() == GoldiesViewModel.MainState.ZIP_NOT_PRESENT_OR_CORRUPT) {
+                    String[] itemsArr = new String[0];
+                    TapeSystem[] systemsArr = new TapeSystem[0];
+
+
+                    String msg = getString(R.string.goldies_zip_absent_or_corrupt) +
+                                "\n"+
+                                Utils.getExceptionMessage(newState.getFailureException());
+
+                    lv.setAdapter(new ArrayAdapter<String>(GoldiesActivity.this, R.layout.goldies_item, itemsArr));
+                    spSystems.setAdapter(new ArrayAdapter<TapeSystem>(GoldiesActivity.this, R.layout.goldies_item, systemsArr));
+
+                    lv.setEnabled(false);
+                    spSystems.setEnabled(false);
+                    btnRefresh.setEnabled(true);
+                    setMessageBarVisible(true,false,msg);
+
+                    return;
+                }
+
+                /*Most common state, we have the archive, which we have successfully read,
+                now we display the list of tape images available for the selected system
+                 */
+                else if (newState.getMainState()== GoldiesViewModel.MainState.LIST_POPULATED) {
+
+                    /*The state is */
+                    String[] itemsArr = new String[0];
+                    itemsArr = newState.getCurrentItems().toArray(itemsArr);
+                    lv.setAdapter(new ArrayAdapter<String>(GoldiesActivity.this, R.layout.goldies_item, itemsArr));
+                    lv.setEnabled(true);
+
+                    /*Redisplay the Systems, but only when the list has changed*/
+                    if (!isSystemListSame(spSystems, newState.getTapeSystems())) {
+                        TapeSystem[] systemsArr = new TapeSystem[0];
+                        systemsArr = newState.getTapeSystems().toArray(systemsArr);
+
+                        ArrayAdapter<TapeSystem> systemAdapter = new ArrayAdapter<TapeSystem>(GoldiesActivity.this, R.layout.goldies_item, systemsArr);
+                        spSystems.setAdapter(systemAdapter);
+                        int selPosition = systemAdapter.getPosition(newState.getCurrentTapeSystem());
+                        spSystems.setSelection(selPosition);
+                    }
+
+                    spSystems.setEnabled(true);
+                    btnRefresh.setEnabled(true);
+
+                    spSystems.setOnItemSelectedListener(GoldiesActivity.this);
+                    lv.setOnItemClickListener(GoldiesActivity.this);
+
+
+                    setMessageBarVisible(false, false, null);
+                }
+
+                /*Unknown state (should never happen)*/
+                else {
+                    String[] itemsArr = new String[0];
+                    TapeSystem[] systemsArr = new TapeSystem[0];
+
+                    lv.setAdapter(new ArrayAdapter<String>(GoldiesActivity.this, R.layout.goldies_item, itemsArr));
+                    spSystems.setAdapter(new ArrayAdapter<TapeSystem>(GoldiesActivity.this, R.layout.goldies_item, systemsArr));
+
+                    lv.setEnabled(false);
+                    spSystems.setEnabled(false);
+                    btnRefresh.setEnabled(false);
+
+                    setMessageBarVisible(false,false,"Internal error: Unknown state");
+                }
             }
         });
+    }
+
+    private void setMessageBarVisible(boolean visible,boolean dismissButtonVisible,String message) {
+
+        TextView tvMessage = (TextView)findViewById(R.id.tvMessage);
+        LinearLayout llMessage = (LinearLayout)findViewById(R.id.llMessage);
+        Button btnDismiss = (Button)findViewById(R.id.btnDismiss);
+
+        if (!visible) {
+            tvMessage.setVisibility(View.GONE);
+            btnDismiss.setVisibility(View.GONE);
+            llMessage.setVisibility(View.GONE);
+            tvMessage.setText("");
+        }
+        else {
+            tvMessage.setVisibility(View.VISIBLE);
+            llMessage.setVisibility(View.VISIBLE);
+            tvMessage.setText(message);
+            if (dismissButtonVisible) {
+                btnDismiss.setVisibility(View.VISIBLE);
+            }
+            else {
+                btnDismiss.setVisibility(View.GONE);
+            }
+
+        }
+
+
+
     }
 
     private boolean isSystemListSame(Spinner s,List<TapeSystem> newList) {
@@ -155,7 +266,9 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
         viewModel.initiateRefresh();
     }
 
-
+    public void onMessageDismiss(View v) {
+        viewModel.reDisplay();
+    }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
