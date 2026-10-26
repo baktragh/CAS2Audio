@@ -43,8 +43,6 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
         viewModel = new ViewModelProvider(this,factory).get(GoldiesViewModel.class);
         setupModelObservers();
 
-        viewModel.reDisplay();
-
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {

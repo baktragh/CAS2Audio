@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.baktra.cas2audio.features.settings.repository.SettingsRepository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -21,17 +22,17 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
     }
     protected static class UIState {
 
-        private MainState mainState;
-        private TapeSystem currentTapeSystem;
-        private List<String> currentItems;
-        private List<TapeSystem> tapeSystems;
+        private final MainState mainState;
+        private final TapeSystem currentTapeSystem;
+        private final List<String> currentItems;
+        private final List<TapeSystem> tapeSystems;
         private Exception failureException;
 
         public UIState(MainState mainState, TapeSystem currentTapeSystem, List<String> currentItems,List<TapeSystem> tapeSystems,Exception failureException) {
             this.mainState=mainState;
             this.currentTapeSystem=currentTapeSystem;
-            this.currentItems=currentItems;
-            this.tapeSystems=tapeSystems;
+            this.currentItems=(currentItems==null?currentItems:Collections.unmodifiableList(currentItems));
+            this.tapeSystems=(tapeSystems==null?tapeSystems:Collections.unmodifiableList(tapeSystems));
             this.failureException=failureException;
         }
 
@@ -59,7 +60,7 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
         }
     }
 
-    private GoldiesRepository goldiesRepo;
+    private final GoldiesRepository goldiesRepo;
     private MutableLiveData<UIState> uiState;
 
     private Map<TapeSystem, List<String>> currentMap;
@@ -72,6 +73,7 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
         this.currentMap=null;
         this.settingsRepo=settingsRepo;
         this.savedTapeSystemName=goldiesRepo.loadLastSystem();
+        reDisplay();
 
     }
 
