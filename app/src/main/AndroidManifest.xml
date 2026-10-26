@@ -46,7 +46,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".features.goldies.GoldiesActivity"
+            android:name=".features.goldies.presentation.GoldiesActivity"
             android:exported="false"
             android:parentActivityName=".features.player.presentation.MainActivity"/>
     </application>

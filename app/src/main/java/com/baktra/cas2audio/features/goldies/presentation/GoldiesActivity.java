@@ -1,4 +1,4 @@
-package com.baktra.cas2audio.features.goldies;
+package com.baktra.cas2audio.features.goldies.presentation;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,11 +16,11 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewTreeLifecycleOwner;
 
 import com.baktra.cas2audio.Cas2AudioApp;
 import com.baktra.cas2audio.R;
 import com.baktra.cas2audio.core.util.Utils;
+import com.baktra.cas2audio.features.goldies.domain.TapeSystem;
 
 import java.util.List;
 
@@ -43,6 +43,12 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
         viewModel = new ViewModelProvider(this,factory).get(GoldiesViewModel.class);
         setupModelObservers();
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        viewModel.cancelBackgroundTasks();
+        super.onDestroy();
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {

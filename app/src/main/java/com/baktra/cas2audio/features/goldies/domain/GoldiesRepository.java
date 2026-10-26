@@ -1,6 +1,8 @@
-package com.baktra.cas2audio.features.goldies;
+package com.baktra.cas2audio.features.goldies.domain;
 
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.baktra.cas2audio.core.util.InstructionStream;
 import com.baktra.cas2audio.core.util.Utils;
@@ -44,6 +46,8 @@ public class GoldiesRepository {
     private final SharedPreferences prefs;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
+    private Future<Integer> currentFuture;
+
     public GoldiesRepository(File localDirectory, SharedPreferences prefs) {
         this.localDirectory=localDirectory;
         repoMap = new HashMap<>();
@@ -51,6 +55,7 @@ public class GoldiesRepository {
         tapeSystems = new ArrayList<>();
         this.zipDirty=true;
         this.prefs=prefs;
+        this.currentFuture=null;
     }
 
     public void displayRepository(GoldiesRepositoryObserver observer,boolean force) {
@@ -108,10 +113,6 @@ public class GoldiesRepository {
 
             /*Skip files in the root directory*/
             if (entryParentFile == null) continue;
-
-            //System.out.println(entryNameFile);
-            //System.out.println(entryParentFile);
-            //System.out.println("--");
 
             /*Get the tape system*/
             TapeSystem tsForEntry = dir2SystemMap.get(entryParentFile.toString());
@@ -218,82 +219,97 @@ public class GoldiesRepository {
 
     public void refresh(GoldiesRepositoryObserver observer) {
 
-        zipDirty=true;
+        if (currentFuture!=null) return;
 
-        Future<Integer> fRefresh = executor.submit(new Callable<Integer>() {
-            public Integer call() throws Exception {
-                HttpURLConnection connection = null;
-                InputStream inputStream = null;
-                FileOutputStream outputStream = null;
+       zipDirty=true;
+       currentFuture = executor.submit(new Callable<Integer>() {
 
+            public Integer call()  {
 
-                URL url = new URL("https://baktra.wz.cz/packages/goldies.zip");
-
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setConnectTimeout(15000);
-                connection.setReadTimeout(15000);
-
-                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-
-                    File outputFile = new File(localDirectory, "goldies2.zip");
-
-                    if (outputFile.exists()) {
-                        outputFile.delete();
-                    }
-
-                    inputStream = connection.getInputStream();
-                    outputStream = new FileOutputStream(outputFile);
-
-                    byte[] buffer = new byte[4096];
-                    int bytesRead;
-                    while ((bytesRead = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, bytesRead);
-                    }
-
-                    /*Swap the output file with the final file*/
-                    File finalFile = new File(localDirectory, "goldies.zip");
-                    if (finalFile.exists()) {
-                        finalFile.delete();
-                    }
-                    outputFile.renameTo(finalFile);
-
-                } else {
-                    throw new IOException("Unexpected server response: " + connection.getResponseCode());
-                }
-
-                // Ensure streams and connections close cleanly
                 try {
-                    if (outputStream != null) outputStream.close();
-                } catch (Exception ignored) {
+
+                    HttpURLConnection connection = null;
+                    InputStream inputStream = null;
+                    FileOutputStream outputStream = null;
+
+
+                    URL url = new URL("https://baktra.wz.cz/packages/goldies.zip");
+
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setConnectTimeout(15000);
+                    connection.setReadTimeout(15000);
+
+                    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+
+                        File outputFile = new File(localDirectory, "goldies2.zip");
+
+                        if (outputFile.exists()) {
+                            outputFile.delete();
+                        }
+
+                        inputStream = connection.getInputStream();
+                        outputStream = new FileOutputStream(outputFile);
+
+                        byte[] buffer = new byte[4096];
+                        int bytesRead;
+                        while ((bytesRead = inputStream.read(buffer)) != -1) {
+                            outputStream.write(buffer, 0, bytesRead);
+                        }
+
+                        /*Swap the output file with the final file*/
+                        File finalFile = new File(localDirectory, "goldies.zip");
+                        if (finalFile.exists()) {
+                            finalFile.delete();
+                        }
+                        outputFile.renameTo(finalFile);
+
+                    } else {
+                        throw new IOException("Unexpected server response: " + connection.getResponseCode());
+                    }
+
+                    // Ensure streams and connections close cleanly
+                    try {
+                        if (outputStream != null) outputStream.close();
+                    } catch (Exception ignored) {
+                    }
+                    try {
+                        if (inputStream != null) inputStream.close();
+                    } catch (Exception ignored) {
+                    }
+                    if (connection != null) connection.disconnect();
+
                 }
-                try {
-                    if (inputStream != null) inputStream.close();
-                } catch (Exception ignored) {
+                /*Exception was thrown, handle it. The observer must be called on main thread*/
+                catch (Exception totalException) {
+                    totalException.printStackTrace();
+                    Handler h = new Handler(Looper.getMainLooper());
+                    h.post(new Runnable() {
+                        public void run() {
+                            observer.onFailedRefresh(totalException);
+                        }
+                    });
+                    currentFuture=null;
+                    return 0;
                 }
-                if (connection != null) connection.disconnect();
+                /*Normal execution, the observer must be called on main thread*/
+                Handler h = new Handler(Looper.getMainLooper());
+                h.post(new Runnable() {
+                    public void run() {
+                        observer.onSuccessfullRefresh();
+                    }
+                });
+                currentFuture=null;
                 return 0;
-
-
             }
         });
 
-        try  {
-            fRefresh.get();
-        }
-        catch (ExecutionException e) {
-            e.printStackTrace();
-            observer.onFailedRefresh((Exception)e.getCause());
-            return;
-        }
-        catch (InterruptedException ie) {
-            ie.printStackTrace();
-            Thread.currentThread().interrupt();
-            observer.onFailedRefresh(ie);
-            return;
-        }
 
-        displayRepository(observer,false);
 
+    }
+
+    public void cancelRefresh() {
+        if (currentFuture==null) return;
+        currentFuture.cancel(true);
     }
 
 

@@ -1,9 +1,12 @@
-package com.baktra.cas2audio.features.goldies;
+package com.baktra.cas2audio.features.goldies.presentation;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.baktra.cas2audio.features.goldies.domain.GoldiesRepository;
+import com.baktra.cas2audio.features.goldies.domain.GoldiesRepositoryObserver;
+import com.baktra.cas2audio.features.goldies.domain.TapeSystem;
 import com.baktra.cas2audio.features.settings.repository.SettingsRepository;
 
 import java.util.Collections;
@@ -83,6 +86,7 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
 
     @Override
     public void onSuccessfullRefresh() {
+        reDisplay();
     }
 
     @Override
@@ -119,15 +123,7 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
 
         /*If no current system, try getting from the persistence data*/
         if (oldTapeSystem==null) {
-
-            if (!savedTapeSystemName.isEmpty()) {
-                for (TapeSystem oneSystem: tapeSystems) {
-                    if (oneSystem.getName().equals(savedTapeSystemName)) {
-                        newTapeSystem=oneSystem;
-                        break;
-                    }
-                }
-            }
+           newTapeSystem=getPersistedTapeSystem(tapeSystems);
         }
         /*Otherwise, use it*/
         else {
@@ -141,10 +137,20 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
 
         //System.out.println("+++ "+oldTapeSystem+">>"+newTapeSystem);
 
-
         List<String> lItems = map.get(newTapeSystem);
         UIState newState = new UIState(MainState.LIST_POPULATED, newTapeSystem, lItems,tapeSystems);
         uiState.setValue(newState);
+    }
+
+    private TapeSystem getPersistedTapeSystem(List<TapeSystem> tapeSystems) {
+        if (!savedTapeSystemName.isEmpty()) {
+            for (TapeSystem oneSystem: tapeSystems) {
+                if (oneSystem.getName().equals(savedTapeSystemName)) {
+                    return oneSystem;
+                }
+            }
+        }
+        return null;
     }
 
     public void updateCurrentTapeSystem(TapeSystem newSystem) {
@@ -175,6 +181,12 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
         if (lastSystem!=null) {
            goldiesRepo.saveLastSystem(lastSystem);
         }
+
+        cancelBackgroundTasks();
+    }
+
+    public void cancelBackgroundTasks() {
+        goldiesRepo.cancelRefresh();
     }
 
 

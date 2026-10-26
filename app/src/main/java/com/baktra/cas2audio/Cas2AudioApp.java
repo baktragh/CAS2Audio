@@ -4,7 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.os.PowerManager;
 
-import com.baktra.cas2audio.features.goldies.GoldiesRepository;
+import com.baktra.cas2audio.features.goldies.domain.GoldiesRepository;
 import com.baktra.cas2audio.features.player.domain.CasPlaybackHandler;
 import com.baktra.cas2audio.features.settings.repository.SettingsRepository;
 import com.baktra.cas2audio.features.player.domain.tapeimage.TapeImageOpener;

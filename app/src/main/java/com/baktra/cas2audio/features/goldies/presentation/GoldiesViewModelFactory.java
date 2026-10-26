@@ -1,9 +1,10 @@
-package com.baktra.cas2audio.features.goldies;
+package com.baktra.cas2audio.features.goldies.presentation;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.baktra.cas2audio.features.goldies.domain.GoldiesRepository;
 import com.baktra.cas2audio.features.settings.repository.SettingsRepository;
 
 public class GoldiesViewModelFactory implements ViewModelProvider.Factory {

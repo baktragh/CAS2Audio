@@ -30,7 +30,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.baktra.cas2audio.Cas2AudioApp;
 import com.baktra.cas2audio.R;
 import com.baktra.cas2audio.core.util.Utils;
-import com.baktra.cas2audio.features.goldies.GoldiesActivity;
+import com.baktra.cas2audio.features.goldies.presentation.GoldiesActivity;
 import com.baktra.cas2audio.features.recent.presentation.RecentActivity;
 import com.baktra.cas2audio.features.settings.SettingsActivity;
 import com.baktra.cas2audio.features.settings.domain.UserSettings;

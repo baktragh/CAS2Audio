@@ -1,4 +1,4 @@
-package com.baktra.cas2audio.features.goldies;
+package com.baktra.cas2audio.features.goldies.domain;
 
 import java.util.List;
 import java.util.Map;
