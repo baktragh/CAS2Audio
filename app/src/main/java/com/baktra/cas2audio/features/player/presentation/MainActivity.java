@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityResultLauncher<Intent> launchGoldies;
 
+    private AlertDialog alertDialog;
+
     public MainActivity() {
         super();
         LN_SP = System.lineSeparator();
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
         playBackViewsEnabled = new ArrayList<>(8);
         playBackMenuItemsDisabled = new ArrayList<>(1);
         playBackMenuItemsEnabled = new ArrayList<>(1);
+        alertDialog=null;
     }
 
     @Override
@@ -127,6 +130,9 @@ public class MainActivity extends AppCompatActivity {
 
     protected void onDestroy() {
         closeOptionsMenu();
+        if (alertDialog!=null && alertDialog.isShowing()) {
+            alertDialog.dismiss();
+        }
         super.onDestroy();
     }
 
@@ -502,8 +508,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        alertDialog = builder.create();
+        alertDialog.show();
     }
 
     public void onAbout(MenuItem mi) {
