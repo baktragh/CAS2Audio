@@ -40,6 +40,7 @@ import com.baktra.cas2audio.features.player.domain.tapeimage.TapeImageOpener;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -72,8 +73,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Cas2AudioApp c2aApp = (Cas2AudioApp)getApplication();
-        MainViewModelFactory factory = new MainViewModelFactory(c2aApp.getSettingsRepository(),c2aApp.getTapeImageOpener(),c2aApp.getCasPlaybackHandler());
+        Cas2AudioApp c2aApp = (Cas2AudioApp) getApplication();
+        MainViewModelFactory factory = new MainViewModelFactory(c2aApp.getSettingsRepository(), c2aApp.getTapeImageOpener(), c2aApp.getCasPlaybackHandler());
 
         /*Widgets to be disabled during playback*/
         playBackViewsDisabled.add(getBrowseButton());
@@ -85,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         playBackViewsEnabled.add(findViewById(R.id.btnStop));
         playBackViewsEnabled.add(findViewById(R.id.btnPause));
 
-        viewModel = new ViewModelProvider(this,factory).get(MainViewModel.class);
+        viewModel = new ViewModelProvider(this, factory).get(MainViewModel.class);
         setupModelObservers();
 
         /*Set the title*/
@@ -96,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
+
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
         MenuItem mi1 = menu.findItem(R.id.miSettings);
@@ -103,25 +105,22 @@ public class MainActivity extends AppCompatActivity {
         playBackMenuItemsDisabled.add(mi1);
         playBackMenuItemsDisabled.add(mi2);
 
-        mi1.setEnabled(!(viewModel.getPlayBackState().getValue()));
-        mi2.setEnabled(!(viewModel.getPlayBackState().getValue()));
+        mi1.setEnabled(!(viewModel.isPlaying()));
+        mi2.setEnabled(!(viewModel.isPlaying()));
         return true;
     }
 
 
     protected void onResume() {
-        //System.out.println("MainActivity::onResume()");
         super.onResume();
     }
 
     protected void onStop() {
-        //System.out.println("MainActivity::onStop()");
         super.onStop();
 
     }
 
     protected void onPause() {
-        //System.out.println("MainActivity::onPause()");
         closeOptionsMenu();
         super.onPause();
     }
@@ -132,163 +131,141 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private void handlePlayerControls(boolean isPlaying) {
+
+        for (View v : playBackViewsDisabled) {
+            v.setEnabled(!isPlaying);
+        }
+        for (View v : playBackViewsEnabled) {
+            v.setEnabled(isPlaying);
+        }
+
+        for (MenuItem mi : playBackMenuItemsDisabled) {
+            mi.setEnabled(!isPlaying);
+        }
+        for (MenuItem mi : playBackMenuItemsEnabled) {
+            mi.setEnabled(isPlaying);
+        }
+
+        /*Cassette image animation*/
+        ImageView iv = findViewById(R.id.ivCassette);
+
+        if (isPlaying) {
+            iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation, null));
+            AnimationDrawable ad = (AnimationDrawable) iv.getDrawable();
+            ad.start();
+        } else {
+            iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation, null));
+            if (iv.getDrawable() instanceof AnimationDrawable) {
+                AnimationDrawable ad = (AnimationDrawable) iv.getDrawable();
+                ad.stop();
+            }
+            iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_inactive, null));
+        }
+    }
+
+
+    private Optional<Boolean> oldVisibility = Optional.empty();
+    private Optional<Integer> oldProgress = Optional.empty();
+    private Optional<Integer> oldPlayerResumeIp = Optional.empty();
+    private Optional<Integer> oldUserResumeIp = Optional.empty();
+
     private void setupModelObservers() {
 
-        /*Chunk list visibility*/
-        viewModel.getChunkListVisibility().observe(this, new Observer<Boolean>() {
+
+        viewModel.getUIState().observe(this, new Observer<MainViewModel.UIState>() {
             @Override
-            public void onChanged(Boolean newVisibility) {
-                ListView lv = (ListView)findViewById(R.id.lvChunks);
-                lv.setVisibility(newVisibility?View.VISIBLE:View.INVISIBLE);
-            }
-        });
+            public void onChanged(MainViewModel.UIState newState) {
 
-        /*Playback controls enable/disable*/
-        viewModel.getPlayBackState().observe(this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean newState) {
+                boolean isPlaying = (newState.getPlayerState() == MainViewModel.PlayerState.PLAYING);
 
-                /*UI elements enabled or disabled*/
-                boolean b = newState.booleanValue();
+                /*Handle chunk list visibility*/
 
-                for (View v : playBackViewsDisabled) {
-                    v.setEnabled(!b);
-                }
-                for (View v : playBackViewsEnabled) {
-                    v.setEnabled(b);
+                if (oldVisibility.isEmpty() || oldVisibility.get()!=newState.isChunkListVisible()) {
+                    ListView lv = (ListView) findViewById(R.id.lvChunks);
+                    lv.setVisibility(newState.isChunkListVisible() ? View.VISIBLE : View.INVISIBLE);
+                    oldVisibility=Optional.of(newState.isChunkListVisible());
                 }
 
-                for (MenuItem mi: playBackMenuItemsDisabled) {
-                    mi.setEnabled(!b);
-                }
-                for (MenuItem mi: playBackMenuItemsEnabled) {
-                    mi.setEnabled(b);
-                }
-
-                /*Cassette image animation*/
-                ImageView iv = findViewById(R.id.ivCassette);
-
-                if (newState) {
-                    iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation,null));
-                    AnimationDrawable ad = (AnimationDrawable)iv.getDrawable();
-                    ad.start();
-                }
-                else {
-                    iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_animation,null));
-                    if (iv.getDrawable() instanceof AnimationDrawable) {
-                        AnimationDrawable ad = (AnimationDrawable) iv.getDrawable();
-                        ad.stop();
-                    }
-                    iv.setImageDrawable(getResources().getDrawable(R.drawable.tape_inactive,null));
+                /*Handle progress*/
+                if (oldProgress.isEmpty() || oldProgress.get()!=newState.getProgressValue()) {
+                    getProgressBar().setProgress(newState.getProgressValue());
+                    oldProgress=Optional.of(newState.getProgressValue());
                 }
 
-                /*In any case, reset the progress bar*/
-                getProgressBar().setProgress(0);
-            }
-        });
-
-        /*Progress*/
-        viewModel.getProgressValue().observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer newProgressValue) {
-                ProgressBar pb = (ProgressBar)findViewById(R.id.pbProgress);
-                pb.setProgress(newProgressValue);
-            }
-        });
-
-        /*Tape image opened/not opened*/
-        viewModel.getCurrentTapeImageCrate().observe(this, new Observer<TapeImageCrate>() {
-            @Override
-            public void onChanged(TapeImageCrate newCrate) {
-
-                /*If there is nothing*/
-                if (newCrate.isEmpty()) {
-                    TextView tv = findViewById(R.id.tvTapeImageName);
-                    tv.setText("");
-                    setChunkDisplay(new ArrayList<>());
-                }
-                else {
-                    TextView tv = findViewById(R.id.tvTapeImageName);
-                    tv.setText(newCrate.getFileName());
-                    setChunkDisplay(newCrate.getConvCrate().getResumePoints());
+                /*Handle playback state, playing/not playing*/
+                if (newState.isPlaybackChanged()) {
+                    handlePlayerControls(isPlaying);
                 }
 
-            }
-        });
-
-        viewModel.getResumePointIp().observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer newResumeIp) {
-                updateDisplayedResumePoint(newResumeIp);
-            }
-        });
-
-        viewModel.getCasTaskAlert().observe(this,new Observer<CasTaskAlertCrate>() {
-            @Override
-            public void onChanged(CasTaskAlertCrate newAlertCrate) {
-                if (newAlertCrate!=null) {
-                    displayPostTaskAlert(R.string.msg_unable_to_process_tit, newAlertCrate.getMessage());
-                }
-            }
-        });
-
-        viewModel.getOpenAlert().observe(this, new Observer<OpenAlertCrate>() {
-            public void onChanged(OpenAlertCrate newAlertCrate) {
-                if (newAlertCrate!=null) {
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                        }
-                    });
-
-                    String primaryReasonString;
-                    int failureReson = newAlertCrate.getReason();
-
-                    if (failureReson == TapeImageOpener.ReadResult.FAILURE_NOT_TAPEIMAGE) {
-                        primaryReasonString = getString(R.string.msg_file_not_tape_image);
+                /*Handle tape image opened, not opened*/
+                if (newState.isCrateChanged()) {
+                    if (newState.getPlayerState() == MainViewModel.PlayerState.TAPE_READY || newState.getPlayerState() == MainViewModel.PlayerState.PLAYING) {
+                        TextView tv = findViewById(R.id.tvTapeImageName);
+                        tv.setText(newState.getCurrentTapeImageCrate().getFileName());
+                        setChunkDisplay(newState.getCurrentTapeImageCrate().getConvCrate().getResumePoints());
                     } else {
-                        primaryReasonString = getString(R.string.msg_file_unable_open);
+                        TextView tv = findViewById(R.id.tvTapeImageName);
+                        tv.setText("");
+                        setChunkDisplay(new ArrayList<>());
                     }
-                    builder.setMessage(String.format("%s%n%s", primaryReasonString, newAlertCrate.getDetails()));
-                    builder.setTitle(getString(R.string.msg_file_unable_open_tit));
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
                 }
+
+                /*Handle player resume point*/
+                if (isPlaying || newState.isPlaybackChanged() || newState.isCrateChanged()) {
+
+                    int playerIp = newState.getPlayerSelectedResumePointIp();
+
+                    if (oldPlayerResumeIp.isEmpty() || oldPlayerResumeIp.get()!=playerIp) {
+                        updatePlayerResumePoint(playerIp);
+                        oldPlayerResumeIp=Optional.of(playerIp);
+                    }
+                }
+
+                /*Handle user resume point*/
+                if (!isPlaying) {
+                    int userIp = newState.getUserSelectedResumePointIp();
+                    if (oldUserResumeIp.isEmpty() || oldUserResumeIp.get() != userIp) {
+                        updateUserSelectedResumePoint(userIp);
+                        oldUserResumeIp = Optional.of(userIp);
+                    }
+                }
+
+
+                /*Handle alerts*/
+                if (newState.getAlertType()!= MainViewModel.AlertType.NONE) {
+
+                    if (newState.getAlertType() == MainViewModel.AlertType.PLAYBACK_ERROR) {
+                        displaySimpleAlert(getString(R.string.msg_unable_to_process_tit), Utils.getExceptionMessage(newState.getAlertException()));
+                    } else if (newState.getAlertType() == MainViewModel.AlertType.CAS_UNREADABLE) {
+                        displaySimpleAlert(getString(R.string.msg_file_unable_open_tit), Utils.getExceptionMessage(newState.getAlertException()));
+                    } else if (newState.getAlertType() == MainViewModel.AlertType.PLAYER_EMPTY) {
+                        displaySimpleAlert(getString(R.string.msg_nothing_to_play_tit), getString(R.string.msg_nothing_to_play));
+                    }
+                }
+
             }
         });
+
     }
 
 
     public void onPlay(View v) {
-
-        /*Check if anything was selected*/
-        if (viewModel.getCurrentTapeImageCrate().getValue().isEmpty()) {
-            displaySimpleAlert(getString(R.string.msg_nothing_to_play_tit),getResources().getString(R.string.msg_nothing_to_play));
-            return;
-        }
-
-        /*Create new background task*/
-        Exception e = viewModel.startPlayback();
-        if (e!=null) {
-            displaySimpleAlert(getString(R.string.msg_unable_to_process_tit), Utils.getExceptionMessage(e));
-        }
+        viewModel.startPlayback();
     }
-
-
 
     private void setChunkDisplay(ArrayList<ResumePoint> resumePoints) {
 
-        ListView lv = (ListView)findViewById(R.id.lvChunks);
-        ResumePointAdapter rpa = new ResumePointAdapter(this,lv,resumePoints,0);
+        ListView lv = (ListView) findViewById(R.id.lvChunks);
+        ResumePointAdapter rpa = new ResumePointAdapter(this, lv, resumePoints, 0);
         lv.setAdapter(rpa);
         rpa.notifyDataSetChanged();
 
-        if (lv.getOnItemClickListener()==null) {
+        if (lv.getOnItemClickListener() == null) {
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    onClickChunks(adapterView,view,i,l);
+                    onClickChunks(adapterView, view, i, l);
                 }
             });
         }
@@ -300,11 +277,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickChunks(AdapterView<?> adapterView, View view, int i, long l) {
-        ListView lv = (ListView)adapterView;
+        ListView lv = (ListView) adapterView;
         ResumePointAdapter rpa = (ResumePointAdapter) lv.getAdapter();
-        ResumePoint p = (ResumePoint)rpa.getItem(i);
-        if (p!=null) {
-            viewModel.setResumePoint(p.getResumeIp());
+        ResumePoint p = (ResumePoint) rpa.getItem(i);
+        if (p != null) {
+            viewModel.setUserResumePoint(p.getResumeIp());
         }
     }
 
@@ -312,20 +289,21 @@ public class MainActivity extends AppCompatActivity {
 
         int stopReason;
 
-        if (v==findViewById(R.id.btnPause)) {
-            stopReason=STOP_REASON_PAUSE;
-        }
-        else {
-            stopReason=STOP_REASON_STOP;
+        if (v == findViewById(R.id.btnPause)) {
+            stopReason = STOP_REASON_PAUSE;
+        } else {
+            stopReason = STOP_REASON_STOP;
         }
 
         viewModel.stopPlayback(stopReason);
 
 
     }
+
     public void onSettings(MenuItem item) {
         doSettings();
     }
+
     public void doSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
         intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -362,45 +340,47 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void processBrowseResult(ActivityResult o) {
-        if (o.getResultCode()!=Activity.RESULT_OK || o.getData()==null || o.getData().getData()==null) return;
+        if (o.getResultCode() != Activity.RESULT_OK || o.getData() == null || o.getData().getData() == null)
+            return;
         openTapeImageUri(o.getData().getData());
 
     }
+
     private void processRecentsResult(ActivityResult o) {
 
-        if (o.getResultCode()!=Activity.RESULT_OK || o.getData()==null) return;
+        if (o.getResultCode() != Activity.RESULT_OK || o.getData() == null) return;
 
-            String recentString = o.getData().getStringExtra("recents");
-            if (recentString != null) {
-                this.viewModel.setTapeImageRecentsString(recentString);
-            }
+        String recentString = o.getData().getStringExtra("recents");
+        if (recentString != null) {
+            this.viewModel.setTapeImageRecentsString(recentString);
+        }
 
-            if (o.getData().getData()!=null) {
-                openTapeImageUri(o.getData().getData());
-            }
+        if (o.getData().getData() != null) {
+            openTapeImageUri(o.getData().getData());
+        }
     }
 
     private void openTapeImageUri(Uri uri) {
-        String fileName=null;
-        fileName=extractFileNameFromURI(uri);
-        viewModel.openTapeImageFromURI(uri,fileName);
+        String fileName = null;
+        fileName = extractFileNameFromURI(uri);
+        viewModel.openTapeImageFromURI(uri, fileName);
     }
 
     private void processSettingsResult(ActivityResult o) {
 
         /*Handle the settings activity*/
-        if (o.getResultCode() != Activity.RESULT_OK || o.getData()==null) return;
-        UserSettings us = IntentCompat.getSerializableExtra(o.getData(),"user_settings",UserSettings.class);
+        if (o.getResultCode() != Activity.RESULT_OK || o.getData() == null) return;
+        UserSettings us = IntentCompat.getSerializableExtra(o.getData(), "user_settings", UserSettings.class);
         this.viewModel.updateUserSettings(us);
     }
 
     private void processGoldiesResult(ActivityResult o) {
 
         /*Handle the Goldies Activity*/
-        if (o.getResultCode() != Activity.RESULT_OK || o.getData()==null) return;
+        if (o.getResultCode() != Activity.RESULT_OK || o.getData() == null) return;
 
         Intent intentData = o.getData();
-        viewModel.openTapeImageFromArray(intentData.getIntArrayExtra("tape_image_data"),intentData.getStringExtra("tape_image_name"));
+        viewModel.openTapeImageFromArray(intentData.getIntArrayExtra("tape_image_data"), intentData.getStringExtra("tape_image_name"));
 
     }
 
@@ -450,7 +430,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     private ProgressBar getProgressBar() {
         return findViewById(R.id.pbProgress);
     }
@@ -459,26 +438,31 @@ public class MainActivity extends AppCompatActivity {
         return findViewById(R.id.btnBrowse);
     }
 
-    public void displayPostTaskAlert(int titleId, String msg) {
-        displaySimpleAlert(getResources().getString(titleId),msg);
+
+    void updateUserSelectedResumePoint(int resumeIp) {
+        if (resumeIp == -1) return;
+        ListView lv = (ListView) findViewById(R.id.lvChunks);
+        ResumePointAdapter rpa = (ResumePointAdapter) lv.getAdapter();
+        if (rpa==null) return;
+        rpa.setUserResumePoint(resumeIp);
     }
 
-
-    void updateDisplayedResumePoint(int resumeIp) {
-        if (resumeIp==-1) return;
-        ListView lv = (ListView)findViewById(R.id.lvChunks);
-        ResumePointAdapter rpa = (ResumePointAdapter)lv.getAdapter();
-        rpa.setResumePoint(resumeIp);
+    void updatePlayerResumePoint(int resumeIp) {
+        if (resumeIp == -1) return;
+        ListView lv = (ListView) findViewById(R.id.lvChunks);
+        ResumePointAdapter rpa = (ResumePointAdapter) lv.getAdapter();
+        if (rpa==null) return;
+        rpa.setPlayerResumePoint(resumeIp);
     }
 
     private String extractFileNameFromURI(Uri uri) {
         String result = null;
 
         /*Let us have content URI*/
-        if (uri.getScheme()!=null && uri.getScheme().equals("content")) {
+        if (uri.getScheme() != null && uri.getScheme().equals("content")) {
             Cursor cursor = getContentResolver().query(uri, null, null, null, null);
             try {
-                if (cursor != null && cursor.moveToFirst() &&cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)>=0) {
+                if (cursor != null && cursor.moveToFirst() && cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME) >= 0) {
                     result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
                 }
             } finally {
@@ -501,6 +485,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.dismiss();
+                viewModel.dismissAlert();
             }
         });
 
@@ -509,13 +494,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onAbout(MenuItem mi) {
-        Toast.makeText(this,getString(R.string.toast_about),Toast.LENGTH_LONG).show();
+        Toast.makeText(this, getString(R.string.toast_about), Toast.LENGTH_LONG).show();
     }
 
     public void onExit(MenuItem mi) {
         finish();
     }
-
 
 
 }

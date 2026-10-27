@@ -9,7 +9,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.baktra.cas2audio.core.util.Utils;
 import com.baktra.cas2audio.features.player.domain.CasPlaybackHandler;
 import com.baktra.cas2audio.features.player.domain.CasPlaybackObserver;
 import com.baktra.cas2audio.features.recent.domain.TapeImageRecents;
@@ -21,58 +20,189 @@ import com.baktra.cas2audio.features.player.domain.tapeimage.TapeImageOpener;
 
 public class MainViewModel extends ViewModel implements CasPlaybackObserver {
 
-    /*User interface state*/
-    private MutableLiveData<TapeImageCrate> currentTapeImageCrate;
-    private MutableLiveData<Boolean> chunkListVisibility;
-    private MutableLiveData<Boolean> playBackState;
-    private MutableLiveData<Integer> resumePointIp;
-    private MutableLiveData<Integer> progressValue;
-    private SingleLiveEvent<CasTaskAlertCrate> casTaskAlert;
-    private SingleLiveEvent<OpenAlertCrate> openAlert;
-
 
     /*Repositories and services*/
     private SettingsRepository settingsRepository;
     private TapeImageOpener tapeImageOpener;
     private final CasPlaybackHandler casPlaybackHandler;
 
-
-    public MainViewModel(SettingsRepository settingsRepo,TapeImageOpener tiOpener,CasPlaybackHandler cpHandler) {
-        playBackState = new MutableLiveData<>(Boolean.FALSE);
-        progressValue = new MutableLiveData<>(0);
-        currentTapeImageCrate = new MutableLiveData<>(TapeImageCrate.getEmpty());
-        resumePointIp = new MutableLiveData<>(0);
-        chunkListVisibility =new MutableLiveData<>(Boolean.FALSE);
-        casTaskAlert = new SingleLiveEvent<>();
-        openAlert = new SingleLiveEvent<>();
-        settingsRepository=settingsRepo;
-        tapeImageOpener=tiOpener;
-        casPlaybackHandler = cpHandler;
-        loadPreferences();
+    enum PlayerState {
+        EMPTY,
+        TAPE_READY,
+        PLAYING,
     }
 
-    Exception startPlayback() {
-       try {
+    enum AlertType {
+        NONE,
+        CAS_UNREADABLE,
+        PLAYER_EMPTY,
+        PLAYBACK_ERROR
 
-           UserSettings us = getUserSettings();
+    }
+
+    protected class UIState {
+
+        private final PlayerState playerState;
+        private final int progressValue;
+        private final int playerSelectedResumePointIp;
+        private final int userSelectedResumePointIp;
+
+        private final TapeImageCrate currentTapeImageCrate;
+        private final boolean chunkListVisible;
+
+        private final AlertType alertType;
+        private final Throwable alertException;
+
+        private final boolean isCrateChanged;
+
+        private final boolean isPlaybackChanged;
+
+
+
+
+        public UIState(PlayerState playerState, int progressValue, int playerIp, int userIp, TapeImageCrate crate, boolean chunkListVisible, AlertType alertType, Throwable alertException, boolean isPlaybackChanged, boolean isCrateChanged) {
+            this.playerState = playerState;
+            this.progressValue = progressValue;
+            this.playerSelectedResumePointIp = playerIp;
+            this.userSelectedResumePointIp = userIp;
+            this.currentTapeImageCrate = crate;
+            this.chunkListVisible = chunkListVisible;
+            this.alertType = alertType;
+            this.alertException = alertException;
+            this.isCrateChanged = isCrateChanged;
+            this.isPlaybackChanged = isPlaybackChanged;
+        }
+
+        public PlayerState getPlayerState() {
+            return this.playerState;
+        }
+
+        public int getProgressValue() {
+            return this.progressValue;
+        }
+
+        public int getPlayerSelectedResumePointIp() {
+            return this.playerSelectedResumePointIp;
+        }
+
+        public int getUserSelectedResumePointIp() {
+            return this.userSelectedResumePointIp;
+        }
+
+        public boolean isChunkListVisible() {
+            return this.chunkListVisible;
+        }
+
+        public TapeImageCrate getCurrentTapeImageCrate() {
+            return this.currentTapeImageCrate;
+        }
+
+        public AlertType getAlertType() {
+            return this.alertType;
+        }
+
+        public Throwable getAlertException() {
+            return this.alertException;
+        }
+
+        public boolean isCrateChanged() {
+            return this.isCrateChanged;
+        }
+
+        public boolean isPlaybackChanged() {
+            return this.isPlaybackChanged;
+        }
+    }
+
+    /*User interface state*/
+    private MutableLiveData<UIState> uiState;
+
+
+    public MainViewModel(SettingsRepository settingsRepo, TapeImageOpener tiOpener, CasPlaybackHandler cpHandler) {
+        settingsRepository = settingsRepo;
+        tapeImageOpener = tiOpener;
+        casPlaybackHandler = cpHandler;
+        uiState = new MutableLiveData<>();
+        uiState.setValue(new UIState(PlayerState.EMPTY, 0, 0, 0, null, false, AlertType.NONE, null,true,true));
+        casPlaybackHandler.setObserver(this);
+        loadPreferences();
+
+    }
+
+    void startPlayback() {
+
+
+
+        if (uiState.getValue().playerState == PlayerState.EMPTY) {
+
+            /*Update UI state to ready, with error*/
+            UIState oldState = uiState.getValue();
+            UIState newState = new UIState
+                    (oldState.playerState,
+                            oldState.progressValue,
+                            oldState.playerSelectedResumePointIp,
+                            oldState.userSelectedResumePointIp,
+                            oldState.currentTapeImageCrate,
+                            oldState.chunkListVisible,
+                            AlertType.PLAYER_EMPTY,
+                            null,
+                            false,
+                            false
+                    );
+            uiState.setValue(newState);
+            return;
+        }
+
+        try {
+
+            UserSettings us = getUserSettings();
             getCasPlaybackHandler().prepare(
-                    currentTapeImageCrate.getValue().getConvCrate().getInstructions(),
-                    this,
+                    uiState.getValue().currentTapeImageCrate.getConvCrate().getInstructions(),
                     !us.isDoMono(),
                     us.isDoSquareWave(),
                     us.getAmplitude(),
-                    us.isDo48kHz()?48000:44100,
+                    us.isDo48kHz() ? 48000 : 44100,
                     us.isDoInvertPolarity(),
-                    resumePointIp.getValue()
-                    );
-       }
-       catch (Exception e) {
-           return e;
-       }
+                    uiState.getValue().userSelectedResumePointIp
+            );
+        } catch (Exception e) {
 
-       playBackState.setValue(true);
-       getCasPlaybackHandler().play();
-       return null;
+            /*Update UI state to ready, with error*/
+            UIState oldState = uiState.getValue();
+            UIState newState = new UIState
+                    (PlayerState.TAPE_READY,
+                            oldState.progressValue,
+                            oldState.playerSelectedResumePointIp,
+                            oldState.userSelectedResumePointIp,
+                            oldState.currentTapeImageCrate,
+                            oldState.chunkListVisible,
+                            AlertType.PLAYBACK_ERROR,
+                            e,
+                            false,
+                            false
+                    );
+            uiState.setValue(newState);
+            return;
+        }
+
+        /*Update UI state to playing*/
+        UIState oldState = uiState.getValue();
+        UIState newState = new UIState
+                (PlayerState.PLAYING,
+                        oldState.progressValue,
+                        oldState.playerSelectedResumePointIp,
+                        oldState.userSelectedResumePointIp,
+                        oldState.currentTapeImageCrate,
+                        oldState.chunkListVisible,
+                        AlertType.NONE,
+                        null,
+                        true,
+                        false
+                );
+        uiState.setValue(newState);
+
+        getCasPlaybackHandler().play();
+
 
     }
 
@@ -80,36 +210,72 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
         getCasPlaybackHandler().stop(reason);
     }
 
-    TapeImageOpener.ReadResult readTapeImage(Uri uri,int[] tapeImageBytes,String fileName) {
+    TapeImageOpener.ReadResult readTapeImage(Uri uri, int[] tapeImageBytes, String fileName) {
         UserSettings us = getSettingsRepository().getUserSettings();
-        return getTapeImageOpener().readTapeImage(uri,tapeImageBytes,us.isDo48kHz(),fileName);
+        return getTapeImageOpener().readTapeImage(uri, tapeImageBytes, us.isDo48kHz(), fileName);
     }
 
     public void onProgressUpdate(int value) {
-        this.progressValue.setValue(value);
+        UIState oldState = uiState.getValue();
+        UIState newState = new UIState
+                (oldState.playerState,
+                        value,
+                        oldState.playerSelectedResumePointIp,
+                        oldState.userSelectedResumePointIp,
+                        oldState.currentTapeImageCrate,
+                        oldState.chunkListVisible,
+                        oldState.alertType,
+                        oldState.alertException,
+                        false,
+                        false
+                );
+        uiState.setValue(newState);
     }
 
     public void onResumePointUpdate(int resumeIp) {
-        setResumePoint(resumeIp);
+
+        /*Check if possible*/
+        int newResumePoint = calculateResumePoint(resumeIp);
+
+        /*The player changes the resume IP*/
+        UIState oldState = uiState.getValue();
+        UIState newState = new UIState
+                (oldState.playerState,
+                        oldState.progressValue,
+                        newResumePoint,
+                        oldState.userSelectedResumePointIp,
+                        oldState.currentTapeImageCrate,
+                        oldState.chunkListVisible,
+                        oldState.alertType,
+                        oldState.alertException,
+                        false,
+                        false
+                );
+        uiState.setValue(newState);
+
     }
 
-    public void setResumePoint(int resumeIp) {
+    public void setUserResumePoint(int resumeIp) {
 
-        /*Always set to zero for an empty tape image or explicit zero resume point*/
-        if (resumeIp==0 || currentTapeImageCrate.getValue().isEmpty()) {
-            this.resumePointIp.setValue(0);
-            return;
-        }
 
-        /*Try getting the closest resume point*/
-        ResumePoint rp = ResumePoint.getClosestResumePoint(resumeIp,currentTapeImageCrate.getValue().getConvCrate().getResumePoints());
-        if (rp!=null) {
-            this.resumePointIp.setValue(rp.getResumeIp());
-        }
-        /*If not available, fall back to 0*/
-        else {
-            this.resumePointIp.setValue(0);
-        }
+        int newResumePoint = calculateResumePoint(resumeIp);
+
+        /*The user changes the resume IP*/
+        UIState oldState = uiState.getValue();
+        UIState newState = new UIState
+                (oldState.playerState,
+                        oldState.progressValue,
+                        oldState.playerSelectedResumePointIp,
+                        newResumePoint,
+                        oldState.currentTapeImageCrate,
+                        oldState.chunkListVisible,
+                        oldState.alertType,
+                        oldState.alertException,
+                        false,
+                        false
+                );
+        uiState.setValue(newState);
+
     }
 
 
@@ -118,41 +284,109 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
         /*Restore user settings*/
         getSettingsRepository().loadSettings();
         /*Update the UI*/
-        chunkListVisibility.setValue(getSettingsRepository().getUiPersistence().isChunkListVisible());
+        boolean chunkListVisibility = (getSettingsRepository().getUiPersistence().isChunkListVisible());
+
+        /*The user changes the resume IP*/
+        UIState oldState = uiState.getValue();
+        UIState newState = new UIState
+                (oldState.playerState,
+                        oldState.progressValue,
+                        oldState.playerSelectedResumePointIp,
+                        oldState.userSelectedResumePointIp,
+                        oldState.currentTapeImageCrate,
+                        chunkListVisibility,
+                        oldState.alertType,
+                        oldState.alertException,
+                        false,
+                        false
+                );
+        uiState.setValue(newState);
     }
 
     private void savePreferences() {
 
         /*Get state of the ui*/
-        getSettingsRepository().getUiPersistence().updateChunkListVisible(chunkListVisibility.getValue());
+        getSettingsRepository().getUiPersistence().updateChunkListVisible(uiState.getValue().chunkListVisible);
 
         /*Save settings*/
         getSettingsRepository().saveSettings();
     }
 
+    private int calculateResumePoint(int resumeIp) {
+        int newResumePoint = 0;
+        if (uiState.getValue().playerState == PlayerState.EMPTY) {
+            newResumePoint = 0;
+        } else {
+            ResumePoint rp = ResumePoint.getClosestResumePoint(resumeIp, uiState.getValue().currentTapeImageCrate.getConvCrate().getResumePoints());
+            if (rp != null) {
+                newResumePoint = rp.getResumeIp();
+            } else {
+                newResumePoint = 0;
+            }
+        }
 
+        return newResumePoint;
+    }
 
 
     public void onSuccessfulPlayback() {
-        playBackState.setValue(false);
-        setResumePoint(0);
+
+        UIState oldState = uiState.getValue();
+        UIState newState = new UIState
+                (PlayerState.TAPE_READY,
+                        oldState.progressValue,
+                        0,
+                        0,
+                        oldState.currentTapeImageCrate,
+                        oldState.chunkListVisible,
+                        oldState.alertType,
+                        oldState.alertException,
+                        true,
+                        false
+                );
+        uiState.setValue(newState);
     }
 
-    public void onCancelledPlayback(int resIp,int stopReason) {
-        playBackState.setValue(false);
-        if (stopReason==STOP_REASON_PAUSE) {
-            setResumePoint(resIp);
+    public void onCancelledPlayback(int resIp, int stopReason) {
+
+        int newResumePoint = 0;
+        if (stopReason == STOP_REASON_PAUSE) {
+            newResumePoint = calculateResumePoint(resIp);
+        } else {
+            newResumePoint = 0;
         }
-        else {
-            setResumePoint(0);
-        }
+        UIState oldState = uiState.getValue();
+        UIState newState = new UIState
+                (PlayerState.TAPE_READY,
+                        oldState.progressValue,
+                        newResumePoint,
+                        newResumePoint,
+                        oldState.currentTapeImageCrate,
+                        oldState.chunkListVisible,
+                        oldState.alertType,
+                        oldState.alertException,
+                        true,
+                        false
+                );
+        uiState.setValue(newState);
 
     }
 
     public void onFailedPlayback(Throwable e) {
-        playBackState.setValue(false);
-        setResumePoint(0);
-        casTaskAlert.setValue(new CasTaskAlertCrate(0, Utils.getExceptionMessage(e)));
+        UIState oldState = uiState.getValue();
+        UIState newState = new UIState
+                (PlayerState.TAPE_READY,
+                        oldState.progressValue,
+                        0,
+                        0,
+                        oldState.currentTapeImageCrate,
+                        oldState.chunkListVisible,
+                        oldState.alertType,
+                        oldState.alertException,
+                        true,
+                        false
+                );
+        uiState.setValue(newState);
     }
 
     UserSettings getUserSettings() {
@@ -171,85 +405,147 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
         getSettingsRepository().getTapeImageRecents().parsePersistenceString(s);
     }
 
-    void setCurrentTapeImageCrate(TapeImageCrate tic) {
-        currentTapeImageCrate.setValue(tic);
-        setResumePoint(0);
-    }
-
     public void flipChunkListVisibility() {
-        chunkListVisibility.setValue(!chunkListVisibility.getValue());
-    }
 
-    public LiveData<Boolean> getChunkListVisibility() {
-        return chunkListVisibility;
-    }
+        boolean newVisibility = !uiState.getValue().chunkListVisible;
+        UIState oldState = uiState.getValue();
+        UIState newState = new UIState
+                (oldState.playerState,
+                        oldState.progressValue,
+                        oldState.playerSelectedResumePointIp,
+                        oldState.userSelectedResumePointIp,
+                        oldState.currentTapeImageCrate,
+                        newVisibility,
+                        oldState.alertType,
+                        oldState.alertException,
+                        false,
+                        false
 
-    public LiveData<Boolean> getPlayBackState() {
-        return playBackState;
-    }
+                );
+        uiState.setValue(newState);
 
-    public LiveData<Integer> getProgressValue() {
-        return progressValue;
     }
-
-    public LiveData<TapeImageCrate> getCurrentTapeImageCrate() {return currentTapeImageCrate;}
-    public LiveData<Integer> getResumePointIp() {return resumePointIp;}
 
 
     @Override
     public void onCleared() {
+        super.onCleared();
         savePreferences();
         getCasPlaybackHandler().stop(STOP_REASON_TERMINATE);
+        getCasPlaybackHandler().removeObserver();
+    }
+
+    private void setEmptyState() {
+        UIState oldState = uiState.getValue();
+        UIState newState = new UIState
+                (PlayerState.EMPTY,
+                        oldState.progressValue,
+                        0,
+                        0,
+                        null,
+                        oldState.chunkListVisible,
+                        oldState.alertType,
+                        oldState.alertException,
+                        true,
+                        true
+                );
+        uiState.setValue(newState);
+    }
+
+    private void setEmptyStateWithError(AlertType alertType, Throwable alertException) {
+        UIState oldState = uiState.getValue();
+        UIState newState = new UIState
+                (PlayerState.EMPTY,
+                        oldState.progressValue,
+                        0,
+                        0,
+                        null,
+                        oldState.chunkListVisible,
+                        alertType,
+                        alertException,
+                        true,
+                        true
+                );
+        uiState.setValue(newState);
     }
 
     public void openTapeImageFromURI(Uri tapeImageUri, String fileName) {
 
         /*Open nothing*/
-        if (tapeImageUri==null) {
-            setCurrentTapeImageCrate(TapeImageCrate.getEmpty());
+        if (tapeImageUri == null) {
+            setEmptyState();
             return;
         }
 
         /*Try to open the tape image*/
-        TapeImageOpener.ReadResult result = readTapeImage(tapeImageUri,null,fileName);
-        processOpenedImage(result,false,tapeImageUri,fileName);
+        TapeImageOpener.ReadResult result = readTapeImage(tapeImageUri, null, fileName);
+        processOpenedImage(result, false, tapeImageUri, fileName);
 
     }
 
-    public void openTapeImageFromArray(int[] tapeImageBytes,String fileName) {
-        if (tapeImageBytes==null) {
-            setCurrentTapeImageCrate(TapeImageCrate.getEmpty());
+    public void openTapeImageFromArray(int[] tapeImageBytes, String fileName) {
+
+        if (tapeImageBytes == null) {
+            setEmptyState();
             return;
         }
 
-        TapeImageOpener.ReadResult result = readTapeImage(null,tapeImageBytes,fileName);
-        processOpenedImage(result,false,null,fileName);
+        TapeImageOpener.ReadResult result = readTapeImage(null, tapeImageBytes, fileName);
+        processOpenedImage(result, false, null, fileName);
     }
 
-    private void processOpenedImage(TapeImageOpener.ReadResult result, boolean addToRecents,Uri tapeImageUri,String fileName) {
-        /*If successfull, add to recents*/
+    private void processOpenedImage(TapeImageOpener.ReadResult result, boolean addToRecents, Uri tapeImageUri, String fileName) {
+        /*If successful, add to recents*/
         if (result.isSuccess()) {
-            setCurrentTapeImageCrate(result.getTapeImageCrate());
-            if (addToRecents && tapeImageUri!=null) {
+            if (addToRecents && tapeImageUri != null) {
                 getTapeImageRecents().addRecentItem(tapeImageUri, fileName);
             }
+            UIState oldState = uiState.getValue();
+            UIState newState = new UIState
+                    (PlayerState.TAPE_READY,
+                            oldState.progressValue,
+                            0,
+                            0,
+                            result.getTapeImageCrate(),
+                            oldState.chunkListVisible,
+                            AlertType.NONE,
+                            null,
+                            false,
+                            true
+                    );
+            uiState.setValue(newState);
         }
         /*Otherwise, set up for just "empty" tape image*/
         else {
-            /*The player has an empt tape image*/
-            setCurrentTapeImageCrate(TapeImageCrate.getEmpty());
-            /*Tell the user by scheduling an alert*/
-            openAlert.setValue(new OpenAlertCrate(result.getFailureNature(), Utils.getExceptionMessage(result.getException())));
+            setEmptyStateWithError(AlertType.CAS_UNREADABLE, result.getException());
         }
     }
 
+    public void dismissAlert() {
+        UIState oldState = uiState.getValue();
+        UIState newState = new UIState
+                (oldState.playerState,
+                        oldState.progressValue,
+                        oldState.playerSelectedResumePointIp,
+                        oldState.userSelectedResumePointIp,
+                        oldState.currentTapeImageCrate,
+                        oldState.chunkListVisible,
+                        AlertType.NONE,
+                        null,
+                        false,
+                        false
+                );
+        uiState.setValue(newState);
+    }
 
-    public LiveData<OpenAlertCrate> getOpenAlert() {
-        return openAlert;
+    public boolean isPlaying() {
+        return uiState.getValue().playerState == PlayerState.PLAYING;
     }
-    public SingleLiveEvent<CasTaskAlertCrate> getCasTaskAlert() {
-        return this.casTaskAlert;
+
+    public LiveData<UIState> getUIState() {
+        return this.uiState;
     }
+
 
     private SettingsRepository getSettingsRepository() {
         return settingsRepository;
@@ -259,7 +555,9 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
         return tapeImageOpener;
     }
 
-    public CasPlaybackHandler getCasPlaybackHandler() {
+    private CasPlaybackHandler getCasPlaybackHandler() {
         return this.casPlaybackHandler;
     }
+
+
 }

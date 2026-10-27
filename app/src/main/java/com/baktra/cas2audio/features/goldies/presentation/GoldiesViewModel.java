@@ -45,7 +45,7 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
                 this.currentItems=null;
             }
 
-            if (tapeSystems==null) {
+            if (tapeSystems!=null) {
                 ArrayList<TapeSystem> curSystemsCopy = new ArrayList<>();
                 curSystemsCopy.addAll(tapeSystems);
                 this.tapeSystems = Collections.unmodifiableList(curSystemsCopy);

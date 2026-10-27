@@ -13,29 +13,38 @@ public class CasPlaybackHandler {
 
     private final Optional<PowerManager> powerManager;
 
-
     private Optional<CasTask> casTask;
     private Optional<Future<Void>> taskFuture;
 
-    public static final int STOP_REASON_STOP=0;
-    public static final int STOP_REASON_PAUSE=1;
-    public static final int STOP_REASON_TERMINATE=2;
+    public static final int STOP_REASON_STOP = 0;
+    public static final int STOP_REASON_PAUSE = 1;
+    public static final int STOP_REASON_TERMINATE = 2;
 
     private CasPlaybackObserver observer;
+    private ExecutorService executorService;
 
     public CasPlaybackHandler(Optional<PowerManager> pm) {
         this.powerManager = pm;
         clearTask();
+        this.executorService = Executors.newSingleThreadExecutor();
+    }
+
+    public void setObserver(final CasPlaybackObserver observer) {
+        this.observer = observer;
+    }
+
+    public void removeObserver() {
+        this.observer = null;
     }
 
     private void clearTask() {
-        casTask=Optional.empty();
-        taskFuture=Optional.empty();
+        casTask = Optional.empty();
+        taskFuture = Optional.empty();
     }
 
-    public void prepare(int[] instructions, CasPlaybackObserver observer, boolean stereo, boolean square, int volume, int sampleRate, boolean invertPolarity, int resumeIp) throws Exception{
+    public void prepare(int[] instructions, boolean stereo, boolean square, int volume, int sampleRate, boolean invertPolarity, int resumeIp) throws Exception {
 
-        this.observer=observer;
+        this.observer = observer;
 
         try {
             casTask = Optional.of(new CasTask(
@@ -50,15 +59,14 @@ public class CasPlaybackHandler {
                     powerManager
             ));
         } catch (Exception e) {
-           clearTask();
+            clearTask();
             throw e;
         }
     }
 
     public void play() {
         if (casTask.isPresent()) {
-            ExecutorService es = Executors.newSingleThreadExecutor();
-            taskFuture=Optional.of(es.submit(casTask.get()));
+            taskFuture = Optional.of(executorService.submit(casTask.get()));
         }
     }
 
@@ -79,18 +87,20 @@ public class CasPlaybackHandler {
         publishPlaybackSuccess();
     }
 
-    public void processCancellation(int resumeIp,int stopReason) {
+    public void processCancellation(int resumeIp, int stopReason) {
         clearTask();
-        publishPlaybackCancellation(resumeIp,stopReason);
+        publishPlaybackCancellation(resumeIp, stopReason);
     }
 
     public void processFailure(Throwable e) {
-       clearTask();
+        clearTask();
         publishPlaybackFailure(e);
     }
 
 
     public void publishProgress(Integer progress, Integer resumeIp) {
+
+        if (observer == null) return;
 
         Looper mainLooper = Looper.getMainLooper();
         Handler mainHandler = new Handler(mainLooper);
@@ -107,6 +117,9 @@ public class CasPlaybackHandler {
     }
 
     public void publishPlaybackFailure(Throwable e) {
+
+        if (observer == null) return;
+
         Looper mainLooper = Looper.getMainLooper();
         Handler mainHandler = new Handler(mainLooper);
 
@@ -120,6 +133,9 @@ public class CasPlaybackHandler {
 
     public void publishPlaybackSuccess() {
 
+
+        if (observer == null) return;
+
         Looper mainLooper = Looper.getMainLooper();
         Handler mainHandler = new Handler(mainLooper);
 
@@ -131,13 +147,16 @@ public class CasPlaybackHandler {
 
     }
 
-    public void publishPlaybackCancellation(int resumeIp,int stopReason) {
+    public void publishPlaybackCancellation(int resumeIp, int stopReason) {
+
+        if (observer == null) return;
+
         Looper mainLooper = Looper.getMainLooper();
         Handler mainHandler = new Handler(mainLooper);
 
         mainHandler.post(new Runnable() {
             public void run() {
-                observer.onCancelledPlayback(resumeIp,stopReason);
+                observer.onCancelledPlayback(resumeIp, stopReason);
             }
         });
     }

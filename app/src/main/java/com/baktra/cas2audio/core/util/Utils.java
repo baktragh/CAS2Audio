@@ -5,6 +5,9 @@ public class Utils {
 
 
     public static String getExceptionMessage(Throwable ex) {
+
+        if (ex==null) return "";
+
         StringBuilder sb = new StringBuilder(128);
         sb.append(ex.getClass().getSimpleName());
         String m = ex.getMessage();

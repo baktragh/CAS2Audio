@@ -120,16 +120,23 @@ public class ResumePointAdapter extends BaseAdapter {
         }
     }
 
-    public void setResumePoint(int ip) {
+    public void setUserResumePoint(int ip) {
 
-        ResumePoint rp = ResumePoint.getClosestResumePoint(ip,resumePoints);
-        if (rp==null) return;
-
-        currentResumePointIndex=rp.getIndex();
+        ResumePoint rp = ResumePoint.getClosestResumePoint(ip, resumePoints);
+        if (rp == null) return;
+        currentSelectedIndex = rp.getIndex();
 
         /*Notify for the change*/
-        currentSelectedIndex = currentResumePointIndex;
         notifyDataSetChanged();
+    }
+
+    public void setPlayerResumePoint(int ip) {
+
+        ResumePoint rp = ResumePoint.getClosestResumePoint(ip, resumePoints);
+        if (rp == null) return;
+
+        currentSelectedIndex = rp.getIndex();
+        currentResumePointIndex = rp.getIndex();
 
         if (currentSelectedIndex < parentView.getFirstVisiblePosition() || currentSelectedIndex > parentView.getLastVisiblePosition()) {
             /*Programmatic selection, scroll to two items above, when possible*/
@@ -138,7 +145,12 @@ public class ResumePointAdapter extends BaseAdapter {
             parentView.setSelection(selectionIndex);
         }
 
+        notifyDataSetChanged();
+
     }
 
 
 }
+
+
+
