@@ -138,6 +138,8 @@ public class ResumePointAdapter extends BaseAdapter {
         currentSelectedIndex = rp.getIndex();
         currentResumePointIndex = rp.getIndex();
 
+        notifyDataSetChanged();
+
         if (currentSelectedIndex < parentView.getFirstVisiblePosition() || currentSelectedIndex > parentView.getLastVisiblePosition()) {
             /*Programmatic selection, scroll to two items above, when possible*/
             int selectionIndex = currentSelectedIndex - 2;
@@ -145,7 +147,7 @@ public class ResumePointAdapter extends BaseAdapter {
             parentView.setSelection(selectionIndex);
         }
 
-        notifyDataSetChanged();
+
 
     }
 
