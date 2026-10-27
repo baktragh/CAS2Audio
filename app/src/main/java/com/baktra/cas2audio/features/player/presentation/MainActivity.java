@@ -170,6 +170,9 @@ public class MainActivity extends AppCompatActivity {
     private Optional<Integer> oldPlayerResumeIp = Optional.empty();
     private Optional<Integer> oldUserResumeIp = Optional.empty();
 
+    private Optional<MainViewModel.PlayerState> oldPlayerState = Optional.empty();
+    private Optional<TapeImageCrate> oldCrate = Optional.empty();
+
     private void setupModelObservers() {
 
 
@@ -178,6 +181,10 @@ public class MainActivity extends AppCompatActivity {
             public void onChanged(MainViewModel.UIState newState) {
 
                 boolean isPlaying = (newState.getPlayerState() == MainViewModel.PlayerState.PLAYING);
+
+                boolean playbackChanged=false;
+                boolean crateChanged=false;
+
 
                 /*Handle chunk list visibility*/
 
@@ -194,12 +201,14 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 /*Handle playback state, playing/not playing*/
-                if (newState.isPlaybackChanged()) {
+                if (oldPlayerState.isEmpty() || oldPlayerState.get()!=newState.getPlayerState()) {
                     handlePlayerControls(isPlaying);
+                    oldPlayerState=Optional.of(newState.getPlayerState());
+                    playbackChanged=true;
                 }
 
                 /*Handle tape image opened, not opened*/
-                if (newState.isCrateChanged()) {
+                if (oldCrate.isEmpty() || oldCrate.get()!=newState.getCurrentTapeImageCrate()) {
                     if (newState.getPlayerState() == MainViewModel.PlayerState.TAPE_READY || newState.getPlayerState() == MainViewModel.PlayerState.PLAYING) {
                         TextView tv = findViewById(R.id.tvTapeImageName);
                         tv.setText(newState.getCurrentTapeImageCrate().getFileName());
@@ -209,10 +218,12 @@ public class MainActivity extends AppCompatActivity {
                         tv.setText("");
                         setChunkDisplay(new ArrayList<>());
                     }
+                    oldCrate=Optional.ofNullable(newState.getCurrentTapeImageCrate());
+                    crateChanged=true;
                 }
 
                 /*Handle player resume point*/
-                if (isPlaying || newState.isPlaybackChanged() || newState.isCrateChanged()) {
+                if (isPlaying || playbackChanged || crateChanged) {
 
                     int playerIp = newState.getPlayerSelectedResumePointIp();
 
@@ -466,7 +477,9 @@ public class MainActivity extends AppCompatActivity {
                     result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
                 }
             } finally {
-                cursor.close();
+                if (cursor!=null){
+                    cursor.close();
+                }
             }
         }
         /*If not content URI, consider it a file*/

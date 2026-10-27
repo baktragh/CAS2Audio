@@ -53,14 +53,8 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
         private final AlertType alertType;
         private final Throwable alertException;
 
-        private final boolean isCrateChanged;
 
-        private final boolean isPlaybackChanged;
-
-
-
-
-        public UIState(PlayerState playerState, int progressValue, int playerIp, int userIp, TapeImageCrate crate, boolean chunkListVisible, AlertType alertType, Throwable alertException, boolean isPlaybackChanged, boolean isCrateChanged) {
+        public UIState(PlayerState playerState, int progressValue, int playerIp, int userIp, TapeImageCrate crate, boolean chunkListVisible, AlertType alertType, Throwable alertException) {
             this.playerState = playerState;
             this.progressValue = progressValue;
             this.playerSelectedResumePointIp = playerIp;
@@ -69,8 +63,6 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
             this.chunkListVisible = chunkListVisible;
             this.alertType = alertType;
             this.alertException = alertException;
-            this.isCrateChanged = isCrateChanged;
-            this.isPlaybackChanged = isPlaybackChanged;
         }
 
         public PlayerState getPlayerState() {
@@ -105,13 +97,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
             return this.alertException;
         }
 
-        public boolean isCrateChanged() {
-            return this.isCrateChanged;
-        }
 
-        public boolean isPlaybackChanged() {
-            return this.isPlaybackChanged;
-        }
     }
 
     /*User interface state*/
@@ -123,7 +109,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
         tapeImageOpener = tiOpener;
         casPlaybackHandler = cpHandler;
         uiState = new MutableLiveData<>();
-        uiState.setValue(new UIState(PlayerState.EMPTY, 0, 0, 0, null, false, AlertType.NONE, null,true,true));
+        uiState.setValue(new UIState(PlayerState.EMPTY, 0, 0, 0, null, false, AlertType.NONE, null));
         casPlaybackHandler.setObserver(this);
         loadPreferences();
 
@@ -145,9 +131,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
                             oldState.currentTapeImageCrate,
                             oldState.chunkListVisible,
                             AlertType.PLAYER_EMPTY,
-                            null,
-                            false,
-                            false
+                            null
                     );
             uiState.setValue(newState);
             return;
@@ -177,9 +161,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
                             oldState.currentTapeImageCrate,
                             oldState.chunkListVisible,
                             AlertType.PLAYBACK_ERROR,
-                            e,
-                            false,
-                            false
+                            e
                     );
             uiState.setValue(newState);
             return;
@@ -195,9 +177,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
                         oldState.currentTapeImageCrate,
                         oldState.chunkListVisible,
                         AlertType.NONE,
-                        null,
-                        true,
-                        false
+                        null
                 );
         uiState.setValue(newState);
 
@@ -225,9 +205,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
                         oldState.currentTapeImageCrate,
                         oldState.chunkListVisible,
                         oldState.alertType,
-                        oldState.alertException,
-                        false,
-                        false
+                        oldState.alertException
                 );
         uiState.setValue(newState);
     }
@@ -247,9 +225,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
                         oldState.currentTapeImageCrate,
                         oldState.chunkListVisible,
                         oldState.alertType,
-                        oldState.alertException,
-                        false,
-                        false
+                        oldState.alertException
                 );
         uiState.setValue(newState);
 
@@ -270,9 +246,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
                         oldState.currentTapeImageCrate,
                         oldState.chunkListVisible,
                         oldState.alertType,
-                        oldState.alertException,
-                        false,
-                        false
+                        oldState.alertException
                 );
         uiState.setValue(newState);
 
@@ -296,9 +270,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
                         oldState.currentTapeImageCrate,
                         chunkListVisibility,
                         oldState.alertType,
-                        oldState.alertException,
-                        false,
-                        false
+                        oldState.alertException
                 );
         uiState.setValue(newState);
     }
@@ -334,15 +306,13 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
         UIState oldState = uiState.getValue();
         UIState newState = new UIState
                 (PlayerState.TAPE_READY,
-                        oldState.progressValue,
+                        0,
                         0,
                         0,
                         oldState.currentTapeImageCrate,
                         oldState.chunkListVisible,
                         oldState.alertType,
-                        oldState.alertException,
-                        true,
-                        false
+                        oldState.alertException
                 );
         uiState.setValue(newState);
     }
@@ -358,15 +328,13 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
         UIState oldState = uiState.getValue();
         UIState newState = new UIState
                 (PlayerState.TAPE_READY,
-                        oldState.progressValue,
+                        0,
                         newResumePoint,
                         newResumePoint,
                         oldState.currentTapeImageCrate,
                         oldState.chunkListVisible,
                         oldState.alertType,
-                        oldState.alertException,
-                        true,
-                        false
+                        oldState.alertException
                 );
         uiState.setValue(newState);
 
@@ -376,15 +344,13 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
         UIState oldState = uiState.getValue();
         UIState newState = new UIState
                 (PlayerState.TAPE_READY,
-                        oldState.progressValue,
+                        0,
                         0,
                         0,
                         oldState.currentTapeImageCrate,
                         oldState.chunkListVisible,
                         oldState.alertType,
-                        oldState.alertException,
-                        true,
-                        false
+                        oldState.alertException
                 );
         uiState.setValue(newState);
     }
@@ -417,9 +383,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
                         oldState.currentTapeImageCrate,
                         newVisibility,
                         oldState.alertType,
-                        oldState.alertException,
-                        false,
-                        false
+                        oldState.alertException
 
                 );
         uiState.setValue(newState);
@@ -445,9 +409,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
                         null,
                         oldState.chunkListVisible,
                         oldState.alertType,
-                        oldState.alertException,
-                        true,
-                        true
+                        oldState.alertException
                 );
         uiState.setValue(newState);
     }
@@ -462,9 +424,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
                         null,
                         oldState.chunkListVisible,
                         alertType,
-                        alertException,
-                        true,
-                        true
+                        alertException
                 );
         uiState.setValue(newState);
     }
@@ -509,9 +469,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
                             result.getTapeImageCrate(),
                             oldState.chunkListVisible,
                             AlertType.NONE,
-                            null,
-                            false,
-                            true
+                            null
                     );
             uiState.setValue(newState);
         }
@@ -531,9 +489,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
                         oldState.currentTapeImageCrate,
                         oldState.chunkListVisible,
                         AlertType.NONE,
-                        null,
-                        false,
-                        false
+                        null
                 );
         uiState.setValue(newState);
     }
