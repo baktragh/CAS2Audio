@@ -9,6 +9,7 @@ import com.baktra.cas2audio.features.goldies.domain.GoldiesRepositoryObserver;
 import com.baktra.cas2audio.features.goldies.domain.TapeSystem;
 import com.baktra.cas2audio.features.settings.repository.SettingsRepository;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +30,30 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
         private final TapeSystem currentTapeSystem;
         private final List<String> currentItems;
         private final List<TapeSystem> tapeSystems;
-        private Exception failureException;
+        private final Exception failureException;
 
         public UIState(MainState mainState, TapeSystem currentTapeSystem, List<String> currentItems,List<TapeSystem> tapeSystems,Exception failureException) {
             this.mainState=mainState;
             this.currentTapeSystem=currentTapeSystem;
-            this.currentItems=(currentItems==null?currentItems:Collections.unmodifiableList(currentItems));
-            this.tapeSystems=(tapeSystems==null?tapeSystems:Collections.unmodifiableList(tapeSystems));
+
+            if (currentItems!=null) {
+                ArrayList<String> curItemsCopy = new ArrayList<>();
+                curItemsCopy.addAll(currentItems);
+                this.currentItems=Collections.unmodifiableList(curItemsCopy);
+            }
+            else {
+                this.currentItems=null;
+            }
+
+            if (tapeSystems==null) {
+                ArrayList<TapeSystem> curSystemsCopy = new ArrayList<>();
+                curSystemsCopy.addAll(tapeSystems);
+                this.tapeSystems = Collections.unmodifiableList(curSystemsCopy);
+            }
+            else {
+                this.tapeSystems=null;
+            }
+
             this.failureException=failureException;
         }
 
@@ -72,6 +90,7 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
 
     public GoldiesViewModel(GoldiesRepository goldiesRepo, SettingsRepository settingsRepo) {
         this.goldiesRepo=goldiesRepo;
+        goldiesRepo.setObserver(this);
         this.uiState = new MutableLiveData<>(new UIState(MainState.EMPTY,null,null,null));
         this.currentMap=null;
         this.settingsRepo=settingsRepo;
@@ -81,7 +100,7 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
     }
 
     public void reDisplay() {
-        goldiesRepo.displayRepository(this,true);
+        goldiesRepo.displayRepository(true);
     }
 
     @Override
@@ -155,6 +174,8 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
 
     public void updateCurrentTapeSystem(TapeSystem newSystem) {
 
+        if (currentMap==null) return;
+
         List<String> lItems = currentMap.get(newSystem);
         UIState newState = new UIState(MainState.LIST_POPULATED, newSystem, lItems,goldiesRepo.getTapeSystems());
         uiState.setValue(newState);
@@ -172,17 +193,20 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
     public void initiateRefresh() {
         UIState newState = new UIState(MainState.ZIP_DOWNLOADING,null,null,null,null);
         uiState.setValue(newState);
-        goldiesRepo.refresh(this);
+        goldiesRepo.refresh();
     }
 
-
+    @Override
     public void onCleared() {
+        super.onCleared();
+
         TapeSystem lastSystem = uiState.getValue().getCurrentTapeSystem();
         if (lastSystem!=null) {
            goldiesRepo.saveLastSystem(lastSystem);
         }
-
         cancelBackgroundTasks();
+        goldiesRepo.removeObserver();
+
     }
 
     public void cancelBackgroundTasks() {

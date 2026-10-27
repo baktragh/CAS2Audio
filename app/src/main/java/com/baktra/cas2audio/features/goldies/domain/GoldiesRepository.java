@@ -48,6 +48,9 @@ public class GoldiesRepository {
 
     private Future<Integer> currentFuture;
 
+    private GoldiesRepositoryObserver currentObserver;
+
+
     public GoldiesRepository(File localDirectory, SharedPreferences prefs) {
         this.localDirectory=localDirectory;
         repoMap = new HashMap<>();
@@ -56,9 +59,18 @@ public class GoldiesRepository {
         this.zipDirty=true;
         this.prefs=prefs;
         this.currentFuture=null;
+        this.currentObserver=null;
     }
 
-    public void displayRepository(GoldiesRepositoryObserver observer,boolean force) {
+    public void setObserver(GoldiesRepositoryObserver observer) {
+        this.currentObserver=observer;
+    }
+
+    public void removeObserver() {
+        this.currentObserver=null;
+    }
+
+    public void displayRepository(boolean force) {
 
         if (force) {
             zipDirty=true;
@@ -69,14 +81,20 @@ public class GoldiesRepository {
             try {
                 processZip();
                 zipDirty=false;
-                observer.onDisplay(repoMap,tapeSystems);
+                if (currentObserver!=null) {
+                    currentObserver.onDisplay(repoMap, tapeSystems);
+                }
             }
             catch (Exception e) {
                 if (e instanceof FileNotFoundException) {
-                    observer.onFailedRead(ZIP_NOT_PRESENT,e);
+                    if (currentObserver!=null) {
+                        currentObserver.onFailedRead(ZIP_NOT_PRESENT, e);
+                    }
                 }
                 else {
-                    observer.onFailedRead(ZIP_CORRUPTED,e);
+                    if (currentObserver!=null) {
+                        currentObserver.onFailedRead(ZIP_CORRUPTED, e);
+                    }
                 }
             }
         }
@@ -217,7 +235,7 @@ public class GoldiesRepository {
         return  prefs.getString("c2a_goldies_last_system","");
     }
 
-    public void refresh(GoldiesRepositoryObserver observer) {
+    public void refresh() {
 
         if (currentFuture!=null) return;
 
@@ -285,7 +303,9 @@ public class GoldiesRepository {
                     Handler h = new Handler(Looper.getMainLooper());
                     h.post(new Runnable() {
                         public void run() {
-                            observer.onFailedRefresh(totalException);
+                            if (currentObserver!=null) {
+                                currentObserver.onFailedRefresh(totalException);
+                            }
                         }
                     });
                     currentFuture=null;
@@ -295,7 +315,9 @@ public class GoldiesRepository {
                 Handler h = new Handler(Looper.getMainLooper());
                 h.post(new Runnable() {
                     public void run() {
-                        observer.onSuccessfullRefresh();
+                        if (currentObserver!=null) {
+                            currentObserver.onSuccessfullRefresh();
+                        }
                     }
                 });
                 currentFuture=null;
