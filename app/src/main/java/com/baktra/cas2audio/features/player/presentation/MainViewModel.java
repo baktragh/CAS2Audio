@@ -282,6 +282,8 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
 
         /*Save settings*/
         getSettingsRepository().saveSettings();
+
+
     }
 
     private int calculateResumePoint(int resumeIp) {
@@ -439,7 +441,7 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
 
         /*Try to open the tape image*/
         TapeImageOpener.ReadResult result = readTapeImage(tapeImageUri, null, fileName);
-        processOpenedImage(result, false, tapeImageUri, fileName);
+        processOpenedImage(result, true, tapeImageUri, fileName);
 
     }
 

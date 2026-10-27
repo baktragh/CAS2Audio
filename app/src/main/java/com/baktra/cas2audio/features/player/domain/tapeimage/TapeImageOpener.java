@@ -7,7 +7,7 @@ import android.net.Uri;
 import com.baktra.cas2audio.features.player.domain.ConversionCrate;
 import com.baktra.cas2audio.core.util.FileFormatException;
 import com.baktra.cas2audio.core.util.Utils;
-import com.baktra.cas2audio.features.player.domain.tapeimagefile.TapeImage;
+import com.baktra.cas2audio.features.player.domain.tapeimagefile.TapeImageFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -60,7 +60,7 @@ public class TapeImageOpener {
         try  {
 
 
-            TapeImage ti = new TapeImage();
+            TapeImageFile ti = new TapeImageFile();
 
             /*Read from URI*/
             if (uri!=null) {

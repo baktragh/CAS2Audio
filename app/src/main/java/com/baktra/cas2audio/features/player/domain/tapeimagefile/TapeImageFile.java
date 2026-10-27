@@ -6,12 +6,12 @@ import com.baktra.cas2audio.features.player.domain.tapeimage.TapeImageProcessor;
 import java.io.*;
 import java.util.*;
 
-public final class TapeImage {
+public final class TapeImageFile {
 
     private final ArrayList<TapeImageChunk> chunkList;
     
 
-    public TapeImage() {
+    public TapeImageFile() {
         chunkList = new ArrayList<>(32);
         
     }

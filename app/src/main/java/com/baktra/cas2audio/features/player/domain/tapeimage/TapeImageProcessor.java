@@ -8,7 +8,7 @@ import com.baktra.cas2audio.features.player.domain.tapeimagefile.DataChunk;
 import com.baktra.cas2audio.features.player.domain.tapeimagefile.FSKChunk;
 import com.baktra.cas2audio.features.player.domain.tapeimagefile.FujiChunk;
 import com.baktra.cas2audio.features.player.domain.tapeimagefile.PWMChunk;
-import com.baktra.cas2audio.features.player.domain.tapeimagefile.TapeImage;
+import com.baktra.cas2audio.features.player.domain.tapeimagefile.TapeImageFile;
 import com.baktra.cas2audio.features.player.domain.tapeimagefile.TapeImageChunk;
 
 public class TapeImageProcessor {
@@ -19,7 +19,7 @@ public class TapeImageProcessor {
     }
 
     /*Convert tape image to the signal generator instructions*/
-    public ConversionCrate convertItem(TapeImage ti, int sampleRate) throws Exception {
+    public ConversionCrate convertItem(TapeImageFile ti, int sampleRate) throws Exception {
 
         ConversionCrate crate = new ConversionCrate();
         InstructionStream is = new InstructionStream();
