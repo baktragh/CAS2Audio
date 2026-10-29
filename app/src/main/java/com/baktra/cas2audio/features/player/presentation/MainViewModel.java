@@ -351,8 +351,8 @@ public class MainViewModel extends ViewModel implements CasPlaybackObserver {
                         0,
                         oldState.currentTapeImageCrate,
                         oldState.chunkListVisible,
-                        oldState.alertType,
-                        oldState.alertException
+                        AlertType.PLAYBACK_ERROR,
+                        e
                 );
         uiState.setValue(newState);
     }
