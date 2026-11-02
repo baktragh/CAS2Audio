@@ -9,6 +9,10 @@ Play back tape images for 8-bit Atari computers on mobile devices with Android.
 * CAS2Audio is a satellite project of TURGEN - <https://turgen.sourceforge.io/>,
 a tool for creating Atari tapes
 
+### Screenshots
+
+![Screenshot 1](c2a_shot1.png) ![Screenshot 2](c2a_shot2.png) ![Screenshot 3](c2a_shot3.png)
+
 ### Highlights
 
 * Simple, easy to use user interface with easy access to the recently selected tape images
@@ -17,22 +21,24 @@ a tool for creating Atari tapes
 * You can pause the playback and resume from any tape image chunk
 * The signal is generated on-the-fly (no temporary wave files are needed)
 * Displays animated cassette during playback
-* Since version 1.0.8, full support for landscape screen format
-* Since version 1.0.9, full support for live screen rotation and color scheme changes
+* Full support for landscape screen format and live screen rotation and color scheme changes 
+* Goldies archive. Quick access to tape images of popular games from the past. 
 
-### Quick Start
+## Quick Start
 
 You need an 8-bit Atari computer, data recorder, cassette adapter, and a smartphone running Android.
 
 * Install CAS2Audio on your smartphone running Android
-* Download some tape images (.CAS files) to your smartphone
+* Open the app, select the Goldies function and then select the Refresh button. This will automatically download a small
+archive of tape images with popular games. Select the game of your choice, e.g. River Raid. This will open the respective tape image.
 * Connect your data recorder to the Atari computer
 * Insert a cassette adapter in the data recorder and connect the cassette adapter to the headphone
   jack of your smartphone
 * Prepare the Atari computer to load data
 * Press PLAY on your data recorder
-* Open your tape image in the CAS2Audio and click the PLAY button
 * Press a key on your computer to begin the loading
+* Select the PLAY button in the CAS2Audio app.
+* The computer will load the game
 
 ## Technical information
 
@@ -59,8 +65,6 @@ At least Android 12.0 (API 31) is required to run the most recent version
 * Read only access to storage
 * Wake lock (to prevent the device from sleeping when playing back)
 
-## Screenshot
+### Goldies
 
-![Screenshot](c2a_shot1.png)
-
-![Screenshot](c2a_shot2.png)
+* The Goldies archive is downloaded from https://baktra.wz.cz/packages/goldies.zip
