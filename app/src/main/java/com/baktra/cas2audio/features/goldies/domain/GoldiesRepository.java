@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -144,9 +145,24 @@ public class GoldiesRepository {
             /*Place the entry name there*/
             repoMap.get(tsForEntry).add(entryNameFile.getName());
         }
-
         zipFile.close();
 
+        /*Sort the entries lexicographically*/
+        sortEntries();
+    }
+
+    private void sortEntries() {
+
+        for(TapeSystem oneSystem:tapeSystems) {
+            List<String> names = repoMap.get(oneSystem);
+
+            names.sort(new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    return o1.compareTo(o2);
+                }
+            });
+        }
 
     }
 
