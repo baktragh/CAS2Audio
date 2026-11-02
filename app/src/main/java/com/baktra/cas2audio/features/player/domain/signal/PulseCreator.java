@@ -6,81 +6,25 @@ package com.baktra.cas2audio.features.player.domain.signal;
  */
 class PulseCreator {
 
-    /**
-     *
-     */
     public static final int IDX_BAUDRATE = 0;
 
-    /**
-     *
-     */
     public static final int IDX_HEAD = 1;
 
-    /**
-     *
-     */
     public static final int IDX_LONG = 2;
 
-    /**
-     *
-     */
     public static final int IDX_SHORT = 3;
 
-    /**
-     *
-     */
     public static final int IDX_SYNC = 4;
 
-    /**
-     *
-     */
     private static final int SPECIAL_NONE = 0;
 
-    /**
-     *
-     */
     public static final int SPECIAL_SILENCE = 1;
 
-    /**
-     *
-     */
     public static final int SPECIAL_LOW = 2;
 
-    /**
-     *
-     */
     public static final int SPECIAL_HIGH = 3;
 
-    /**
-     * Pilot tone prolongation, number of pulses increases with transfer speed
-     *
-     * @param newWidth New transfer speed
-     * @param origWidth Base transfer speed
-     * @param numPulses Number of pilot tone pulses for base transfer speed
-     * @return Number of pilot tone pulses after prolongation
-     */
-    public static int prolongatePilotTone(int numPulses, int origWidth, int newWidth) {
 
-        double origTime = origWidth * (double) numPulses;
-        double newPulses = origTime / (double) newWidth;
-        return (int) Math.round(newPulses);
-    }
-
-    /**
-     * Create pulse
-     *
-     * @param channels Number of channels
-     * @param volume Volume (in percent)
-     * @param width Pulse width
-     * @param bits Bits per sample
-     * @param signed Signed or unsigned
-     * @param pulseType Type of pulse
-     * @param polarity Polarity of the pulse
-     * @param rightOnly Signal in the right channel only
-     * @param harmonic Which harmonic to use. 0 Rectangular pulse, 1 Sine wave,
-     * other - nth harmonic, -1 auto
-     * @return Array with samples
-     */
     public static byte[] createPulse(int channels, int volume, int width, int bits, boolean signed, int pulseType, int polarity, boolean rightOnly, int harmonic) {
 
         /*Harmonic pulses only for non-specials*/

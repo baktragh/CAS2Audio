@@ -277,8 +277,6 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-        //System.out.println("onItemSelected()");
-
         if (parent==findViewById(R.id.spSystems)) {
             viewModel.updateCurrentTapeSystem((TapeSystem)parent.getSelectedItem());
         }
@@ -288,8 +286,6 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-        //System.out.println("onItemClick()");
 
         if (parent==findViewById(R.id.lvGoldies)) {
 

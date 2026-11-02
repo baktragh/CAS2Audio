@@ -480,9 +480,15 @@ public class MainActivity extends AppCompatActivity {
             Cursor cursor = getContentResolver().query(uri, null, null, null, null);
             try {
                 if (cursor != null && cursor.moveToFirst() && cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME) >= 0) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                    result = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
                 }
-            } finally {
+
+            }
+            catch(IllegalArgumentException e) {
+                result=null;
+            }
+
+            finally {
                 if (cursor!=null){
                     cursor.close();
                 }

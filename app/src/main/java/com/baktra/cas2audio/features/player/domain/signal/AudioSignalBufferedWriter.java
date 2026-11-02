@@ -26,51 +26,24 @@ public class AudioSignalBufferedWriter implements SignalWriter {
     private final int numChannels;
     private final int bitsPerSample;
 
-    /**
-     *
-     */
     private AudioTrack track;
 
-    /*private final AudioFormat audioFormat;*/
 
-    /**
-     *
-     */
     private final int bufferSize;
 
-    /**
-     *
-     */
     private int terminationSignalCounter;
 
-    /**
-     *
-     */
     private byte[] terminationSignal;
 
-    /**
-     *
-     */
     private final int bitShift;
 
-    /**
-     *
-     */
     private long numSamples;
 
-    /**
-     *  @param bitsPerSample
-     * @param channels
-     * @param bufferSize
-     * @param sampleRate
-     * @param terminalSilence
-     */
     public AudioSignalBufferedWriter(int bitsPerSample, int channels, int bufferSize, int sampleRate, int terminalSilence) {
         this.bufferSize = bufferSize;
 
         /* Audio format - new style*/
         /*audioFormat = getAudioFormat(sampleRate,bitsPerSample.channels);*/
-
 
         terminationSignalCounter = -1;
         terminationSignal = null;

@@ -164,7 +164,7 @@ public class SignalGenerator implements SampleConsumer {
         SILENCE_SHORT = PulseCreator.createPulse(cChannels, cPulseVolume, cSampleRate / 10, cBits, cSigned, 1, 1, cSignalInRightChannelOnly, 0);
         BLOCKSEP = PulseCreator.createPulse(cChannels, cPulseVolume, cSampleRate / 44, cBits, cSigned, 1, 1, cSignalInRightChannelOnly, 0);
 
-        /*Reasonable default pieces of signal*/
+        /*Reusable signals*/
         if (!cInvertPolarity) {
             LOW_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_LOW, SignalGenerator.FLAG_POLARITY_01, cSignalInRightChannelOnly, 0);
             HIGH_SAMPLE = PulseCreator.createPulse(cChannels, cPulseVolume, 1, cBits, cSigned, PulseCreator.SPECIAL_HIGH, SignalGenerator.FLAG_POLARITY_01, cSignalInRightChannelOnly, 0);
@@ -178,7 +178,6 @@ public class SignalGenerator implements SampleConsumer {
     }
 
     public void run() throws Exception {
-
 
         /*Prepare for output*/
         prepare();

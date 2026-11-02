@@ -1,21 +1,11 @@
 package com.baktra.cas2audio.features.player.domain.signal;
 
-/**
- *
- * @author  
- */
 public class Double2SampleFactory {
 
     private final Double2Sample[] classArray = new Double2Sample[8];
 
-    /**
-     *
-     */
     final float amplitudeMultiplier;
 
-    /**
-     *
-     */
     final boolean rightOnly;
 
     Double2SampleFactory(int amplitude, boolean rightOnly) {
@@ -32,13 +22,6 @@ public class Double2SampleFactory {
         this.rightOnly = rightOnly;
     }
 
-    /**
-     *
-     * @param signed
-     * @param bitsPerSample
-     * @param numChannels
-     * @return
-     */
     public Double2Sample getDouble2Sample(boolean signed, int bitsPerSample, int numChannels) {
 
         int index = 0;

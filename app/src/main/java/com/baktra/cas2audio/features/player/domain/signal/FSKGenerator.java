@@ -2,9 +2,6 @@ package com.baktra.cas2audio.features.player.domain.signal;
 
 import com.baktra.cas2audio.features.player.domain.CasTask;
 
-/**
- * FSK generator Supports standard FSK tape system Lookup table based.
- */
 class FSKGenerator {
 
     private static final int MARK_FREQUENCY = 5_327;
@@ -13,16 +10,10 @@ class FSKGenerator {
     private final int SPACE_DEGREES_PER_SAMPLE; 
     private final int sampleRate;
 
-    /**
-     *
-     */
     private final int samplesPerMarkOrSpace;
     private final int byteMultiplier;
     private byte[][] sampleSineTable;
 
-    /**
-     *
-     */
     private final SampleConsumer consumer;
     private final Double2Sample f2s;
 
@@ -31,17 +22,6 @@ class FSKGenerator {
 
     private CasTask parentTask;
 
-    /**
-     * Create new FSK generator
-     *
-     * @param baudRate Baud rate
-     * @param signed Signed samples
-     * @param numChannels Number of channels
-     * @param bitsPerSample Bits per sample (8 or 16)
-     * @param c Consumer of the generated samples
-     * @param amplitude Signal amplitude
-     * @param rightOnly Signal in right channel only
-     */
     public FSKGenerator(int baudRate, boolean signed, int numChannels, int bitsPerSample, SampleConsumer c, int amplitude, boolean rightOnly, int sampleRate, CasTask parentTask) {
 
         this.consumer = c;
@@ -63,12 +43,6 @@ class FSKGenerator {
 
     }
 
-    /**
-     * Generate inter-record gap
-     *
-     * @param millis Duration in milliseconds
-     * @throws Exception
-     */
     public void generateIRG(int millis) throws Exception {
 
         /*Total number of samples for mark tone*/
@@ -89,12 +63,7 @@ class FSKGenerator {
 
     }
 
-    /**
-     * Generate block of data
-     *
-     * @param data Data
-     * @throws Exception
-     */
+
     public void generateData(int[] data) throws Exception {
 
         int dataByte;
@@ -108,8 +77,6 @@ class FSKGenerator {
             }
 
             dataByte = data[i];
-
-
 
             /*Start bit*/
             generateMarkOrSpace(SPACE_DEGREES_PER_SAMPLE,i);
@@ -133,12 +100,6 @@ class FSKGenerator {
 
     }
 
-    /**
-     * Generate mark or space
-     *
-     * @param degreesPerSample How many degrees per sample
-     * @throws Exception
-     */
     private void generateMarkOrSpace(int degreesPerSample,int dataIndex) throws Exception {
 
         for (int i = 0; i < samplesPerMarkOrSpace; i++) {
@@ -151,9 +112,6 @@ class FSKGenerator {
 
     }
 
-    /**
-     * Generate 0 and 1
-     */
     void generateFSK(int[] durations, int offset, int length) throws Exception {
 
         int maxIndex = offset + length;
@@ -190,9 +148,6 @@ class FSKGenerator {
         angle = 0;
     }
 
-    /**
-     * Pre-calculate lookup table
-     */
     private void createSineTable() {
 
         /*Allocate table*/
