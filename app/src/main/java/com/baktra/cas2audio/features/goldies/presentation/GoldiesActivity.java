@@ -22,6 +22,7 @@ import com.baktra.cas2audio.R;
 import com.baktra.cas2audio.core.util.Utils;
 import com.baktra.cas2audio.features.goldies.domain.TapeSystem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GoldiesActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,AdapterView.OnItemClickListener {
@@ -78,10 +79,10 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
                 if (newState.getMainState() == GoldiesViewModel.MainState.EMPTY) {
 
                     String[] itemsArr = new String[0];
-                    TapeSystem[] systemsArr = new TapeSystem[0];
+                    ArrayList<TapeSystem> systemsArr = new ArrayList<>();
 
                     lv.setAdapter(new ArrayAdapter<String>(GoldiesActivity.this, R.layout.goldies_item, itemsArr));
-                    spSystems.setAdapter(new ArrayAdapter<TapeSystem>(GoldiesActivity.this, R.layout.goldies_item, systemsArr));
+                    spSystems.setAdapter(new GoldiesSystemAdapter(GoldiesActivity.this, R.layout.goldies_system_item, systemsArr));
 
                     lv.setEnabled(false);
                     spSystems.setEnabled(false);
@@ -99,10 +100,11 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
                 else if (newState.getMainState() == GoldiesViewModel.MainState.ZIP_DOWNLOADING) {
 
                     String[] itemsArr = new String[0];
-                    TapeSystem[] systemsArr = new TapeSystem[0];
+                    ArrayList<TapeSystem> systemsArr = new ArrayList<>();
 
                     lv.setAdapter(new ArrayAdapter<String>(GoldiesActivity.this, R.layout.goldies_item, itemsArr));
-                    spSystems.setAdapter(new ArrayAdapter<TapeSystem>(GoldiesActivity.this, R.layout.goldies_item, systemsArr));
+                    spSystems.setAdapter(new GoldiesSystemAdapter(GoldiesActivity.this, R.layout.goldies_system_item, systemsArr));
+
 
                     lv.setEnabled(false);
                     spSystems.setEnabled(false);
@@ -118,14 +120,15 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
                 else if (newState.getMainState() == GoldiesViewModel.MainState.ZIP_DOWNLOAD_FAILED) {
 
                     String[] itemsArr = new String[0];
-                    TapeSystem[] systemsArr = new TapeSystem[0];
+                    ArrayList<TapeSystem> systemsArr = new ArrayList<>();
 
                     String msg = getString(R.string.goldies_zip_download_failed) +
                             "\n" +
                             Utils.getExceptionMessage(newState.getFailureException());
 
                     lv.setAdapter(new ArrayAdapter<String>(GoldiesActivity.this, R.layout.goldies_item, itemsArr));
-                    spSystems.setAdapter(new ArrayAdapter<TapeSystem>(GoldiesActivity.this, R.layout.goldies_item, systemsArr));
+                    spSystems.setAdapter(new GoldiesSystemAdapter(GoldiesActivity.this, R.layout.goldies_system_item, systemsArr));
+
 
                     lv.setEnabled(false);
                     spSystems.setEnabled(false);
@@ -139,7 +142,7 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
                 * refresh button is enabled, so that the ZIP can be re-downloaded*/
                 else if (newState.getMainState() == GoldiesViewModel.MainState.ZIP_NOT_PRESENT_OR_CORRUPT) {
                     String[] itemsArr = new String[0];
-                    TapeSystem[] systemsArr = new TapeSystem[0];
+                    ArrayList<TapeSystem> systemsArr = new ArrayList<>();
 
 
                     String msg = getString(R.string.goldies_zip_absent_or_corrupt) +
@@ -147,7 +150,8 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
                                 Utils.getExceptionMessage(newState.getFailureException());
 
                     lv.setAdapter(new ArrayAdapter<String>(GoldiesActivity.this, R.layout.goldies_item, itemsArr));
-                    spSystems.setAdapter(new ArrayAdapter<TapeSystem>(GoldiesActivity.this, R.layout.goldies_item, systemsArr));
+                    spSystems.setAdapter(new GoldiesSystemAdapter(GoldiesActivity.this, R.layout.goldies_system_item, systemsArr));
+
 
                     lv.setEnabled(false);
                     spSystems.setEnabled(false);
@@ -170,10 +174,9 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
 
                     /*Redisplay the Systems, but only when the list has changed*/
                     if (!isSystemListSame(spSystems, newState.getTapeSystems())) {
-                        TapeSystem[] systemsArr = new TapeSystem[0];
-                        systemsArr = newState.getTapeSystems().toArray(systemsArr);
+                        List<TapeSystem> systemsArr = newState.getTapeSystems();
 
-                        ArrayAdapter<TapeSystem> systemAdapter = new ArrayAdapter<TapeSystem>(GoldiesActivity.this, R.layout.goldies_item, systemsArr);
+                        GoldiesSystemAdapter systemAdapter = new GoldiesSystemAdapter(GoldiesActivity.this, R.layout.goldies_system_item, systemsArr);
                         spSystems.setAdapter(systemAdapter);
                         int selPosition = systemAdapter.getPosition(newState.getCurrentTapeSystem());
                         spSystems.setSelection(selPosition);
@@ -192,10 +195,10 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
                 /*Unknown state (should never happen)*/
                 else {
                     String[] itemsArr = new String[0];
-                    TapeSystem[] systemsArr = new TapeSystem[0];
+                    ArrayList<TapeSystem> systemsArr = new ArrayList<>();
 
                     lv.setAdapter(new ArrayAdapter<String>(GoldiesActivity.this, R.layout.goldies_item, itemsArr));
-                    spSystems.setAdapter(new ArrayAdapter<TapeSystem>(GoldiesActivity.this, R.layout.goldies_item, systemsArr));
+                    spSystems.setAdapter(new GoldiesSystemAdapter(GoldiesActivity.this, R.layout.goldies_system_item, systemsArr));
 
                     lv.setEnabled(false);
                     spSystems.setEnabled(false);
