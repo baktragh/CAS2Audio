@@ -40,6 +40,13 @@
 
         </LinearLayout>
 
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_weight="0"
+            android:background="?android:attr/listDivider" />
+
         <LinearLayout
             android:id="@+id/llMessage"
             android:layout_width="match_parent"

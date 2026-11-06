@@ -1,23 +1,16 @@
 package com.baktra.cas2audio.features.goldies.presentation;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewTreeLifecycleOwner;
-
 import com.baktra.cas2audio.R;
 import com.baktra.cas2audio.features.goldies.domain.TapeSystem;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class GoldiesSystemAdapter extends BaseAdapter {
@@ -68,8 +61,6 @@ public class GoldiesSystemAdapter extends BaseAdapter {
 
         TextView tv = listItemView.findViewById(R.id.tvSystemName);
         ImageView  iv = listItemView.findViewById(R.id.ivSystemCountry);
-
-        System.out.println("Hello"+tapeSystem);
 
         if (tapeSystem==null) {
             tv.setText("");
