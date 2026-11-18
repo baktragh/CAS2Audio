@@ -1,92 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/sw48kHz"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:padding="8dp"
+        android:text="@string/lbl_48kHz" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/swChannels"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:padding="8dp"
+        android:text="@string/lbl_mono" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/swSquareWave"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:padding="8dp"
+        android:text="@string/lbl_square" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/swInvertPulses"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:padding="8dp"
+        android:text="@string/lbl_invert_polarity" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <TextView
+            style="@android:style/Widget.Material.TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/lbl_amplitude"
+            android:textColor="?android:attr/textColorPrimary" />
+
+        <SeekBar
+            android:id="@+id/sbAmplitude"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:max="9"
+            android:min="2"
+            android:minHeight="48dp"
+            android:progress="5"
+            android:tickMark="@android:drawable/dark_header" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
 
-        <Switch
-            android:id="@+id/sw48kHz"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/btnDefaults"
+            style="@style/Widget.AppCompat.Button"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="@string/lbl_48kHz" />
+            android:layout_weight="0"
+            android:onClick="onDefaults"
+            android:text="@string/btn_defaults" />
 
-        <Switch
-            android:id="@+id/swChannels"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/btnConfirm"
+            style="@style/Widget.AppCompat.Button"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:padding="8dp"
-            android:text="@string/lbl_mono" />
+            android:layout_weight="0"
+            android:onClick="onConfirm"
+            android:text="@string/btn_confirm" />
 
-        <Switch
-            android:id="@+id/swSquareWave"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="@string/lbl_square" />
-
-        <Switch
-            android:id="@+id/swInvertPulses"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="@string/lbl_invert_polarity" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:padding="8dp">
-
-            <TextView
-                style="@android:style/Widget.Material.TextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/lbl_amplitude"
-                android:textColor="?android:attr/textColorPrimary"
-                tools:text="@string/lbl_amplitude" />
-
-            <SeekBar
-                android:id="@+id/sbAmplitude"
-                style="@style/Widget.AppCompat.SeekBar.Discrete"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:max="9"
-                android:min="2"
-                android:progress="5"
-                android:tickMark="@android:drawable/dark_header" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnDefaults"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:onClick="onDefaults"
-                android:text="@string/btn_defaults" />
-
-            <Button
-                android:id="@+id/btnConfirm"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:onClick="onConfirm"
-                android:text="@string/btn_confirm" />
-
-        </LinearLayout>
     </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

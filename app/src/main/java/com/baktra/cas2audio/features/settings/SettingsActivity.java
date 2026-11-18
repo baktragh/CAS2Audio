@@ -5,9 +5,10 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.SeekBar;
-import android.widget.Switch;
+
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.IntentCompat;
 
 import com.baktra.cas2audio.R;
@@ -54,10 +55,10 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void setUI() {
 
-        Switch s48Khz = findViewById(R.id.sw48kHz);
-        Switch sMono = findViewById(R.id.swChannels);
-        Switch sInvertPulses = findViewById(R.id.swInvertPulses);
-        Switch sSquare = findViewById(R.id.swSquareWave);
+        SwitchCompat s48Khz = findViewById(R.id.sw48kHz);
+        SwitchCompat sMono = findViewById(R.id.swChannels);
+        SwitchCompat sInvertPulses = findViewById(R.id.swInvertPulses);
+        SwitchCompat sSquare = findViewById(R.id.swSquareWave);
         SeekBar sbAmplitude = findViewById(R.id.sbAmplitude);
 
         s48Khz.setChecked(userSettings.isDo48kHz());
@@ -69,10 +70,10 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void flushUIToSettings() {
-        Switch s48Khz = findViewById(R.id.sw48kHz);
-        Switch sMono = findViewById(R.id.swChannels);
-        Switch sInvertPulses = findViewById(R.id.swInvertPulses);
-        Switch sSquare = findViewById(R.id.swSquareWave);
+        SwitchCompat s48Khz = findViewById(R.id.sw48kHz);
+        SwitchCompat sMono = findViewById(R.id.swChannels);
+        SwitchCompat sInvertPulses = findViewById(R.id.swInvertPulses);
+        SwitchCompat sSquare = findViewById(R.id.swSquareWave);
         SeekBar sbAmplitude = findViewById(R.id.sbAmplitude);
 
         userSettings.setDo48kHz(s48Khz.isChecked());

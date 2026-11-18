@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         setupModelObservers();
 
         /*Set the title*/
-        setTitle("CAS2Audio 1.1.1");
+        setTitle("CAS2Audio 1.1.2");
 
         /*Initialize launchers*/
         initializeLaunchers();
