@@ -142,7 +142,8 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
 
         /*If no current system, try getting from the persistence data*/
         if (oldTapeSystem==null) {
-           newTapeSystem=getPersistedTapeSystem(tapeSystems);
+           newTapeSystem= getPersistedSelectedTapeSystem(tapeSystems);
+
         }
         /*Otherwise, use it*/
         else {
@@ -150,7 +151,7 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
         }
 
         /*Fall back to the first in the list*/
-        if (newTapeSystem==null) {
+        if (newTapeSystem==null || tapeSystems.indexOf(newTapeSystem)==-1) {
             newTapeSystem = tapeSystems.get(0);
         }
 
@@ -161,7 +162,7 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
         uiState.setValue(newState);
     }
 
-    private TapeSystem getPersistedTapeSystem(List<TapeSystem> tapeSystems) {
+    private TapeSystem getPersistedSelectedTapeSystem(List<TapeSystem> tapeSystems) {
         if (!savedTapeSystemName.isEmpty()) {
             for (TapeSystem oneSystem: tapeSystems) {
                 if (oneSystem.getName().equals(savedTapeSystemName)) {
@@ -170,6 +171,12 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
             }
         }
         return null;
+    }
+
+    private void persistSelectedTapeSystem(TapeSystem ts) {
+        if (ts==null) return;
+        savedTapeSystemName=ts.getName();
+        goldiesRepo.saveLastSystem(uiState.getValue().getCurrentTapeSystem());
     }
 
     public void updateCurrentTapeSystem(TapeSystem newSystem) {
@@ -191,6 +198,7 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
     }
 
     public void initiateRefresh() {
+        persistSelectedTapeSystem(uiState.getValue().getCurrentTapeSystem());
         UIState newState = new UIState(MainState.ZIP_DOWNLOADING,null,null,null,null);
         uiState.setValue(newState);
         goldiesRepo.refresh();
@@ -201,9 +209,7 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
         super.onCleared();
 
         TapeSystem lastSystem = uiState.getValue().getCurrentTapeSystem();
-        if (lastSystem!=null) {
-           goldiesRepo.saveLastSystem(lastSystem);
-        }
+        persistSelectedTapeSystem(lastSystem);
         cancelBackgroundTasks();
         goldiesRepo.removeObserver();
 
