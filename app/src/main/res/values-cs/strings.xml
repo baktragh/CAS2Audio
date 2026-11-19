@@ -43,4 +43,7 @@
     <string name="goldies_downloading">Stahuje se...</string>
     <string name="btn_dismiss">Zavřít</string>
 
+    <string name="show_changelog">Seznam změn</string>
+    <string name="empty_changelog">Seznam změn není k dispozici</string>
+
 </resources>

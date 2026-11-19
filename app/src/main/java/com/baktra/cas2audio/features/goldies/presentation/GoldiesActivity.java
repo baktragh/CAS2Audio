@@ -2,6 +2,8 @@ package com.baktra.cas2audio.features.goldies.presentation;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -28,6 +30,7 @@ import java.util.List;
 public class GoldiesActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener,AdapterView.OnItemClickListener {
 
     private GoldiesViewModel viewModel;
+    private boolean showChangeLogEnabled;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,7 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
         GoldiesViewModelFactory factory = new GoldiesViewModelFactory(c2aApp.getGoldiesRepository(), c2aApp.getSettingsRepository());
 
         setTitle(getString(R.string.goldies));
+        showChangeLogEnabled=true;
 
 
         viewModel = new ViewModelProvider(this,factory).get(GoldiesViewModel.class);
@@ -49,7 +53,24 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
     @Override
     protected void onDestroy() {
         viewModel.cancelBackgroundTasks();
+        closeOptionsMenu();
         super.onDestroy();
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.goldies_menu, menu);
+        MenuItem mi1 = menu.findItem(R.id.miShowChangeLog);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem saveItem = menu.findItem(R.id.miShowChangeLog);
+        if (saveItem != null) {
+            saveItem.setEnabled(showChangeLogEnabled);
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -63,6 +84,10 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
         }
     }
 
+    public void onShowChangeLog(MenuItem item) {
+        viewModel.showChangeLog();
+    }
+
     private void setupModelObservers() {
         /*Chunk list visibility*/
         viewModel.getUIState().observe(this, new Observer<GoldiesViewModel.UIState>() {
@@ -71,8 +96,8 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
 
                 ListView lv = (ListView) findViewById(R.id.lvGoldies);
                 Spinner spSystems = (Spinner) findViewById(R.id.spSystems);
-
                 ImageButton btnRefresh = (ImageButton)findViewById(R.id.btnRefresh);
+                showChangeLogEnabled=true;
 
                 /*For an empty state, display just everything empty.
                 * The user can select the refresh button to download the archive*/
@@ -108,7 +133,7 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
 
                     lv.setEnabled(false);
                     spSystems.setEnabled(false);
-                    btnRefresh.setActivated(false);
+                    btnRefresh.setEnabled(false);
 
                     setMessageBarVisible(true,false,getString(R.string.goldies_downloading));
 
@@ -190,6 +215,27 @@ public class GoldiesActivity extends AppCompatActivity implements AdapterView.On
 
 
                     setMessageBarVisible(false, false, null);
+                }
+
+                /*Display changelog state*/
+                else if (newState.getMainState() == GoldiesViewModel.MainState.DISPLAY_CHANGELOG) {
+                    String[] itemsArr = new String[0];
+                    ArrayList<TapeSystem> systemsArr = new ArrayList<>();
+
+                    String msg = newState.getChangeLog();
+                    if (msg.isEmpty()) {
+                        msg = getString(R.string.empty_changelog);
+                    }
+
+                    lv.setAdapter(new ArrayAdapter<String>(GoldiesActivity.this, R.layout.goldies_item, itemsArr));
+                    spSystems.setAdapter(new GoldiesSystemAdapter(GoldiesActivity.this, R.layout.goldies_system_item, systemsArr));
+
+                    lv.setEnabled(false);
+                    spSystems.setEnabled(false);
+                    btnRefresh.setEnabled(false);
+                    showChangeLogEnabled=false;
+
+                    setMessageBarVisible(true,true,msg);
                 }
 
                 /*Unknown state (should never happen)*/

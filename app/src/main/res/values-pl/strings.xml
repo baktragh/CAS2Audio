@@ -45,4 +45,7 @@
     <string name="goldies_downloading">Ściąganie...</string>
     <string name="btn_dismiss">Zamknij</string>
 
+    <string name="show_changelog">Lista zmian</string>
+    <string name="empty_changelog">Lista zmian jest niedostępna</string>
+
 </resources>

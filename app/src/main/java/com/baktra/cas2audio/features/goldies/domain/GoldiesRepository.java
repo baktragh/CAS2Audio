@@ -44,6 +44,8 @@ public class GoldiesRepository {
     private Map<String,TapeSystem> dir2SystemMap;
     private List<TapeSystem> tapeSystems;
 
+    private String changeLog;
+
     private final SharedPreferences prefs;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -61,6 +63,7 @@ public class GoldiesRepository {
         this.prefs=prefs;
         this.currentFuture=null;
         this.currentObserver=null;
+        this.changeLog="";
     }
 
     public void setObserver(GoldiesRepositoryObserver observer) {
@@ -115,6 +118,7 @@ public class GoldiesRepository {
         ZipFile zipFile = new ZipFile(f);
 
         processMapEntry(zipFile);
+        processChangeLogEntry(zipFile);
 
         /*Get all entries*/
         Enumeration<ZipEntry> allEntries = (Enumeration<ZipEntry>) zipFile.entries();
@@ -199,6 +203,35 @@ public class GoldiesRepository {
         }
         catch (Exception e) {
             throw new IOException("Error when processing mapfile: "+ Utils.getExceptionMessage(e));
+        }
+    }
+
+    private void processChangeLogEntry(ZipFile zipFile) {
+
+        StringBuilder sb = new StringBuilder();
+        String ln = System.lineSeparator();
+
+        try {
+            /*Get the changelog*/
+            ZipEntry mapFileEntry = zipFile.getEntry("changelog.txt");
+            InputStream isMap = zipFile.getInputStream(mapFileEntry);
+            InputStreamReader isrMap = new InputStreamReader(isMap);
+            BufferedReader brMap = new BufferedReader(isrMap);
+
+            String line;
+            while ((line = brMap.readLine()) != null) {
+                line = line.trim();
+                sb.append(line);
+                sb.append(ln);
+            }
+
+            changeLog=sb.toString();
+
+            brMap.close();
+            isrMap.close();
+            isMap.close();
+        } catch (Exception e) {
+            changeLog="";
         }
     }
 
@@ -348,6 +381,10 @@ public class GoldiesRepository {
     public void cancelRefresh() {
         if (currentFuture==null) return;
         currentFuture.cancel(true);
+    }
+
+    public String getChangeLog() {
+        return changeLog;
     }
 
 

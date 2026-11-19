@@ -22,7 +22,9 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
         ZIP_NOT_PRESENT_OR_CORRUPT,
         ZIP_DOWNLOAD_FAILED,
         LIST_POPULATED,
-        ZIP_DOWNLOADING
+        ZIP_DOWNLOADING,
+        DISPLAY_CHANGELOG
+
     }
     protected static class UIState {
 
@@ -31,8 +33,9 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
         private final List<String> currentItems;
         private final List<TapeSystem> tapeSystems;
         private final Exception failureException;
+        private final String changeLog;
 
-        public UIState(MainState mainState, TapeSystem currentTapeSystem, List<String> currentItems,List<TapeSystem> tapeSystems,Exception failureException) {
+        public UIState(MainState mainState, TapeSystem currentTapeSystem, List<String> currentItems,List<TapeSystem> tapeSystems,Exception failureException,String changeLog) {
             this.mainState=mainState;
             this.currentTapeSystem=currentTapeSystem;
 
@@ -55,10 +58,11 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
             }
 
             this.failureException=failureException;
+            this.changeLog=changeLog;
         }
 
         public UIState(MainState mainState, TapeSystem currentTapeSystem, List<String> currentItems,List<TapeSystem> tapeSystems) {
-            this(mainState,currentTapeSystem,currentItems,tapeSystems,null);
+            this(mainState,currentTapeSystem,currentItems,tapeSystems,null,null);
         }
 
         public MainState getMainState() {
@@ -78,6 +82,10 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
 
         public Exception getFailureException() {
             return failureException;
+        }
+
+        public String getChangeLog() {
+            return changeLog;
         }
     }
 
@@ -110,12 +118,12 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
 
     @Override
     public void onFailedRefresh(Exception failureException) {
-        UIState newState = new UIState(MainState.ZIP_DOWNLOAD_FAILED, null, null, null,failureException);
+        UIState newState = new UIState(MainState.ZIP_DOWNLOAD_FAILED, null, null, null,failureException,null);
         uiState.setValue(newState);
     }
 
     public void onFailedRead(int reason,Exception failureException) {
-        UIState newState = new UIState(MainState.ZIP_NOT_PRESENT_OR_CORRUPT,null,null,null,failureException);
+        UIState newState = new UIState(MainState.ZIP_NOT_PRESENT_OR_CORRUPT,null,null,null,failureException,null);
         uiState.setValue(newState);
     }
 
@@ -154,8 +162,6 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
         if (newTapeSystem==null || tapeSystems.indexOf(newTapeSystem)==-1) {
             newTapeSystem = tapeSystems.get(0);
         }
-
-        //System.out.println("+++ "+oldTapeSystem+">>"+newTapeSystem);
 
         List<String> lItems = map.get(newTapeSystem);
         UIState newState = new UIState(MainState.LIST_POPULATED, newTapeSystem, lItems,tapeSystems);
@@ -199,9 +205,15 @@ public class GoldiesViewModel extends ViewModel implements GoldiesRepositoryObse
 
     public void initiateRefresh() {
         persistSelectedTapeSystem(uiState.getValue().getCurrentTapeSystem());
-        UIState newState = new UIState(MainState.ZIP_DOWNLOADING,null,null,null,null);
+        UIState newState = new UIState(MainState.ZIP_DOWNLOADING,null,null,null);
         uiState.setValue(newState);
         goldiesRepo.refresh();
+    }
+
+    public void showChangeLog() {
+        persistSelectedTapeSystem(uiState.getValue().getCurrentTapeSystem());
+        UIState newState = new UIState(MainState.DISPLAY_CHANGELOG,null,null,null,null,goldiesRepo.getChangeLog());
+        uiState.setValue(newState);
     }
 
     @Override

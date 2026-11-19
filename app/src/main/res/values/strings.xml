@@ -42,5 +42,9 @@
     <string name="goldies_downloading">Downloading...</string>
     <string name="btn_dismiss">Dismiss</string>
 
+    <string name="show_changelog">Show changelog</string>
+    <string name="empty_changelog">Changelog is not available</string>
+
+
 
 </resources>
